@@ -1,0 +1,611 @@
+<div class="p-2">
+
+    <livewire:requisicion.component.informacion-requisicion :requisicion="$requisicion" />
+
+
+
+
+    <div class="flex justify-end my-4 mr-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
+            Agregar Cotizacion
+        </button>
+    </div>
+
+    @if ($requisicion->detalleRequisiciones->isNotEmpty())
+        <div class="w-full text-sm relative ">
+            <table class=" w-full bg-white border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 text-center ">
+                        <th class="md:py-2 md:px-4 border-b ">Cantidad</th>
+                        <th class="md:py-2 md:px-4 border-b ">Producto</th>
+                        <th class="md:py-2 md:px-4 border-b ">Observaciones</th>
+                        <th class="md:py-2 md:px-4 border-b  absolute">Accion</th>
+                        <!-- Agrega más columnas según tus necesidades -->
+                    </tr>
+                </thead>
+                <tbody>
+
+
+
+                    @foreach ($requisicion->detalleRequisiciones as $detalle)
+                        <tr class="text-center @if ($detalle->producto_id == 0) bg-red-200 @endif">
+                            <td class="md:py-2 md:px-4 border-b">{{ $detalle->cantidad }}</td>
+                            <td class="md:py-2 md:px-4 border-b">{{ $detalle->producto }}</td>
+                            <td class="md:py-2 md:px-4 border-b">{{ $detalle->observaciones }}</td>
+                            <td class="md:py-2 md:px-4 border-b ">
+
+                                <div class="">
+                                    <div class=" text-justify relative">
+                                        <x-dropdown align="right" width="60">
+                                            <x-slot name="trigger">
+                                                <span class="inline-flex rounded-md">
+                                                    <button
+                                                        class="px-1 py-1 text-black transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                            class="w-6 h-6">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            </x-slot>
+
+                                            <x-slot name="content">
+                                                <div class="w-60">
+
+                                                    <div class="block px-4 py-2 text-xs bg-gray-400 text-gray-100">
+                                                        {{ __('Acciones') }}
+                                                    </div>
+
+                                                    <x-dropdown-link id="alta-producto"
+                                                        class="no-underline text-xs cursor-pointer">
+                                                        <div>
+                                                            <button wire:click="AbrirModalAltaProducto">Alta
+                                                                Producto</button>
+                                                        </div>
+                                                    </x-dropdown-link>
+                                                    <x-dropdown-link id="editar-producto"
+                                                        class="no-underline text-xs cursor-pointer">
+                                                        <div>
+                                                            <button
+                                                                wire:click="AbrirModal('{{ $detalle->id }}')">Asignar
+                                                                Producto</button>
+                                                        </div>
+                                                    </x-dropdown-link>
+
+
+
+                                                </div>
+                                            </x-slot>
+                                        </x-dropdown>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <p class="text-gray-600">No hay detalles disponibles para esta requisición.</p>
+    @endif
+
+
+
+
+    @if ($requisicion->cotizaciones->isNotEmpty())
+        <div class="container mt-3">
+            @foreach ($requisicion->cotizaciones as $cotizacion)
+                <div class="row bg-gray-200 ">
+                    <div class="col-4 d-flex justify-center align-items-center">
+                        <p class="m-0 text-center"> Proveedor: <span>{{ $cotizacion['proveedor'] }}</span> </p>
+
+                    </div>
+                    <div class="col-4 d-flex justify-center align-items-center">
+                        <button wire:click.prevent="download({{ $cotizacion->id }})" class="flex items-start">
+                            <x-typ-download class="w-6 h-6" />
+                            <span class="pt-1">Cotización</span>
+                        </button>
+                    </div>
+                    <div class="col-4 d-flex justify-center p-3">
+                        <button wire:click="deleteCotizacion({{ $cotizacion->id }})" class="btn btn-danger btn-sm">
+                            <span class="pt-1">Eliminar Cotización</span>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-center">
+                            Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-center">
+                            Dias Credito: {{ $cotizacion['dias_credito'] }}
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-center">
+                            Forma Pago: {{ $cotizacion['formapago'] }}
+                        </p>
+                    </div>
+                </div>
+                <table class="w-full text-sm text-gray-500 mb-3">
+                    <thead class=" bg-gray-50">
+                        {{-- <tr>
+                            <th colspan="5">
+                                <div class="flex justify-around">
+                                    <p> Proveedor: <span>{{ $cotizacion['proveedor'] }}</span> </p>
+                                    <button wire:click.prevent="download({{ $cotizacion->id }})"
+                                        class="flex items-start">
+                                        <x-typ-download class="w-6 h-6" />
+                                        <span class="pt-1">Cotización</span>
+                                    </button>
+                                    <button wire:click.prevent="download({{ $cotizacion->id }})"
+                                        class="flex items-start">
+                                        <x-gmdi-delete class="w-6 h-6 text-red-500" />
+                                        <span class="pt-1">Quitar Proveedor</span>
+                                    </button>
+                                </div>
+
+                            </th>
+                        </tr>
+                        <tr>
+                            <th colspan="5">
+                                <div class="flex justify-around  flex-wrap text-sm">
+                                    <p>
+                                        Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
+                                    </p>
+                                    <p>
+                                        Dias Credito: {{ $cotizacion['dias_credito'] }}
+                                    </p>
+                                    <p>
+                                        Forma Pago: {{ $cotizacion['formapago'] }}
+                                    </p>
+
+                                </div>
+                            </th>
+                        </tr> --}}
+                        <tr class="text-center">
+
+                            <th scope="col" class="md:px-6 md:py-3">
+                                Cantidad
+                            </th>
+                            <th scope="col" class="md:px-6 md:py-3">
+                                Producto
+                            </th>
+                            <th scope="col" class="md:px-6 md:py-3">
+                                Precio Cotizado
+                            </th>
+                            <th scope="col" class="md:px-6 md:py-3">
+                                Total
+                            </th>
+                            <th scope="col" class="md:px-6 md:py-3">
+                                Accion
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach ($cotizacion->detalleCotizaciones as $detalle)
+                            <tr class="bg-white text-center border-b">
+                                <td class="md:px-6 md:py-3">
+                                    {{ $detalle['cantidad'] }}
+                                </td>
+                                <td class="md:px-6 md:py-3">
+                                    {{ $detalle['producto'] }}
+                                </td>
+                                <td class="md:px-6 md:py-3">
+                                    ${{ $detalle['precio'] }}
+                                </td>
+                                <td class="md:px-6 md:py-3">
+                                    ${{ $detalle['precio'] * $detalle['cantidad'] }}
+                                </td>
+                                <td>
+                                    <div class="flex justify-around items-center">
+
+                                        <button wire:click="editarDetalle({{ $detalle['id'] }})" class="text-blue-500">
+                                            <x-far-edit class="w-6 h-6" />
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                    </tbody>
+                </table>
+            @endforeach
+        </div>
+    @else
+        <p class="text-gray-600 text-center my-4">Aun no cuenta con cotizaciones.</p>
+    @endif
+
+
+    <div wire:ignore.self class="modal fade" id="ModalAddCotizacion" aria-hidden="true"
+        aria-labelledby="exampleModalToggleLabel" tabindex="-10">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-top">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Detalle Cotizacion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="proveedorSelect">Proveedor</label>
+                    <div class="w-full">
+                        <select class="select2 w-full" name="cotizacion.proveedor_id" id="selectProveedor"
+                            wire:model.live="cotizacion.proveedor_id">
+                            <option value="">Selecciona un proveedor</option>
+                            @foreach ($proveedores as $proveedor)
+                                <option value="{{ $proveedor['cidclienteproveedor'] }}">
+                                    {{ $proveedor['crazonsocial'] }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error for="cotizacion.proveedor_id" />
+                    </div>
+
+                    <div class="w-full file-input-container" x-data="{ uploading: false, progress: 0, fileUploaded: false }"
+                        x-on:livewire-upload-start="uploading = true" x-on:livewire-upload-finish="uploading = false"
+                        x-on:livewire-upload-error="uploading = false"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                        <label for="cotizacion">Cotizacion</label>
+                        <input wire:model.live="cotizacion.image" class="w-full" type="file" id="cotizacion">
+                        <!-- Progress Bar -->
+                        <div class="w-full" x-show="uploading">
+                            <progress class="w-full bg-red-200" max="100"
+                                x-bind:value="progress"></progress>
+                        </div>
+                        <x-input-error for="cotizacion.image" />
+
+                    </div>
+
+                    <div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Cantidad</th>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col">Precio</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($requisicion->detalleRequisiciones as $detalle)
+                                    <tr>
+
+                                        <td class="col-2">{{ $detalle->cantidad }}</td>
+                                        <td>{{ $detalle->producto }}</td>
+                                        <td class="col-3">
+                                            <input wire:model="cotizacion.precios.{{ $detalle->id }}" value="1"
+                                                type="number" class="form-control col-3">
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex justify-between space-x-1">
+                        <div>
+                            <x-label for="cantidad">Tiempo de Entrega</x-label>
+                            <input wire:model="cotizacion.dias_entrega" class="w-full h-10 border rounded-lg mb-2"
+                                type="number" id="cantidad" name="cantidad">
+                            <x-input-error for="cotizacion.dias_entrega" />
+                        </div>
+                        <div>
+                            <x-label for="cantidad">Dias de Credito</x-label>
+                            <input wire:model="cotizacion.dias_credito" class="w-full h-10 border rounded-lg mb-2"
+                                type="number" id="diascredito" name="diascredito">
+                            <x-input-error for="cotizacion.dias_credito" />
+                        </div>
+                        <div>
+                            <x-label for="formaPago">Forma de Pago</x-label>
+                            <select name="cotizacion.formapago" id="cotizacion.formapago"
+                                wire:model.live="cotizacion.formapago" class=" border-[#dee2e6] rounded-lg"
+                                name="formaPago" id="formaPago">
+                                <option value="">Selecciona una opción</option>
+                                <option value="Contado">Contado</option>
+                                <option value="Credito">Credito</option>
+                            </select>
+                            <x-input-error for="cotizacion.formapago" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-label for="observaciones">Comentarios</x-label>
+                        <textarea wire:model="cotizacion.comentarios" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentarios..."
+                            id="observaciones" name="observaciones" rows="4"></textarea>
+                        <x-input-error for="cotizacion.comentarios" />
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <x-button type="submit" id="GuardarProducto" class="ml-2"
+                        wire:click="save">Guardar</x-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <x-dialog-modal wire:model="cotizacion.openEditarDetalle">
+        <x-slot name="title">
+            Editar Detalle Cotización
+        </x-slot>
+        <x-slot name="content">
+
+            <div class="w-full">
+                <x-label class="text-center"></x-label>
+
+            </div>
+            <div class="w-full">
+                <x-label>Cantidad</x-label>
+                <x-input wire:model="cotizacion.detalleEditar.cantidad" type="number" class="w-full" />
+            </div>
+            <div class="w-full">
+                <x-label>Precio</x-label>
+                <x-input wire:model="cotizacion.detalleEditar.precio" type="number" class="w-full" />
+            </div>
+        </x-slot>
+        <x-slot name="footer">
+            <x-button wire:click="update()">Actualizar</x-button>
+            <x-button wire:click="$set('cotizacion.openEditarDetalle',false)">Cancelar</x-button>
+        </x-slot>
+    </x-dialog-modal>
+
+
+
+    <div wire:ignore.self class="modal fade" id="ModalEditProducto" aria-hidden="true"
+        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-top">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalToggleLabel">Editar Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="w-full">
+                        <label for="">Productos</label>
+                        <select class="select2 w-full" name="producto.id_Producto" id="SelectProducto"
+                            wire:model.live="producto.id_Producto">
+                            <option value="">Selecciona un producto</option>
+                            @foreach ($productos as $producto)
+                                <option value="{{ $producto['cidproducto'] }}">{{ $producto['cnombreproducto'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-input-error for="producto.id_Producto" />
+
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <x-button type="submit" class="ml-2" wire:click="updateProducto">Guardar</x-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div>
+        @livewire('producto.create')
+    </div>
+
+
+
+    <x-dialog-modal wire:model="openIncompleta">
+        <x-slot name="title">
+            Requisicion Incompleta
+        </x-slot>
+        <x-slot name="content">
+
+
+            <div class="w-full">
+                <x-label>Comentario</x-label>
+                <textarea wire:model="comentario" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
+                    rows="4"></textarea>
+                <x-input-error for="comentario" />
+            </div>
+
+        </x-slot>
+        <x-slot name="footer">
+            <x-button wire:click="incompleta()">Guardar</x-button>
+            <x-button wire:click="$set('openIncompleta',false)">Cancelar</x-button>
+        </x-slot>
+    </x-dialog-modal>
+
+
+    <x-dialog-modal wire:model="openPreAutorizacion">
+        <x-slot name="title">
+            Autorización
+        </x-slot>
+        <x-slot name="content">
+            <p>Deje un comentario de cierre para autorizar.</p>
+
+            <div class="w-full">
+                <x-label>Comentario</x-label>
+                <textarea wire:model="comentario_preautorizacion" id="input_preautorizacion"
+                    class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..." rows="4"></textarea>
+                <x-input-error for="comentario" />
+            </div>
+
+        </x-slot>
+        <x-slot name="footer">
+            <x-button wire:click="autorizarCotizacion()" id="btn-preautorizar" disabled>Autorizar</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)">Cancelar</x-button>
+        </x-slot>
+    </x-dialog-modal>
+
+    <x-dialog-modal wire:model="openRemoveCotizacion">
+        <x-slot name="title">
+            Remover Cotizacion
+        </x-slot>
+        <x-slot name="content">
+            <p>Se eliminara la siguiente cotizacion:</p>
+
+        </x-slot>
+        <x-slot name="footer">
+            <x-button wire:click="deleteCotizacion()" id="btn-remover-cotizacion">Remover</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)">Cancelar</x-button>
+        </x-slot>
+    </x-dialog-modal>
+
+
+
+    @if ($requisicion->cotizaciones->count() >= 2)
+        @can('Incompleta', $requisicion)
+            <div class="flex justify-between mt-4">
+                <x-button wire:click="$set('openIncompleta',true)">Incompleta</x-button>
+                <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+            </div>
+        @endcan
+    @else
+        <span>Se necesitan 2 Cotizaciones para poder finalizar</span>
+    @endif
+
+
+    <div class="my-4 mx-2 flex justify-around">
+
+        @can('autorizarCotizacion', $requisicion)
+            <x-button wire:click="$toggle('openIncompleta')"
+                class="bg-red-500 hover:bg-red-400 active:bg-red-300 focus:bg-red-400">Volver a cotizar</x-button>
+            <x-button wire:click="$toggle('openPreAutorizacion')"
+                class="bg-green-500 hover:bg-green-400 active:bg-green-300 focus:bg-green-400">Autorizar</x-button>
+            {{-- <x-button wire:click="autorizarCotizacion()"
+                class="bg-green-500 hover:bg-green-400 active:bg-green-300 focus:bg-green-400">Autorizar</x-button> --}}
+        @endcan
+
+    </div>
+
+
+    <script>
+        var comentPreAutorizar = ''
+        var valueProveedorSelected = ''
+
+        function InicializarSelect() {
+
+            $('.select2').select2({
+                dropdownParent: $("#ModalEditProducto")
+            });
+            $('.select2').select2({
+                dropdownParent: $("#ModalAddCotizacion")
+            });
+
+
+        }
+
+
+        function resetInputFile() {
+            //$(`#selectProveedor option[value="${valueProveedorSelected}"]`).remove();
+            let numero = Math.floor(Math.random() * 10);
+            console.log(numero);
+            var container = document.querySelector('.file-input-container');
+            var inputElement = document.getElementById("cotizacion");
+
+            // Eliminar el input existente
+            if (inputElement) {
+                inputElement.remove();
+            }
+
+            // Crear un nuevo input de tipo file
+            var newInputElement = document.createElement('input');
+            newInputElement.setAttribute('type', 'file');
+            newInputElement.setAttribute('id', 'cotizacion');
+            newInputElement.classList.add('w-full');
+            newInputElement.setAttribute('wire:model.live', 'image');
+            newInputElement.setAttribute('wire:key', numero); // Aquí podrías establecer un nuevo valor único
+
+            // Insertar el nuevo input después del contenedor
+            container.parentNode.insertBefore(newInputElement, container.nextSibling);
+
+            location.reload()
+        }
+
+
+        function cerrarModalEditProducto() {
+            var closeButton = $('#ModalEditProducto .btn-close'); // Busca el botón de cierre dentro del modal
+            closeButton.click();
+        }
+
+        function cerrarModalAddCotizacion() {
+            console.log("cerrar modal cotizacion");
+            var closeButton = $('#ModalAddCotizacion .btn-close');
+            closeButton.click();
+        }
+
+
+        $(document).on('cerrar-modal-edit-producto', function() {
+            cerrarModalEditProducto();
+            Livewire.dispatch('Actualizardetalle');
+        });
+
+        $(document).on('cerrar-modal-add-cotizacion', function() {
+            console.log('se cerro modal');
+
+            resetInputFile();
+            cerrarModalAddCotizacion();
+
+        });
+
+        $(document).ready(function() {
+
+            $('#input_preautorizacion').on('keyup', function(e) {
+
+                comentPreAutorizar = e.target.value
+                if (comentPreAutorizar === '') {
+                    console.log('Comentario obligarotiros');
+                    $('#btn-preautorizar').prop('disabled', true);
+                } else {
+                    console.log('coment valido');
+                    $('#btn-preautorizar').prop('disabled', false);
+                }
+
+            })
+
+            $('#selectProveedor').on('change', function(e) {
+                console.log(e.target.value);
+                valueProveedorSelected = e.target.value
+                @this.set('cotizacion.proveedor_id', $(this).val());
+                @this.set('cotizacion.proveedor', $(this).find('option:selected').text());
+
+
+            });
+
+            $(document).ready(function() {
+                $('#SelectProducto').on('change', function() {
+
+
+
+                    @this.set('producto.id_Producto', $(this).val());
+                    @this.set('producto.producto', $(this).find('option:selected').text());
+
+
+                });
+            });
+
+            $('#ModalEditProducto').on('shown.bs.modal', function() {
+                $('.select2').select2({
+                    dropdownParent: $("#ModalEditProducto")
+                });
+            });
+
+            $('#ModalAddCotizacion').on('shown.bs.modal', function() {
+                $('.select2').select2({
+                    dropdownParent: $("#ModalAddCotizacion")
+                });
+            });
+
+            // Desde Livewire, cerrar el modal
+            Livewire.on('togglemodal', function() {
+                $('#ModalEditProducto').modal('show');
+            });
+
+
+
+        });
+    </script>
+
+
+</div>
