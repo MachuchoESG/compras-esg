@@ -55,4 +55,6 @@ Route::middleware([
     Route::get('/requisicion/{requisicion}/aprobacion', [requisicionController::class, 'aprobacion'])->name('requisicion.aprobacion');
     Route::get('/requisicion/{requisicion}/formato', [requisicionController::class, 'formato'])->name('requisicion.formato');
     Route::resource('cotizacion', CotizacionController::class);
+    Route::get('/run-migrations', [App\Http\Controllers\MigrationsRun::class, 'runMigrations']);
+
 });
