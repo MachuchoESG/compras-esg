@@ -30,12 +30,17 @@ class Index extends Component
     public function cerrarModal()
     {
         $this->userSeleccionado = [];
+        $this->reset('search');  // Resetear búsqueda o cualquier otra propiedad si es necesario
+
+        // Fuerza la actualización de los datos
+        $this->render();
+
     }
 
     public function emitirEventOpenUpdateModal($user)
     {
         //$this->emit('abrirModalEditar', $user);
-        $this->dispatch('open-modal-update', $user);
+        //$this->dispatch('open-modal-update', $user);
         $this->userSeleccionado = $user;
     }
 

@@ -21,10 +21,10 @@
         </x-slot>
 
         <x-slot name="content">
-            <div class="w-60">
+            <div class="w-60" style="overflow-y: auto; max-height: 50vh">
 
                 @if ($escompras)
-                    <div class="block px-4 py-2 text-xs text-gray-400" style="overflow-y: auto; max-height: 40vh">
+                    <div class="block px-4 py-2 text-xs text-gray-400">
                         {{ __('Requisiciones') }}
 
 

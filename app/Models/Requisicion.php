@@ -110,6 +110,12 @@ class Requisicion extends Model
 
     public static function getRequisicionesIncompletas()
     {
+        if (auth()->id() == 30) {
+            return Requisicion::where('estatus_id', 10)
+                //->where('user_id', Auth::id())
+                ->select('id', 'folio')
+                ->get();
+        }
 
         return Requisicion::where('estatus_id', 10)
             ->where('user_id', Auth::id())
@@ -307,10 +313,10 @@ class Requisicion extends Model
 
 
 
-        if (Auth::user()->id == 30) {
+        /* if (Auth::user()->id == 30) {
             return collect();
-        }
-        return Requisicion::with('solicitante')->where('estatus_id', 7)->orderBy('updated_at', 'desc')
+        } */
+        return Requisicion::with('solicitante')->where('estatus_id', 7) //->orderBy('updated_at', 'desc')
             ->get();
     }
 

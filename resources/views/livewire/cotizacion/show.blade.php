@@ -104,7 +104,7 @@
                     </div>
                     <div class="col-4 d-flex justify-center align-items-center">
                         <button wire:click.prevent="download({{ $cotizacion->id }})" class="flex items-start">
-                            <x-typ-download class="w-6 h-6" />
+                            {{-- <x-typ-download class="w-6 h-6" /> --}}
                             <span class="pt-1">Cotización</span>
                         </button>
                     </div>
@@ -131,40 +131,6 @@
                 </div>
                 <table class="w-full text-sm text-gray-500 mb-3">
                     <thead class=" bg-gray-50">
-                        {{-- <tr>
-                            <th colspan="5">
-                                <div class="flex justify-around">
-                                    <p> Proveedor: <span>{{ $cotizacion['proveedor'] }}</span> </p>
-                                    <button wire:click.prevent="download({{ $cotizacion->id }})"
-                                        class="flex items-start">
-                                        <x-typ-download class="w-6 h-6" />
-                                        <span class="pt-1">Cotización</span>
-                                    </button>
-                                    <button wire:click.prevent="download({{ $cotizacion->id }})"
-                                        class="flex items-start">
-                                        <x-gmdi-delete class="w-6 h-6 text-red-500" />
-                                        <span class="pt-1">Quitar Proveedor</span>
-                                    </button>
-                                </div>
-
-                            </th>
-                        </tr>
-                        <tr>
-                            <th colspan="5">
-                                <div class="flex justify-around  flex-wrap text-sm">
-                                    <p>
-                                        Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
-                                    </p>
-                                    <p>
-                                        Dias Credito: {{ $cotizacion['dias_credito'] }}
-                                    </p>
-                                    <p>
-                                        Forma Pago: {{ $cotizacion['formapago'] }}
-                                    </p>
-
-                                </div>
-                            </th>
-                        </tr> --}}
                         <tr class="text-center">
 
                             <th scope="col" class="md:px-6 md:py-3">
@@ -259,7 +225,7 @@
 
                     </div>
 
-                    <div>
+                    <div style="overflow-y: auto; max-height: 30vh">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -314,7 +280,7 @@
                     <div>
                         <x-label for="observaciones">Comentarios</x-label>
                         <textarea wire:model="cotizacion.comentarios" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentarios..."
-                            id="observaciones" name="observaciones" rows="4"></textarea>
+                            id="observaciones" name="observaciones" rows="2"></textarea>
                         <x-input-error for="cotizacion.comentarios" />
 
                     </div>

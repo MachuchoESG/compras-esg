@@ -7,7 +7,7 @@ use App\Models\Puesto;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
-use Livewire\Attributes\On;
+//use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Update extends Component
@@ -58,7 +58,7 @@ class Update extends Component
         // Reiniciar valores cuando se cierra el modal
         $this->openMUpdateUser = false;
         $this->clearInputs();
-        $this->dispatch('modal-update-closed');
+        //$this->dispatch('modal-update-closed');
     }
 
     public function clearInputs()

@@ -66,12 +66,12 @@
 <script>
     var targetNode
     // Escuchar el evento modal-closed desde el componente Update
-    window.addEventListener('modal-update-closed', event => {
+   /*  window.addEventListener('modal-update-closed', event => {
         @this.call('cerrarModal');
-    });
+    }); */
 
     window.addEventListener('modal-update-init', event => {
-        console.log('se inicio el modal update');
+        //console.log('se inicio el modal update');
         targetNode = document.getElementById(
             "modal-update-user");
         const observer = new MutationObserver(callback);
@@ -92,6 +92,8 @@
                     ._x_isShown
                 ); // a falta de event para detectar modal cerrado, se implementa mutation para ver cambios en modal.
                 if (mutation.target._x_isShown === false) {
+                    console.log('Se cerro modal update');
+                    
                     @this.call('cerrarModal');
                 }
             }

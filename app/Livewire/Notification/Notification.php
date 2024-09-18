@@ -21,10 +21,10 @@ class Notification extends Component
 
 
     public $cantidadPendienteIncompletas = 0;
-    public $pendienteIncompletas= [];
+    public $pendienteIncompletas = [];
 
-    public $cantidadPendienteAutorizarCotizacion= 0;
-    public $pendienteAutorizarCotizacion= [];
+    public $cantidadPendienteAutorizarCotizacion = 0;
+    public $pendienteAutorizarCotizacion = [];
 
 
     public $totalnotificaciones = 0;
@@ -46,37 +46,44 @@ class Notification extends Component
         if ($user) {
             $this->escompras = $user->compras();
 
-            if ($this->escompras) {
-
-
-             
+            if ($this->escompras) { //lmvilla //ESTATUS 7
+                //dd('entre');
                 $requisicionesPendientes = Requisicion::getRequisicionesPendientesdeCotizar();
+
                 $this->cantidadPendienteCotizacion = $requisicionesPendientes->count();
+                //dd($this->cantidadPendienteCotizacion);
                 $this->pendientecotizacion = $requisicionesPendientes;
                 $this->totalnotificaciones = $this->cantidadPendienteCotizacion;
-
-              
-
             }
 
             $this->esjefe = $user->jefe();
 
-            if ($this->esjefe) {
-                //$this->cantidadPendienteAprobar = Requisicion::contarRequisicionesPendientesdeAprobar();
+            if ($this->esjefe || auth()->id() == 30) {
+
                 $requisionesPendientesAprobar = Requisicion::getRequisicionesPendientesAprobar();
-                $this->cantidadPendienteAprobar = $requisionesPendientesAprobar->count();
+                if ($requisionesPendientesAprobar === 0) {
+                    $this->cantidadPendienteAprobar = 0;
+                } else {
+                    $this->cantidadPendienteAprobar = $requisionesPendientesAprobar->count();
+                }
+
                 $this->pendientesaprobar = $requisionesPendientesAprobar;
 
-
-
                 $requisionesPendientesAutorizar = Requisicion::getRequisicionesPendientesdeAutorizar();
-                $this->cantidadPendienteAutorizar = $requisionesPendientesAutorizar->count();
+
+                if ($requisionesPendientesAutorizar === 0) {
+                    $this->cantidadPendienteAutorizar = 0;
+                } else {
+                    $this->cantidadPendienteAutorizar = $requisionesPendientesAutorizar->count();
+                }
+
                 $this->pendienteautorizar = $requisionesPendientesAutorizar;
 
-                $this->totalnotificaciones = $this->cantidadPendienteAprobar + $this->cantidadPendienteAutorizar;
+                $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteAprobar + $this->cantidadPendienteAutorizar;
             }
 
-            if($user->cotizacionesAutorizar()){
+            if ($user->cotizacionesAutorizar()) { //lmvilla // ESTAUS 12
+
                 $pendientesAutorizarCotizacion = Requisicion::getRequisicionesPendientesdeAutoriarCotizar();
                 $this->cantidadPendienteAutorizarCotizacion = $pendientesAutorizarCotizacion->count();
                 $this->pendienteAutorizarCotizacion = $pendientesAutorizarCotizacion;
@@ -86,13 +93,12 @@ class Notification extends Component
             }
 
 
-            $requisicionesIncompletas =Requisicion::getRequisicionesIncompletas();
+            $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();
             $this->pendienteIncompletas = $requisicionesIncompletas;
             $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas;
-            ;
 
-
+            //dd($this->totalnotificaciones);
         }
     }
 
