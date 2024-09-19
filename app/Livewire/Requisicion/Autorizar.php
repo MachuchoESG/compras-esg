@@ -37,6 +37,7 @@ class Autorizar extends Component
     public $jefe = "";
     public $comentario = "";
     public $comentariofinal = "";
+    public $cotizacionPrevAutorizada = [];
 
     public function download($id)
     {
@@ -110,17 +111,12 @@ class Autorizar extends Component
 
             }
         }
-
-
-
-
-     
     }
 
     public function tienespermiso($total)
     {
 
-     
+
         $usersolicitante = User::find($this->requisicion->empleado_id);
         $departamento_id = $usersolicitante->departamento->id;
 
@@ -200,7 +196,7 @@ class Autorizar extends Component
 
     public function updateCantidad($id, $cantidad)
     {
-       
+
         $detalle = DetalleCotizacion::find($id);
 
         if ($detalle) {
@@ -211,8 +207,26 @@ class Autorizar extends Component
     public function toggleSelection($id, $check)
     {
 
-
         $detalle = DetalleCotizacion::find($id);
+        //Validar que otras cotizaciones no tengan autorizadas el mismo producto
+        $cotizacionDelDetalle = Cotizacion::where('id', '=', $detalle->cotizacion_id)->first();
+        $requisicionID = $cotizacionDelDetalle->requisicion_id;
+
+        $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
+
+        $detallesCotizacionesPorRequi = DetalleCotizacion::whereIn('cotizacion_id', $cotizacionesRequisicion)->get();
+
+        if ($check != false) {
+            foreach ($detallesCotizacionesPorRequi as $dc) {
+                if ($dc->id != $id) {
+                    if ($dc->autorizado == 1 && $dc->producto_id == $detalle->producto_id) {
+                        $this->alert('warning', 'Ya existe un producto autorizado con el nombre de: ' . $detalle->producto);
+                        $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
+                        return 0;
+                    }
+                }
+            }
+        }
 
         if ($detalle) {
             $detalle->autorizado = $check;
@@ -421,7 +435,7 @@ class Autorizar extends Component
         ], [], [
             'comentariofinal' => 'Comentario',
         ]);
- 
+
         // Crear el comentario
         $comentario = Comentarios::create([
             'requisicion_id' => $this->requisicion->id,
@@ -431,7 +445,6 @@ class Autorizar extends Component
 
         if ($comentario) {
             return redirect()->route('requisicion.index');
-
         } else {
             $this->alert('error', 'Error al agregar el comentario');
             return redirect()->route('requisicion.index');
@@ -569,7 +582,6 @@ class Autorizar extends Component
             }
 
             $this->agregarComentarioFinal();
-
         } catch (\Throwable $th) {
 
             $requisicionupdate = Requisicion::find($this->requisicion->id);
@@ -583,25 +595,25 @@ class Autorizar extends Component
                 $requisicionupdate->save();
             }
             $this->agregarComentarioFinal();
-          
         }
         return redirect()->route('requisicion.index');
-     
     }
     public function save()
     {
 
         $total = $this->obtenerTotalAutorizar();
 
+        //dd($total);
+
         if ($this->tienespermiso($total)) {
-            
-             $this->generarorden();
+
+            $this->generarorden();
         } else {
             $this->autorizarsiguientenivel();
         }
 
 
-       
+
         // $this->dispatch('ObtenerCantidad', lista: $this->selectedItems);
     }
 
@@ -621,7 +633,7 @@ class Autorizar extends Component
     public function agregarComentarioFinal()
     {
 
-      
+
         $this->alert('info', 'Deseas agregar un comentario final a la requisicion?', [
             'position' => 'center',
             'timer' => 6000,
@@ -640,10 +652,11 @@ class Autorizar extends Component
     ];
     public function confirmed()
     {
-        $this->comentarioFinal=true;
+        $this->comentarioFinal = true;
     }
 
-    public function cancelled(){
+    public function cancelled()
+    {
         return redirect()->route('requisicion.index');
     }
 
