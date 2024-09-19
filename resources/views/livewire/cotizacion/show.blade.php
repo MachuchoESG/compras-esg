@@ -422,7 +422,7 @@
 
 
 
-    @if ($requisicion->cotizaciones->count() >= 2)
+    @if ($requisicion->cotizaciones->count() > 0)
         @can('Incompleta', $requisicion)
             <div class="flex justify-between mt-4">
                 <x-button wire:click="$set('openIncompleta',true)">Incompleta</x-button>
@@ -430,7 +430,7 @@
             </div>
         @endcan
     @else
-        <span>Se necesitan 2 Cotizaciones para poder finalizar</span>
+        <span>Se necesitan 1 Cotización para poder finalizar</span>
     @endif
 
 
