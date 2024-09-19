@@ -26,7 +26,7 @@ class Edit extends Component
     public $existencias = 0;
     public $openProductoSR = true;
     public $open = false;
-
+    public $openComentarios = false;
 
 
     #[Rule(
@@ -57,12 +57,13 @@ class Edit extends Component
 
 
 
-    public function finalizarIncompleta(){
+    public function finalizarIncompleta()
+    {
         $requisicionincompleta = Requisicion::find($this->requisicion->id);
 
 
-        if($requisicionincompleta){
-            $requisicionincompleta->estatus_id=7;
+        if ($requisicionincompleta) {
+            $requisicionincompleta->estatus_id = 7;
             $requisicionincompleta->save();
 
             $this->alert('success', 'Requisicion', [
@@ -73,9 +74,8 @@ class Edit extends Component
             ]);
 
             return redirect()->route('requisicion.index');
-        }else
-        {
-            
+        } else {
+
             $this->alert('error', 'Requisicion', [
                 'position' => 'top-end',
                 'timer' => '4000',
@@ -83,7 +83,6 @@ class Edit extends Component
                 'text' => 'No se encontro informacion del documento' . $requisicionincompleta->folio,
             ]);
         }
-       
     }
 
     public function updated($property, $value)

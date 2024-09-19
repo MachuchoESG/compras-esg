@@ -316,7 +316,7 @@ class Requisicion extends Model
         /* if (Auth::user()->id == 30) {
             return collect();
         } */
-        return Requisicion::with('solicitante')->where('estatus_id', 7) //->orderBy('updated_at', 'desc')
+        return Requisicion::with('solicitante')->where('estatus_id', 7)->orderBy('updated_at', 'desc')
             ->get();
     }
 
