@@ -23,9 +23,9 @@ class Create extends Component
     public $sucursal_id = '';
     public $clasificacion1 = [];
     public $clasificacion2 = [];
-    public $listaunidadmedidas=[];
-    public $consecutivo='';
-    public $ultimoProducto='';
+    public $listaunidadmedidas = [];
+    public $consecutivo = '';
+    public $ultimoProducto = '';
 
     public $urlApi;
 
@@ -52,13 +52,14 @@ class Create extends Component
         'CNOMBREPRODUCTO' => "",
         'CIDVALORCLASIFICACION1' => "",
         'CIDVALORCLASIFICACION2' => "",
-        'CIDUNIXML'=>''
+        'CIDUNIXML' => ''
     ];
 
 
     #[On('AbrirModalAltaProducto')]
     public function AbrirModal()
     {
+        //dd('Intenta abrir modal');
         $this->open = true;
     }
 
@@ -87,7 +88,7 @@ class Create extends Component
     {
         $this->validate();
 
-      
+
 
         try {
             $sucursal = Sucursal::find($this->sucursal_id);
@@ -112,18 +113,18 @@ class Create extends Component
         $this->open = false;
     }
 
-    public function buscarconsecutivo(){
+    public function buscarconsecutivo()
+    {
         $sucursal = Sucursal::find($this->sucursal_id);
-        $producto = Http::get($this->urlApi  . $sucursal->nomenclatura . '/ComercialProductos/Consecutivo?nomenclatura='.$this->consecutivo);
-      
+        $producto = Http::get($this->urlApi  . $sucursal->nomenclatura . '/ComercialProductos/Consecutivo?nomenclatura=' . $this->consecutivo);
 
-        if($producto->successful()){
+
+        if ($producto->successful()) {
             $response = $producto->json();
-            $this->ultimoProducto = 'El ultimo codigo de producto registrado con la nomenclatura '.$this->consecutivo. ' es '. $response['ccodigoproducto'] .'-'. $response['cnombreproducto'];
-        }else{
-            $this->ultimoProducto='No se encontraron resultados con la nomenclatura ';
+            $this->ultimoProducto = 'El ultimo codigo de producto registrado con la nomenclatura ' . $this->consecutivo . ' es ' . $response['ccodigoproducto'] . '-' . $response['cnombreproducto'];
+        } else {
+            $this->ultimoProducto = 'No se encontraron resultados con la nomenclatura ';
         }
-       
     }
     public function render()
     {

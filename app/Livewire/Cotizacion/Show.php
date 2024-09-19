@@ -90,7 +90,6 @@ class Show extends Component
         }
     }
 
-
     public function incompleta()
     {
         $this->validate([
@@ -203,6 +202,7 @@ class Show extends Component
 
     public function AbrirModalAltaProducto()
     {
+        // dd('abri modal alta producto');
         $this->dispatch('AbrirModalAltaProducto');
     }
 

@@ -103,13 +103,15 @@
 
                     </div>
                     <div class="col-4 d-flex justify-center align-items-center">
-                        <button wire:click.prevent="download({{ $cotizacion->id }})" class="flex items-start">
+                        <button wire:click.prevent="download({{ $cotizacion->id }})"
+                            class="btn btn-secondary flex items-start">
                             {{-- <x-typ-download class="w-6 h-6" /> --}}
                             <span class="pt-1">Cotización</span>
                         </button>
                     </div>
                     <div class="col-4 d-flex justify-center p-3">
                         <button wire:click="deleteCotizacion({{ $cotizacion->id }})" class="btn btn-danger btn-sm">
+                            <i class="bi bi-file-earmark-arrow-down-fill"></i>
                             <span class="pt-1">Eliminar Cotización</span>
                         </button>
                     </div>

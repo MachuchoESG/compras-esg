@@ -3,6 +3,7 @@
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\empresaController;
+use App\Http\Controllers\MigrationsRun;
 use App\Http\Controllers\PermisosrequisicionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\proveedorController;
@@ -56,5 +57,5 @@ Route::middleware([
     Route::get('/requisicion/{requisicion}/formato', [requisicionController::class, 'formato'])->name('requisicion.formato');
     Route::resource('cotizacion', CotizacionController::class);
     Route::get('/run-migrations', [App\Http\Controllers\MigrationsRun::class, 'runMigrations']);
-
+    Route::get('/clear-view-cache', [App\Http\Controllers\MigrationsRun::class, 'clearViewCache']);
 });
