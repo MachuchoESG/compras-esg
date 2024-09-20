@@ -35,8 +35,14 @@ class Show extends Component
     public $openIncompleta = false;
     public $openPreAutorizacion = false;
     public $openRemoveCotizacion = false;
+    public $openCotizacionUnicaComentario = false;
+    public $esCotizacionUnica = false;
+
     public $comentario;
     public $comentario_preautorizacion;
+    public $comentario_cotizacionunica;
+
+    public $cantMinimaCotizaciones = 2;
 
 
     public $requisicionId;
@@ -51,7 +57,11 @@ class Show extends Component
 
 
 
-
+    public function toggleCotizacionUnica($isChecked)
+    {
+        $this->esCotizacionUnica = $isChecked;
+        $this->cantMinimaCotizaciones = $isChecked ? 1 : 2;
+    }
 
     public function liberarRequisicion()
     {
@@ -68,6 +78,52 @@ class Show extends Component
 
             if ($requisicion) {
                 $requisicion->estatus_id = 12;
+                $requisicion->save();
+
+
+                $this->alert('success', 'Requisicion', [
+                    'position' => 'center',
+                    'timer' => '5000',
+                    'toast' => true,
+                    'text' => 'Requisción liberada correctamente',
+                ]);
+
+                return redirect()->route('requisicion.index');
+            }
+        } else {
+            $this->alert('error', 'Requisicion', [
+                'position' => 'center',
+                'timer' => '5000',
+                'toast' => true,
+                'text' => 'Favor de agregar una cotización',
+            ]);
+        }
+    }
+
+    public function liberarRequisicionCotUnica()
+    {
+        $requisicion = Requisicion::find($this->requisicion->id);
+        
+
+        $this->validate([
+            'comentario_cotizacionunica' => 'required',
+        ], [], [
+            'comentario' => 'Comentario',
+        ]);
+
+        // Crear el comentario
+        $comentario = Comentarios::create([
+            'requisicion_id' => $this->requisicion->id,
+            'user_id' => Auth::id(),
+            'comentario' => $this->comentario_cotizacionunica,
+        ]);
+
+        if ($requisicion->cotizaciones()->count() > 0) {
+            // Al menos una cotización encontrada
+
+            if ($requisicion) {
+                $requisicion->estatus_id = 12;
+                $requisicion->cotizacion_unica = $this->esCotizacionUnica;
                 $requisicion->save();
 
 
@@ -292,6 +348,8 @@ class Show extends Component
 
 
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
+
+        //dd($this->requisicion->detalleRequisiciones);
 
         $this->cotizacion->requisicion =   $this->requisicion;
 

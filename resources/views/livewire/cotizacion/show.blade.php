@@ -6,6 +6,15 @@
 
 
     <div class="flex justify-end my-4 mr-2">
+        <div class="me-5">
+            <div class="form-check pt-1">
+                <input class="form-check-input" type="checkbox" id="cotizacion_unica"
+                    wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
+                <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
+                    Cotización Unica
+                </label>
+            </div>
+        </div>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
             Agregar Cotizacion
         </button>
@@ -356,7 +365,6 @@
     </div>
 
 
-
     <div>
         @livewire('producto.create')
     </div>
@@ -406,6 +414,29 @@
         </x-slot>
     </x-dialog-modal>
 
+    <x-dialog-modal wire:model="openCotizacionUnicaComentario">
+        <x-slot name="title">
+            Autorización Cotizacion Unica
+        </x-slot>
+        <x-slot name="content">
+            <p>Para finalizar Requisicion de "Cotizacion Unica" ingrese un breve comentario del porque se agrego una
+                sola cotización.</p>
+
+            <div class="w-full">
+                <x-label>Comentario</x-label>
+                <textarea wire:model="comentario_cotizacionunica" id="input_cotizacionunica"
+                    class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..." rows="4"></textarea>
+                <x-input-error for="comentario" />
+            </div>
+
+        </x-slot>
+        <x-slot name="footer">
+            <x-button wire:click="liberarRequisicionCotUnica()" id="btn-autorizar-unica" disabled>FINALIZAR
+                REQUISICIÓN</x-button>
+            <x-button wire:click="$set('openCotizacionUnicaComentario',false)">Cancelar</x-button>
+        </x-slot>
+    </x-dialog-modal>
+
     <x-dialog-modal wire:model="openRemoveCotizacion">
         <x-slot name="title">
             Remover Cotizacion
@@ -422,15 +453,20 @@
 
 
 
-    @if ($requisicion->cotizaciones->count() > 0)
+    @if ($requisicion->cotizaciones->count() >= $cantMinimaCotizaciones)
         @can('Incompleta', $requisicion)
             <div class="flex justify-between mt-4">
                 <x-button wire:click="$set('openIncompleta',true)">Incompleta</x-button>
-                <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+                @if ($esCotizacionUnica)
+                    <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
+                @else
+                    <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+                @endif
+
             </div>
         @endcan
     @else
-        <span>Se necesitan 1 Cotización para poder finalizar</span>
+        <p class="text-center">Se necesitan {{ $cantMinimaCotizaciones }} Cotización para poder finalizar</p>
     @endif
 
 
@@ -450,6 +486,7 @@
 
     <script>
         var comentPreAutorizar = ''
+        var comentCotUnica = ''
         var valueProveedorSelected = ''
 
         function InicializarSelect() {
@@ -531,6 +568,22 @@
                 }
 
             })
+
+            $('#input_cotizacionunica').on('keyup', function(e) {
+
+                comentPreAutorizar = e.target.value
+                if (comentPreAutorizar === '') {
+                    console.log('Comentario obligarotiros');
+                    $('#btn-autorizar-unica').prop('disabled', true);
+                    alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+                } else {
+                    console.log('coment valido');
+                    $('#btn-autorizar-unica').prop('disabled', false);
+                }
+
+            })
+
+
 
             $('#selectProveedor').on('change', function(e) {
                 console.log(e.target.value);
