@@ -6,18 +6,28 @@
 
 
     <div class="flex justify-end my-4 mr-2">
-        <div class="me-5">
-            <div class="form-check pt-1">
-                <input class="form-check-input" type="checkbox" id="cotizacion_unica"
-                    wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
-                <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
-                    Cotización Unica
-                </label>
-            </div>
-        </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
-            Agregar Cotizacion
-        </button>
+        @if (!$contieneProductoSinRegistrar)
+            @if ($requisicion->cotizaciones->isNotEmpty())
+                <div class="me-5">
+                    <div class="form-check pt-1">
+                        <input class="form-check-input" type="checkbox" id="cotizacion_unica"
+                            wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
+                        <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
+                            Cotización Unica
+                        </label>
+                    </div>
+
+                </div>
+            @endif
+            <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
+                Agregar Cotizacion
+            </button>
+        @else
+            <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
+                sistema.</p>
+        @endif
+
     </div>
 
     @if ($requisicion->detalleRequisiciones->isNotEmpty())
@@ -70,7 +80,7 @@
                                                     <x-dropdown-link id="alta-producto"
                                                         class="no-underline text-xs cursor-pointer">
                                                         <div>
-                                                            <button wire:click="AbrirModalAltaProducto">Alta
+                                                            <button wire:click="AbrirModalAltaProducto()">Alta
                                                                 Producto</button>
                                                         </div>
                                                     </x-dropdown-link>
@@ -104,7 +114,7 @@
 
 
     @if ($requisicion->cotizaciones->isNotEmpty())
-        <div class="container mt-3">
+        <div class="container mt-3 mx-0 w-100">
             @foreach ($requisicion->cotizaciones as $cotizacion)
                 <div class="row bg-gray-200 ">
                     <div class="col-4 d-flex justify-center align-items-center">
@@ -113,15 +123,18 @@
                     </div>
                     <div class="col-4 d-flex justify-center align-items-center">
                         <button wire:click.prevent="download({{ $cotizacion->id }})"
-                            class="btn btn-secondary flex items-start">
-                            {{-- <x-typ-download class="w-6 h-6" /> --}}
-                            <span class="pt-1">Cotización</span>
+                            class="btn btn-secondary btn-sm d-flex items-start">
+                            <x-eva-download-outline class="h-5 w-5" />
+                            <span class="ms-2 fw-bold">Cotización</span>
                         </button>
                     </div>
                     <div class="col-4 d-flex justify-center p-3">
-                        <button wire:click="deleteCotizacion({{ $cotizacion->id }})" class="btn btn-danger btn-sm">
-                            <i class="bi bi-file-earmark-arrow-down-fill"></i>
-                            <span class="pt-1">Eliminar Cotización</span>
+                        <i class="bi bi-trash-fill"></i>
+                        <button wire:click="deleteCotizacion({{ $cotizacion->id }})"
+                            class="btn btn-danger btn-sm d-flex">
+                            {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
+                            <x-eva-trash class="h-5 w-5" />
+                            <span class="ms-2 fw-bold">Eliminar Cotización</span>
                         </button>
                     </div>
                     <div class="col-4">
@@ -139,6 +152,7 @@
                             Forma Pago: {{ $cotizacion['formapago'] }}
                         </p>
                     </div>
+
                 </div>
                 <table class="w-full text-sm text-gray-500 mb-3">
                     <thead class=" bg-gray-50">
@@ -358,7 +372,7 @@
                 </div>
                 <div class="modal-footer">
 
-                    <x-button type="submit" class="ml-2" wire:click="updateProducto">Guardar</x-button>
+                    <x-button type="submit" class="ml-2" wire:click="updateProducto()">Guardar</x-button>
                 </div>
             </div>
         </div>
@@ -541,6 +555,12 @@
         }
 
 
+        $(document).on('change', '.form-check-input', function(e) {
+            console.log('algo cambió');
+            var isChecked = $(this).is(':checked');
+            console.log(isChecked);
+        });
+
         $(document).on('cerrar-modal-edit-producto', function() {
             cerrarModalEditProducto();
             Livewire.dispatch('Actualizardetalle');
@@ -582,7 +602,6 @@
                 }
 
             })
-
 
 
             $('#selectProveedor').on('change', function(e) {
