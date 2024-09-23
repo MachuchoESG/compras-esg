@@ -37,6 +37,7 @@ class Show extends Component
     public $openRemoveCotizacion = false;
     public $openCotizacionUnicaComentario = false;
     public $esCotizacionUnica = false;
+    public $contieneProductoSinRegistrar = false;
 
     public $comentario;
     public $comentario_preautorizacion;
@@ -48,6 +49,7 @@ class Show extends Component
     public $requisicionId;
     public $proveedores = [];
     public $productos = [];
+    public $producto = [];
     public $requisicion;
 
     public $detalleid;
@@ -103,7 +105,7 @@ class Show extends Component
     public function liberarRequisicionCotUnica()
     {
         $requisicion = Requisicion::find($this->requisicion->id);
-        
+
 
         $this->validate([
             'comentario_cotizacionunica' => 'required',
@@ -149,7 +151,7 @@ class Show extends Component
     public function incompleta()
     {
         $this->validate([
-            'comentario_preautorizacion' => 'required',
+            'comentario' => 'required',
         ], [], [
             'comentario' => 'Comentario',
         ]);
@@ -245,6 +247,8 @@ class Show extends Component
     // #[On('AbrirModalEditarDetalle')]
     public function AbrirModal($id)
     {
+        //dd($this->requisicion->sucursal->nomenclatura);
+        $this->productos = ProductoService::ListaProductos($this->requisicion->sucursal->nomenclatura);
         $this->detalleid = $id;
         $this->cotizacion->openEditProducto = true;
 
@@ -307,9 +311,23 @@ class Show extends Component
 
         $this->dispatch('cerrar-modal-edit-producto');
         $this->alert('success', 'Producto editado correctamente');
+
+        $this->contieneProductoSinRegistrar = false; // validacion para verifiar que no queden productos_id en 0
+        foreach ($this->requisicion->detalleRequisiciones as $dr) {
+            if ($dr->producto_id === 0) {
+                $this->contieneProductoSinRegistrar = true;
+            }
+        }
+
+
+        return view('livewire.cotizacion.show');
     }
     public function save()
     {
+        if ($this->esCotizacionUnica) {// valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
+            $this->alert('error', 'No se puede dar de alta nueva cotizacion si se marco "Cotizacion Unica"');
+            return view('livewire.cotizacion.show');
+        }
 
         $this->cotizacion->guardarCotizacion();
 
@@ -326,13 +344,9 @@ class Show extends Component
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
 
         $this->cotizacion->requisicion =   $this->requisicion;
-        //$this->proveedores = ProveedorService::ListaProveedores($requisicion->sucursal->nomenclatura);
         $proveedoresAll = ProveedorService::ListaProveedores($requisicion->sucursal->nomenclatura);
-        //dd($this->proveedores);
         $proveedoresAgregados = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
-        //dd($proveedoresAll);
-        //dd($proveedoresAgregados);
-        //$arr = json_decode($proveedoresAgregados);
+
         $proveedoresAgregadosIds = $proveedoresAgregados->pluck('proveedor_id')->toArray();
 
         // Filtrar proveedores que no están en los proveedores agregados
@@ -349,26 +363,31 @@ class Show extends Component
 
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
 
-        //dd($this->requisicion->detalleRequisiciones);
+
+        foreach ($this->requisicion->detalleRequisiciones as $dr) { // recorre los productos de requi, si uno no existe bloquea registro de cotizacion
+            if ($dr->producto_id === 0) {
+                $this->contieneProductoSinRegistrar = true;
+            }
+        }
 
         $this->cotizacion->requisicion =   $this->requisicion;
 
-        //$this->proveedores = ProveedorService::ListaProveedores($requisicion->sucursal->nomenclatura);
         $proveedoresAll = ProveedorService::ListaProveedores($requisicion->sucursal->nomenclatura);
-        //dd($this->proveedores);
         $proveedoresAgregados = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
-        //dd($proveedoresAll);
-        //dd($proveedoresAgregados);
-        //$arr = json_decode($proveedoresAgregados);
+
         $proveedoresAgregadosIds = $proveedoresAgregados->pluck('proveedor_id')->toArray();
 
-        // Filtrar proveedores que no están en los proveedores agregados
+        // Filtrar proveedores que no están en los proveedores agregados recientes
         foreach ($proveedoresAll as $pa) {
             if (!in_array($pa['cidclienteproveedor'], $proveedoresAgregadosIds)) {
                 $this->proveedores[] = $pa;  // Agregar el proveedor a la lista
             }
         }
-        //dd($this->proveedores);
+
+        if ($requisicion->cotizacion_unica) { // si la requi fue regresada, valida si es cotizacion unica y agrega las validaciones
+            $this->esCotizacionUnica = true;
+            $this->cantMinimaCotizaciones = 1;
+        }
 
         $this->productos = ProductoService::ListaProductos($requisicion->sucursal->nomenclatura);
     }

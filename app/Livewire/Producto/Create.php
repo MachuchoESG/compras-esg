@@ -111,6 +111,8 @@ class Create extends Component
         }
 
         $this->open = false;
+
+        return view('livewire.cotizacion.show');
     }
 
     public function buscarconsecutivo()
