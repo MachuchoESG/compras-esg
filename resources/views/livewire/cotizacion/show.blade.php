@@ -638,6 +638,10 @@
             });
 
             // Desde Livewire, cerrar el modal
+            Livewire.on('uncheckCotizacionUnica', function() {
+                $('#cotizacion_unica').prop('checked', false);
+            });
+
             Livewire.on('togglemodal', function() {
                 $('#ModalEditProducto').modal('show');
             });

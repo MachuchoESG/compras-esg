@@ -61,6 +61,13 @@ class Show extends Component
 
     public function toggleCotizacionUnica($isChecked)
     {
+        //dd($this->requisicion->cotizaciones()->count());
+        if ($this->requisicion->cotizaciones()->count() > 1) {
+            $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
+            $this->esCotizacionUnica = false;
+            $this->dispatch('uncheckCotizacionUnica');
+            return view('livewire.cotizacion.show');
+        }
         $this->esCotizacionUnica = $isChecked;
         $this->cantMinimaCotizaciones = $isChecked ? 1 : 2;
     }
@@ -324,7 +331,7 @@ class Show extends Component
     }
     public function save()
     {
-        if ($this->esCotizacionUnica) {// valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
+        if ($this->esCotizacionUnica) { // valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
             $this->alert('error', 'No se puede dar de alta nueva cotizacion si se marco "Cotizacion Unica"');
             return view('livewire.cotizacion.show');
         }
