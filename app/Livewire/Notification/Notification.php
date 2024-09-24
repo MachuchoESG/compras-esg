@@ -32,6 +32,8 @@ class Notification extends Component
     public $esjefe = false;
     public $escompras = false;
 
+    public $sizeNotification = 10;//no toma query sizes se usa backend para modificar tamaño
+
 
 
     public function mount()
@@ -48,6 +50,7 @@ class Notification extends Component
 
             if ($this->escompras) { //lmvilla //ESTATUS 7
                 //dd('entre');
+                $this->sizeNotification = $this->sizeNotification + 10;
                 $requisicionesPendientes = Requisicion::getRequisicionesPendientesdeCotizar();
 
                 $this->cantidadPendienteCotizacion = $requisicionesPendientes->count();
@@ -59,7 +62,7 @@ class Notification extends Component
             $this->esjefe = $user->jefe();
 
             if ($this->esjefe || auth()->id() == 30) {
-
+                $this->sizeNotification = $this->sizeNotification + 10;
                 $requisionesPendientesAprobar = Requisicion::getRequisicionesPendientesAprobar();
                 if ($requisionesPendientesAprobar === 0) {
                     $this->cantidadPendienteAprobar = 0;
@@ -83,7 +86,7 @@ class Notification extends Component
             }
 
             if ($user->cotizacionesAutorizar()) { //lmvilla // ESTAUS 12
-
+                $this->sizeNotification = $this->sizeNotification + 10;
                 $pendientesAutorizarCotizacion = Requisicion::getRequisicionesPendientesdeAutoriarCotizar();
                 $this->cantidadPendienteAutorizarCotizacion = $pendientesAutorizarCotizacion->count();
                 $this->pendienteAutorizarCotizacion = $pendientesAutorizarCotizacion;
@@ -92,6 +95,9 @@ class Notification extends Component
                 $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteAutorizarCotizacion;
             }
 
+            if ($this->sizeNotification === 40) {
+                $this->sizeNotification = 50;
+            }
 
             $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();

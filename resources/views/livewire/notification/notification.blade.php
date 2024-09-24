@@ -21,17 +21,15 @@
         </x-slot>
 
         <x-slot name="content">
-            <div class="w-60" style="overflow-y: auto; max-height: 50vh">
+            <div class="row mx-0" style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
 
                 @if ($escompras)
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Requisiciones') }}
-
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
 
                         @if ($cantidadPendienteCotizacion > 0)
-                            <p>Pendientes de subir cotizacion</p>
+                            <p class=""> {{ __('Requisiciones') }} - Pendientes de subir cotizacion</p>
                             @foreach ($pendientecotizacion as $requisicion)
-                                <x-dropdown-link
+                                <x-dropdown-link style="padding-inline: .5rem!important;"
                                     href="{{ route('cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
                                     <p>{{ $requisicion->folio }}</p>
                                     <span clas>{{ $requisicion->solicitante->name }}</span>
@@ -42,21 +40,16 @@
                         @else
                             <p>No hay requisiciones pendientes de subir cotizaciones.</p>
                         @endif
-
-
-
                     </div>
                 @endif
 
                 @if ($esjefe)
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Requisiciones') }}
-
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
 
                         @if ($cantidadPendienteAprobar > 0)
-                            <p>Pendientes de aprobar</p>
+                            <p class="">{{ __('Requisiciones') }} - Pendientes de aprobar</p>
                             @foreach ($pendientesaprobar as $requisicion)
-                                <x-dropdown-link
+                                <x-dropdown-link style="padding-inline: .5rem!important;"
                                     href="{{ route('requisicion.aprobacion', ['requisicion' => $requisicion]) }}">
                                     {{ $requisicion->folio }}
                                 </x-dropdown-link>
@@ -66,9 +59,9 @@
                         @endif
 
                         @if ($cantidadPendienteAutorizar > 0)
-                            <p>Pendientes de autorizar</p>
+                            <p class="">Pendientes de autorizar</p>
                             @foreach ($pendienteautorizar as $requisicion)
-                                <x-dropdown-link
+                                <x-dropdown-link style="padding-inline: .5rem!important;"
                                     href="{{ route('requisicion.autorizar', ['requisicion' => $requisicion]) }}">
                                     {{ $requisicion->folio }}
                                 </x-dropdown-link>
@@ -82,14 +75,12 @@
 
 
                 @if ($cantidadPendienteAutorizarCotizacion > 0)
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Cotizaciones') }}
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
 
-
-
-                        <p>Pendientes Autorizar </p>
+                        <p class="">{{ __('Cotizaciones') }} - Pendientes Autorizar </p>
                         @foreach ($pendienteAutorizarCotizacion as $requisicion)
-                            <x-dropdown-link href="{{ route('cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
+                                href="{{ route('cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
                                 {{ $requisicion->folio }}
                             </x-dropdown-link>
                         @endforeach
@@ -102,14 +93,11 @@
 
 
                 @if ($cantidadPendienteIncompletas > 0)
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                        {{ __('Requisiciones') }}
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
 
-
-
-                        <p>Incompletas</p>
+                        <p class="">{{ __('Requisiciones') }} - Incompletas</p>
                         @foreach ($pendienteIncompletas as $requisicion)
-                            <x-dropdown-link
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
                                 href="{{ route('requisicion.edit', ['requisicion' => $requisicion->id]) }}">
                                 {{ $requisicion->folio }}
                             </x-dropdown-link>
