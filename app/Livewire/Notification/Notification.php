@@ -49,12 +49,10 @@ class Notification extends Component
             $this->escompras = $user->compras();
 
             if ($this->escompras) { //lmvilla //ESTATUS 7
-                //dd('entre');
                 $this->sizeNotification = $this->sizeNotification + 10;
                 $requisicionesPendientes = Requisicion::getRequisicionesPendientesdeCotizar();
 
                 $this->cantidadPendienteCotizacion = $requisicionesPendientes->count();
-                //dd($this->cantidadPendienteCotizacion);
                 $this->pendientecotizacion = $requisicionesPendientes;
                 $this->totalnotificaciones = $this->cantidadPendienteCotizacion;
             }
@@ -65,7 +63,6 @@ class Notification extends Component
 
                 $this->sizeNotification = $this->sizeNotification + 10;
                 $requisionesPendientesAprobar = Requisicion::getRequisicionesPendientesAprobar();
-                //dd($requisionesPendientesAprobar);
                 if ($requisionesPendientesAprobar === 0) {
                     $this->cantidadPendienteAprobar = 0;
                 } else {
@@ -75,7 +72,6 @@ class Notification extends Component
                 $this->pendientesaprobar = $requisionesPendientesAprobar;
 
                 $requisionesPendientesAutorizar = Requisicion::getRequisicionesPendientesdeAutorizar();
-                //dd($requisionesPendientesAutorizar);
                 if ($requisionesPendientesAutorizar === 0) {
                     $this->cantidadPendienteAutorizar = 0;
                 } else {
@@ -106,7 +102,6 @@ class Notification extends Component
             $this->pendienteIncompletas = $requisicionesIncompletas;
             $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas;
 
-            //dd($this->totalnotificaciones);
         }
     }
 

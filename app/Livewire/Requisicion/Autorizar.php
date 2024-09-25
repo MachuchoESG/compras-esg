@@ -612,8 +612,6 @@ class Autorizar extends Component
 
         $total = $this->obtenerTotalAutorizar();
 
-        //dd($total);
-
         if ($this->tienespermiso($total)) {
 
             $this->generarorden();

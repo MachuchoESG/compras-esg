@@ -65,12 +65,10 @@ class Create extends Component
 
     public function addProducto($id, $producto)
     {
-        //dd($producto);
         $this->requisicion->addProducto($id, $producto);
 
         $this->reset('existencias');
 
-        //dd($this->requisicion);
         $this->dispatch('cerrar-modal');
     }
 

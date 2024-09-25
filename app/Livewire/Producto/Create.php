@@ -59,7 +59,6 @@ class Create extends Component
     #[On('AbrirModalAltaProducto')]
     public function AbrirModal()
     {
-        //dd('Intenta abrir modal');
         $this->open = true;
     }
 

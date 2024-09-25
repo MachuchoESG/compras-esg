@@ -61,7 +61,6 @@ class Show extends Component
 
     public function toggleCotizacionUnica($isChecked)
     {
-        //dd($this->requisicion->cotizaciones()->count());
         if ($this->requisicion->cotizaciones()->count() > 1) {
             $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
             $this->esCotizacionUnica = false;
@@ -242,7 +241,6 @@ class Show extends Component
             'comentario' => $this->comentario_preautorizacion,
         ]);
 
-        //dd($this->requisicion);
         if ($this->requisicion) {
             $this->requisicion->estatus_id = 2;
             $this->requisicion->cotizacion_unica = $this->esCotizacionUnica;
@@ -263,7 +261,6 @@ class Show extends Component
     // #[On('AbrirModalEditarDetalle')]
     public function AbrirModal($id)
     {
-        //dd($this->requisicion->sucursal->nomenclatura);
         $this->productos = ProductoService::ListaProductos($this->requisicion->sucursal->nomenclatura);
         $this->detalleid = $id;
         $this->cotizacion->openEditProducto = true;
@@ -278,7 +275,6 @@ class Show extends Component
 
     public function AbrirModalAltaProducto()
     {
-        // dd('abri modal alta producto');
         $this->dispatch('AbrirModalAltaProducto');
     }
 
@@ -290,7 +286,6 @@ class Show extends Component
 
     public function deleteCotizacion($id)
     {
-        //dd($id);
         $COT = Cotizacion::find($id);
         if ($COT) {
             //$this->cotizacion->deleteCotizacion($id);
@@ -411,7 +406,6 @@ class Show extends Component
 
     public function render()
     {
-        //dd('render');
         return view('livewire.cotizacion.show');
     }
 }

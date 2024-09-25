@@ -74,7 +74,6 @@ class RequisicionCreateForm extends Form
     {
         $this->producto['producto'] = $producto;
         $this->producto['producto_id'] = ($id === null || $id==='' || $id === '0') ? 0 : $id ;
-        //dd($this->producto);
         $this->validate([
             'producto.producto_id' => 'required',
             'producto.cantidad' => 'required|numeric|min:1',

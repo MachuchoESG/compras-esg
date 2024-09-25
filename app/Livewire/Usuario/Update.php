@@ -96,7 +96,6 @@ class Update extends Component
             'departamento_id' => $this->departamento_id,
             'puesto_id' => $this->puesto_id
         ];
-        //dd($usuario);
         $usuario->name = $this->name;
         $usuario->email = $this->email;
         $usuario->departamento_id = $this->departamento_id;
@@ -108,7 +107,6 @@ class Update extends Component
         if ($validator->fails()) {
             $errors = $validator->errors();
             $arrErrors = $errors->toArray();
-            //dd($arrErrors);
 
             foreach ($arrErrors as $errors) {
                 $errMessage = '';
@@ -122,7 +120,6 @@ class Update extends Component
             return;
         }
 
-        //dd($usuario);
         $usuario->save();
         $this->cerrarModal();
         $this->alert('success', "Se actualizo correctamente el departamento " . $usuario->name);
