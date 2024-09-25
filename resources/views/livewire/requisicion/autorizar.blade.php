@@ -105,12 +105,14 @@
                     @endforeach
                 </div>
 
+                <div class="my-3 d-flex justify-between">
+                    <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
+                    <x-danger-button wire:click.prevent="noAutorizar">No autorizar</x-danger-button>
+                    <x-button wire:click.prevent="volverCotizar">Volver a cotizar</x-button>
+                </div>
 
 
 
-                <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
-                <x-danger-button wire:click.prevent="noAutorizar">No autorizar</x-danger-button>
-                <x-button wire:click.prevent="volverCotizar">Volver a cotizar</x-button>
             </form>
         @endif
     </div>
