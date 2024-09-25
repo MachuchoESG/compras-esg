@@ -468,6 +468,15 @@
 
 
     @if ($requisicion->cotizaciones->count() >= $cantMinimaCotizaciones)
+        @if ($requisicion->estatus_id == 5){{-- Estatus volver a cotizar --}}
+
+            @if ($esCotizacionUnica)
+                <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
+            @else
+                <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+            @endif
+
+        @endif
         @can('Incompleta', $requisicion)
             <div class="flex justify-between mt-4">
                 <x-button wire:click="$set('openIncompleta',true)">Incompleta</x-button>

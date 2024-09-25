@@ -32,7 +32,7 @@ class Notification extends Component
     public $esjefe = false;
     public $escompras = false;
 
-    public $sizeNotification = 10;//no toma query sizes se usa backend para modificar tamaño
+    public $sizeNotification = 10; //no toma query sizes se usa backend para modificar tamaño
 
 
 
@@ -62,8 +62,10 @@ class Notification extends Component
             $this->esjefe = $user->jefe();
 
             if ($this->esjefe || auth()->id() == 30) {
+
                 $this->sizeNotification = $this->sizeNotification + 10;
                 $requisionesPendientesAprobar = Requisicion::getRequisicionesPendientesAprobar();
+                //dd($requisionesPendientesAprobar);
                 if ($requisionesPendientesAprobar === 0) {
                     $this->cantidadPendienteAprobar = 0;
                 } else {
@@ -73,7 +75,7 @@ class Notification extends Component
                 $this->pendientesaprobar = $requisionesPendientesAprobar;
 
                 $requisionesPendientesAutorizar = Requisicion::getRequisicionesPendientesdeAutorizar();
-
+                //dd($requisionesPendientesAutorizar);
                 if ($requisionesPendientesAutorizar === 0) {
                     $this->cantidadPendienteAutorizar = 0;
                 } else {

@@ -293,6 +293,15 @@ class Autorizar extends Component
 
     public function volverCotizar()
     {
+        $registro = AutorizacionHistorial::where('user_id', auth()->user()->puesto->id)
+            ->where('requisicion_id', $this->requisicion->id)
+            ->first();
+
+        // Si se encuentra el registro, actualizamos el campo visto a true
+        if ($registro) {
+            $registro->visto = false;
+            $registro->save();
+        }
 
         $requisicion = Requisicion::find($this->requisicion->id);
 

@@ -221,6 +221,14 @@ class Show extends Component
     }
     public function autorizarCotizacion()
     {
+
+        if ($this->esCotizacionUnica && $this->requisicion->cotizaciones()->count() > 1) {
+            $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
+            $this->esCotizacionUnica = false;
+            $this->dispatch('uncheckCotizacionUnica');
+            return view('livewire.cotizacion.show');
+        }
+
         $this->validate([
             'comentario_preautorizacion' => 'required',
         ], [], [
@@ -237,6 +245,7 @@ class Show extends Component
         //dd($this->requisicion);
         if ($this->requisicion) {
             $this->requisicion->estatus_id = 2;
+            $this->requisicion->cotizacion_unica = $this->esCotizacionUnica;
             $this->requisicion->save();
 
 

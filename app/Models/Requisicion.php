@@ -232,7 +232,7 @@ class Requisicion extends Model
                             ->where('puestoautorizador_id', $puestoIdUsuario);
                     });
             })
-                ->where('Visto', 0)
+                ->where('visto', 0)
                 ->where('estatus_id', 1)
                 ->select('id', 'folio')
                 ->get();
@@ -316,8 +316,13 @@ class Requisicion extends Model
         /* if (Auth::user()->id == 30) {
             return collect();
         } */
-        return Requisicion::with('solicitante')->where('estatus_id', 7)->orderBy('updated_at', 'desc')
+        return Requisicion::with('solicitante')->whereIn('estatus_id', [7, 5])->orderBy('updated_at', 'desc')
             ->get();
+    }
+
+    public static function getRequisicionesVolverACotizar()
+    {
+        return Requisicion::where('estatus_id', [5])->orderBy('created_at', 'desc');
     }
 
     public static function contarRequisicionesPendientesdeAutorizar()
