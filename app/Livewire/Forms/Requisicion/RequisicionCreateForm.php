@@ -73,7 +73,7 @@ class RequisicionCreateForm extends Form
     public function addProducto($id = null, $producto = null)
     {
         $this->producto['producto'] = $producto;
-        $this->producto['producto_id'] = ($id === null || $id==='' || $id === '0') ? 0 : $id ;
+        $this->producto['producto_id'] = ($id === null || $id === '' || $id === '0') ? 0 : $id;
         $this->validate([
             'producto.producto_id' => 'required',
             'producto.cantidad' => 'required|numeric|min:1',
@@ -93,12 +93,24 @@ class RequisicionCreateForm extends Form
     public function save()
     {
 
-
-
         $this->user = Auth::user();
 
-        $this->validate();
-
+        if ($this->sucursal_id == 1) { // id 1 es Monterrey sucursal Matriz
+            $this->validate();
+        } else {
+            $this->validate(
+                [
+                    'empresa_id' => 'required',
+                    'sucursal_id' => 'required',
+                    'fecharequerida' => 'required|date|after_or_equal:today',
+                    'proyecto_id' => '',
+                    'observaciones' => 'required',
+                    'listaProductos' => 'required|array|min:1'
+        
+                ]
+            );
+        }
+        
         $this->user_id = $this->user->id;
 
         if ($this->empleado_id == '') {
@@ -106,22 +118,39 @@ class RequisicionCreateForm extends Form
         }
 
 
-
-        $requisicionNueva = Requisicion::create(
-            $this->only(
-                'empresa_id',
-                'sucursal_id',
-                'fecharequerida',
-                'empleado_id',
-                'observaciones',
-                'user_id',
-                'estatus_id',
-                'unidad',
-                'seguimiento',
-                'proyecto_id',
-                'proyecto'
-            )
-        );
+        if ($this->sucursal_id == 1) { // id 1 es Monterrey sucursal Matriz
+            $requisicionNueva = Requisicion::create(
+                $this->only(
+                    'empresa_id',
+                    'sucursal_id',
+                    'fecharequerida',
+                    'empleado_id',
+                    'observaciones',
+                    'user_id',
+                    'estatus_id',
+                    'unidad',
+                    'seguimiento',
+                    'proyecto_id',
+                    'proyecto'
+                )
+            );
+        } else {
+            $requisicionNueva = Requisicion::create(
+                $this->only(
+                    'empresa_id',
+                    'sucursal_id',
+                    'fecharequerida',
+                    'empleado_id',
+                    'observaciones',
+                    'user_id',
+                    'estatus_id',
+                    'unidad',
+                    'seguimiento',
+                )
+            );
+        }
+        
+        
 
 
         $requisicionNueva->detalleRequisiciones()->createMany($this->listaProductos);
