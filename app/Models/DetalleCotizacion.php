@@ -24,4 +24,9 @@ class DetalleCotizacion extends Model
     {
         return $this->belongsTo(Cotizacion::class, 'cotizacion_id');
     }
+
+    public function cotizaciones()
+    {
+        return $this->belongsTo(Cotizacion::class);
+    }
 }

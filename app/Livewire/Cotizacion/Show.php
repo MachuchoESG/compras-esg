@@ -68,6 +68,12 @@ class Show extends Component
             return view('livewire.cotizacion.show');
         }
         $this->esCotizacionUnica = $isChecked;
+
+        $requisicion = Requisicion::find($this->requisicion->id);
+        $requisicion->cotizacion_unica = $this->esCotizacionUnica;
+        $requisicion->save();
+
+
         $this->cantMinimaCotizaciones = $isChecked ? 1 : 2;
     }
 

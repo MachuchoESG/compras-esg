@@ -104,6 +104,8 @@ class Create extends Component
 
             $this->productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
 
+            //dd($this->productos);
+
             $this->productoscargados = ($this->productos !== false);
 
             $this->cargandoproductos = false;
