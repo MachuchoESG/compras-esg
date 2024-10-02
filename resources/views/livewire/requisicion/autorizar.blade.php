@@ -72,7 +72,7 @@
                                             <td class="w-4 p-4">
                                                 <div class="flex items-center">
                                                     <input id="checkbox-table-search-{{ $detalle['id'] }}"
-                                                        wire:click="toggleSelection( {{ $detalle->id }} ,$event.target.checked  )"
+                                                        wire:click="toggleSelection( {{ $loop->index }} ,{{ $detalle->id }} ,$event.target.checked  )"
                                                         type="checkbox"
                                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                                                         @if ($detalle['autorizado']) checked @endif>
@@ -87,7 +87,7 @@
                                                     id="{{ $detalle['id'] }}">
                                             </td>
                                             <td class="px-6 py-4">
-                                                {{ $detalle['producto'] }}
+                                                {{ $loop->index + 1 }}. {{ $detalle['producto'] }}
                                             </td>
                                             <td class="px-6 py-4">
                                                 ${{ $detalle['precio'] }}

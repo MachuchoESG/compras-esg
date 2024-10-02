@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use PhpParser\Node\Stmt\Else_;
 use PhpParser\Node\Stmt\TryCatch;
 
 class Autorizar extends Component
@@ -38,6 +39,7 @@ class Autorizar extends Component
     public $comentario = "";
     public $comentariofinal = "";
     public $cotizacionPrevAutorizada = [];
+    public $indexProdAdded = [];
 
     public function download($id)
     {
@@ -204,27 +206,51 @@ class Autorizar extends Component
             $detalle->save();
         }
     }
-    public function toggleSelection($id, $check)
+    public function toggleSelection($index, $id, $check)
     {
-
+    
         $detalle = DetalleCotizacion::find($id);
         //Validar que otras cotizaciones no tengan autorizadas el mismo producto
         $cotizacionDelDetalle = Cotizacion::where('id', '=', $detalle->cotizacion_id)->first();
         $requisicionID = $cotizacionDelDetalle->requisicion_id;
 
         $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
+        $allCotizaciones = [];
+        foreach ($cotizacionesRequisicion as $cr) {
+            $coti = DetalleCotizacion::select('id', 'producto' ,'cotizacion_id', 'producto_id')->where('cotizacion_id', '=', $cr->id)->get();
+            array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
+        }
 
-        $detallesCotizacionesPorRequi = DetalleCotizacion::whereIn('cotizacion_id', $cotizacionesRequisicion)->get();
-
-        if ($check != false) {
-            foreach ($detallesCotizacionesPorRequi as $dc) {
-                if ($dc->id != $id) {
-                    if ($dc->autorizado == 1 && $dc->producto_id == $detalle->producto_id) {
-                        $this->alert('warning', 'Ya existe un producto autorizado con el nombre de: ' . $detalle->producto);
-                        $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
-                        return 0;
+        if (!$this->requisicion->cotizacion_unica) {
+            if ($check != false) {
+                foreach ($allCotizaciones as $AC) {
+                    if ($AC['cotizacion_id'] == $detalle->cotizacion_id) {
+                        if (!in_array($index, $this->indexProdAdded)) {
+                            array_push($this->indexProdAdded, $index);
+                            break;
+                        }
+                    } else {
+                        foreach ($AC['cotizaciones'] as $cot) {
+                            if (in_array($index, $this->indexProdAdded)) {
+                                //$this->alert('warning', json_encode($cot));
+                                $this->alert('warning', 'Ya existe un producto autorizado  '. $index+1 . '. ' . $detalle->producto . ' con otro proveedor');
+                                //$this->alert('warning', json_encode($this->indexProdAdded));
+                                $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
+                                return 0;
+                            } else {
+                                array_push($this->indexProdAdded, $index);
+                                break;
+                            }
+                        }
                     }
                 }
+
+            } else {
+                $pos = array_search($index, $this->indexProdAdded);
+                if ($pos !== false) {
+                    unset($this->indexProdAdded[$pos]);
+                }
+                //dd($this->indexProdAdded);
             }
         }
 
@@ -248,6 +274,7 @@ class Autorizar extends Component
 
                 $cotizacion->save();
             }
+            //dd($this->indexProdAdded);
         }
 
 
@@ -669,6 +696,25 @@ class Autorizar extends Component
 
     public function mount($requisicion)
     {
+
+        $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicion->id)->get();
+        $allCotizaciones = [];
+        foreach ($cotizacionesRequisicion as $cr) {
+            $coti = DetalleCotizacion::select('id', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+            array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
+        }
+
+        $index = 0;
+        foreach ($allCotizaciones as $AC) {
+            foreach ($AC['cotizaciones'] as $producto) {
+                if ($producto['autorizado'] == 1) {
+                    array_push($this->indexProdAdded, $index); // En caso de recargar pagina valida los index agregados previamente
+                }
+                $index++;
+            }
+            $index = 0;
+        }
+        //dd($this->indexProdAdded);
         // Requisicion::with('detalleRequisiciones', 'cotizaciones.detalleCotizaciones')->find($requisicion->id);
 
         $this->urlApi = ApiUrl::urlApi();
