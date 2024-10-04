@@ -3,6 +3,7 @@
 namespace App\Livewire\Usuario;
 
 use App\Actions\Fortify\PasswordValidationRules;
+use App\Mail\SendMailNewUserNoReplay;
 use App\Models\Departamento;
 use App\Models\Empresa;
 use App\Models\Puesto;
@@ -11,6 +12,7 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -91,20 +93,31 @@ class Create extends Component
         }
 
         $this->open = false;
-
-
+        $this->sendMailNewUser($data['name'], $data['email'], $data['password']);
 
         return redirect()->route('usuario.index');
     }
 
-    public function sendMailNewUser($nombre, $correo, $contraseña){
-        
+    public function sendMailNewUser($nombre, $correo, $contraseña)
+    {
+        Mail::to($correo)->send(new SendMailNewUserNoReplay($nombre, $correo, $contraseña));
+    }
+
+    public function generarPasswordRandom()
+    {
+        $letras = substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 3);
+        $numeros = substr(str_shuffle('1234567890'), 0, 3);
+
+        $this->usuario['password'] = $letras . $numeros;
     }
 
 
     public function mount()
     {
         $this->departamentos = Departamento::all();
+        $dep1 = $this->departamentos[0];
+        $this->puestos = Puesto::where('departamento_id', '=', $dep1->id)->get();
+        //dd($dep1);
     }
 
     public function render()
