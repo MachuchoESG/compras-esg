@@ -91,7 +91,14 @@ class Create extends Component
         }
 
         $this->open = false;
+
+
+
         return redirect()->route('usuario.index');
+    }
+
+    public function sendMailNewUser($nombre, $correo, $contraseña){
+        
     }
 
 
