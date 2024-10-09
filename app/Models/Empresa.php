@@ -18,4 +18,9 @@ class Empresa extends Model
     {
         return $this->hasMany(Sucursal::class);
     }
+
+    public function gastosFijos()
+    {
+        return $this->hasMany(GastoFijo::class, 'id_empresa');
+    }
 }

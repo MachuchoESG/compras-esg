@@ -21,6 +21,7 @@
                     <li><a class="dropdown-item" href="{{ route('estatus.index') }}">Estatus</a></li>
                     <li><a class="dropdown-item" href="{{ route('departamento.index') }}">Departamentos</a></li>
                     <li><a class="dropdown-item" href="{{ route('puesto.index') }}">Puestos</a></li>
+                    <li><a class="dropdown-item" href="{{ route('gastosfijos.index') }}">Gastos Fijos</a></li>
                     <li class="hidden md:flex lg:hidden"><a class="dropdown-item"
                             href="{{ route('permisosrequisicion.index') }}">{{ __('Flujo autorización') }}</a></li>
                     <li class="hidden md:flex lg:hidden"><a class="dropdown-item"

@@ -35,7 +35,8 @@ class ProductoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $resp = [ 'id'=>1, 'text' => $id ];
+        return json_encode($resp);
     }
 
     /**

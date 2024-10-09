@@ -4,6 +4,7 @@ use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\empresaController;
 use App\Http\Controllers\EstatusController;
+use App\Http\Controllers\GastosFijosController;
 use App\Http\Controllers\MigrationsRun;
 use App\Http\Controllers\PermisosrequisicionController;
 use App\Http\Controllers\ProductoController;
@@ -53,6 +54,9 @@ Route::middleware([
     Route::resource('puesto', PuestoController::class);
     Route::resource('usuario', UsuarioController::class);
     Route::resource('estatus', EstatusController::class);
+    Route::resource('gastosfijos',GastosFijosController::class);
+    Route::get('gf-empresas', [GastosFijosController::class, 'gastosFijosEmpresas']);
+    Route::get('gf-opt-productos/{opt}', [GastosFijosController::class, 'gastosFijosOptProductos']);
     Route::resource('permisosrequisicion', PermisosrequisicionController::class);
     Route::get('/requisicion/{requisicion}/autorizar', [requisicionController::class, 'autorizar'])->name('requisicion.autorizar');
     Route::get('/requisicion/{requisicion}/aprobacion', [requisicionController::class, 'aprobacion'])->name('requisicion.aprobacion');

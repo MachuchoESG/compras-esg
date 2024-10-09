@@ -22,4 +22,9 @@ class Sucursal extends Model
     {
         return $this->belongsTo(Empresa::class);
     }
+
+    public function gastosFijos()
+    {
+        return $this->hasMany(GastoFijo::class, 'id_sucursal');
+    }
 }
