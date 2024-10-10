@@ -32,12 +32,14 @@ class Autorizar extends Component
     public $comentarioOpen = false;
     public $openCancelacion = false;
     public $comentarioFinal = false;
+    public $comentarioFinalAutorizar = false;
     public $selectedItems = [];
     public $datosActualizados = [];
     public $urlApi;
     public $jefe = "";
     public $comentario = "";
     public $comentariofinal = "";
+    public $comentariofinalautorizar = "";
     public $cotizacionPrevAutorizada = [];
     public $indexProdAdded = [];
 
@@ -208,7 +210,7 @@ class Autorizar extends Component
     }
     public function toggleSelection($index, $id, $check)
     {
-    
+
         $detalle = DetalleCotizacion::find($id);
         //Validar que otras cotizaciones no tengan autorizadas el mismo producto
         $cotizacionDelDetalle = Cotizacion::where('id', '=', $detalle->cotizacion_id)->first();
@@ -217,7 +219,7 @@ class Autorizar extends Component
         $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
         $allCotizaciones = [];
         foreach ($cotizacionesRequisicion as $cr) {
-            $coti = DetalleCotizacion::select('id', 'producto' ,'cotizacion_id', 'producto_id')->where('cotizacion_id', '=', $cr->id)->get();
+            $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id')->where('cotizacion_id', '=', $cr->id)->get();
             array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
         }
 
@@ -233,7 +235,7 @@ class Autorizar extends Component
                         foreach ($AC['cotizaciones'] as $cot) {
                             if (in_array($index, $this->indexProdAdded)) {
                                 //$this->alert('warning', json_encode($cot));
-                                $this->alert('warning', 'Ya existe un producto autorizado  '. $index+1 . '. ' . $detalle->producto . ' con otro proveedor');
+                                $this->alert('warning', 'Ya existe un producto autorizado  ' . $index + 1 . '. ' . $detalle->producto . ' con otro proveedor');
                                 //$this->alert('warning', json_encode($this->indexProdAdded));
                                 $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
                                 return 0;
@@ -244,7 +246,6 @@ class Autorizar extends Component
                         }
                     }
                 }
-
             } else {
                 $pos = array_search($index, $this->indexProdAdded);
                 if ($pos !== false) {
@@ -486,6 +487,26 @@ class Autorizar extends Component
             return redirect()->route('requisicion.index');
         }
     }
+
+    public function saveComentarioFinalAutorizar()
+    {
+        if ($this->comentariofinalautorizar !== '') {
+            $comentario = Comentarios::create([
+                'requisicion_id' => $this->requisicion->id,
+                'user_id' => Auth::id(),
+                'comentario' => $this->comentariofinalautorizar,
+            ]);
+        }
+        $this->comentariofinalautorizar = '';
+        $this->save();
+        /* if ($comentario) {
+            return redirect()->route('requisicion.index');
+        } else {
+            $this->alert('error', 'Error al agregar el comentario');
+            return redirect()->route('requisicion.index');
+        } */
+    }
+
     public function generarorden()
     {
 
@@ -634,13 +655,13 @@ class Autorizar extends Component
         }
         return redirect()->route('requisicion.index');
     }
+
     public function save()
     {
-
+        $this->comentarioFinalAutorizar = false;
         $total = $this->obtenerTotalAutorizar();
 
         if ($this->tienespermiso($total)) {
-
             $this->generarorden();
         } else {
             $this->autorizarsiguientenivel();

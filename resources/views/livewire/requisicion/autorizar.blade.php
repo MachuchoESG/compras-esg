@@ -4,7 +4,7 @@
 
     <div>
         @if ($requisicion->cotizaciones->count() != 0)
-            <form wire:submit.prevent="save">
+            <form wire:submit.prevent="$set('comentarioFinalAutorizar', true)">
                 <div class="w-full">
                     @foreach ($requisicion->cotizaciones as $cotizacion)
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 mt-4">
@@ -172,7 +172,6 @@
     </x-dialog-modal>
 
 
-
     <x-alpine-modal wire:model="comentarioOpen">
         <x-slot name="title">
             Solicitud de Autorización
@@ -228,6 +227,27 @@
         <x-slot name="footer">
             <x-button wire:click="saveComentarioFinal()">Guardar</x-button>
 
+        </x-slot>
+    </x-alpine-modal>
+
+    <x-alpine-modal wire:model="comentarioFinalAutorizar">
+        <x-slot name="title">
+            Comentario Final Antes de Autorizar
+        </x-slot>
+        <x-slot name="content">
+
+            <div class="w-full">
+                <p class="fw-bold">El comentario final antes de autorizar no es obligatorio.</p>
+                <x-label>Comentario</x-label>
+                <textarea wire:model="comentariofinalautorizar" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
+                    rows="1"></textarea>
+                <x-input-error for="comentariofinalautorizar" />
+            </div>
+        </x-slot>
+        <x-slot name="footer">
+            <x-button class="btn btn-secondary btn-sm me-3"
+                wire:click="$set('comentarioFinalAutorizar', false)">Cancelar</x-button>
+            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Guardar</x-button>
         </x-slot>
     </x-alpine-modal>
 
