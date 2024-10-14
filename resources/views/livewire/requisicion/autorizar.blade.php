@@ -247,7 +247,7 @@
         <x-slot name="footer">
             <x-button class="btn btn-secondary btn-sm me-3"
                 wire:click="$set('comentarioFinalAutorizar', false)">Cancelar</x-button>
-            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Guardar</x-button>
+            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Autorizar</x-button>
         </x-slot>
     </x-alpine-modal>
 
