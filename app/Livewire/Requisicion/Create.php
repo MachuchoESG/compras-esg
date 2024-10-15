@@ -3,6 +3,7 @@
 namespace App\Livewire\Requisicion;
 
 use App\Livewire\Forms\Requisicion\RequisicionCreateForm;
+use App\Models\Departamento;
 use App\Models\Empresa;
 use App\Models\Sucursal;
 use App\Models\User;
@@ -30,6 +31,9 @@ class Create extends Component
     public $solicitantes = [];
     public $productos = [];
     public $proyectos = [];
+    public $departamentos = [];
+    public $departamento_especial;
+    public $requisicion_especial = false;
     public $productosinregistro = false;
     public $productoscargados = false;
     public $cargandoproductos = false;
@@ -49,11 +53,20 @@ class Create extends Component
 
     public function save()
     {
+        if ($this->requisicion_especial) {
+            $this->requisicion->cotizacion_especial = 1;
+            $this->requisicion->departamento_especial = $this->departamento_especial;
+        }
 
         $requisicionCreada =  $this->requisicion->save();
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);
 
         return redirect()->route('requisicion.index');
+    }
+
+    public function checkCotizacionEspecial()
+    {
+        $this->requisicion_especial = !$this->requisicion_especial;
     }
 
 
@@ -136,6 +149,8 @@ class Create extends Component
     public function mount()
     {
 
+        $this->departamentos = Departamento::all();
+        $this->departamento_especial = $this->departamentos[0]->id;
         // $this->urlApi  = ApiUrl::urlApi();
         // Obtener el usuario autenticado
         $this->user = Auth::user();

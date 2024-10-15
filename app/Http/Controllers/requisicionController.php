@@ -65,9 +65,7 @@ class requisicionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Requisicion $requisicion)
-    {
-    }
+    public function destroy(Requisicion $requisicion) {}
 
     public function autorizar(Requisicion $requisicion)
     {
@@ -77,6 +75,11 @@ class requisicionController extends Controller
     public function aprobacion(Requisicion $requisicion)
     {
         return view('requisicion.aprobacion', ['requisicion' => $requisicion]);
+    }
+
+    public function cotizacionespecial(Requisicion $requisicion)
+    {
+        return view('requisicion.cotizacionespecial', ['requisicion' => $requisicion]);
     }
 
     public function formato(Requisicion $requisicion)

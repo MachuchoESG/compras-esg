@@ -28,7 +28,10 @@ class Requisicion extends Model
         'visto',
         'unidad',
         'proyecto_id',
-        'proyecto'
+        'proyecto',
+        'cotizacion_especial',
+        'departamento_especial',
+        'observacion_especial',
     ];
 
     protected static function boot()
@@ -107,6 +110,10 @@ class Requisicion extends Model
         return $this->hasMany(Comentarios::class, 'requisicion_id')->orderBy('created_at', 'desc');
     }
 
+    public static function getRequisicionesEspeciales(){
+        $user = User::find(Auth::id());
+        return Requisicion::where('cotizacion_especial', '=', 1)->where('departamento_especial','=',$user->departamento_id)->where('aprobado','=',1)->get();
+    }
 
     public static function getRequisicionesIncompletas()
     {

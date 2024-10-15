@@ -26,6 +26,8 @@ class Notification extends Component
     public $cantidadPendienteAutorizarCotizacion = 0;
     public $pendienteAutorizarCotizacion = [];
 
+    public $cantidadNotiCotizacionEspecial = 0;
+    public $CotizacionesEspecial = [];
 
     public $totalnotificaciones = 0;
 
@@ -97,10 +99,14 @@ class Notification extends Component
                 $this->sizeNotification = 50;
             }
 
+            $requisicionesEpeciales = Requisicion::getRequisicionesEspeciales();
+            $this->CotizacionesEspecial = $requisicionesEpeciales;
+            //dd($requisicionesEpeciales);
             $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();
+            $this->cantidadNotiCotizacionEspecial =$requisicionesEpeciales->count();
             $this->pendienteIncompletas = $requisicionesIncompletas;
-            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas;
+            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas + $this->cantidadNotiCotizacionEspecial;;
 
         }
     }

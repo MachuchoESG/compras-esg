@@ -4,6 +4,7 @@ namespace App\Livewire\Requisicion\Component;
 
 use App\Models\Autorizacionhistorial;
 use App\Models\Cotizacion;
+use App\Models\DetalleCotizacion;
 use App\Models\Evidencia;
 use App\Models\Requisicion;
 use App\Models\User;
@@ -22,17 +23,19 @@ class Detallerequisicion extends Component
     public $cotizaciones;
     public $autorizacionHistorial = [];
     public $archivo;
+    public $productosRequisicion = [];
 
     use LivewireAlert;
     use WithFileUploads;
-    
-    public $openComentarios=false;
+
+    public $openComentarios = false;
 
 
     public function mount()
     {
         $this->requisicion =  Requisicion::with('cotizaciones', 'historialesAutorizacion')->find($this->requisicionid);
         $this->autorizacionHistorial = $this->requisicion->historialesAutorizacion;
+        $this->productosRequisicion = DetalleCotizacion::where('requisicion_id', '=', $this->requisicion->id);
         $this->cotizaciones = $this->requisicion->cotizaciones;
     }
 
@@ -82,7 +85,7 @@ class Detallerequisicion extends Component
                 'text' => 'No se encontró el documento',
             ]);
         } else {
-                   
+
             try {
                 $path = storage_path('app/' . $evidencia->url);
                 return response()->download($path);
@@ -108,19 +111,18 @@ class Detallerequisicion extends Component
                 'text' => 'No se encontró el documento',
             ]);
         } else {
-            
-            try{
+
+            try {
                 $path = storage_path('app/' . $archivo->url);
-                 return response()->download($path);
-            }catch (\Exception $e){
-                 $this->alert('warning', 'Cotización', [
+                return response()->download($path);
+            } catch (\Exception $e) {
+                $this->alert('warning', 'Cotización', [
                     'position' => 'top-end',
                     'timer' => '4000',
                     'toast' => true,
                     'text' => 'No se encontró el documento',
                 ]);
-            }  
-           
+            }
         }
     }
     public function render()

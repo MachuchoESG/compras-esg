@@ -35,8 +35,22 @@
     @if (!empty($requisicion->unidad))
         <p class="text-gray-500 text-md">Unidad de Taller: {{ $requisicion->unidad }}</p>
     @endif
+    <div class="d-flex justify-content-between">
+        <p class="text-gray-500 text-md">Cotización Unica: {{ $requisicion->cotizacion_unica ? 'Si' : 'No' }}</p>
+        <p class="text-gray-500 text-md">Cotización Especial: {{ $requisicion->cotizacion_especial ? 'Si' : 'No' }}</p>
+        <p class="text-gray-500 text-md">Cotización Departamento Asignado:
+            {{ $requisicion->departamento_especial ?? 'NO APLICA' }}
+        </p>
+    </div>
+    <div>
+        <p>Productos a Cotizar</p>
+        <ul>
+            @foreach ($productosRequisicion as $item)
+                <li> Producto: {{$item->producto}} - {{ $item->cantidad }} </li>
+            @endforeach
+        </ul>
+    </div>
 
-    <p class="text-gray-500 text-md">Cotización Unica: {{ $requisicion->cotizacion_unica ? 'Si' : 'No' }}</p>
 
     @if ($requisicion->comentarios->count() > 0)
         <x-button wire:click="$set('openComentarios', true)" class="my-2">Ver Comentarios</x-button>

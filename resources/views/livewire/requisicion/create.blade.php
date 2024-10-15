@@ -76,7 +76,27 @@
 
         </div>
 
+        <div class="row mt-2 mb-4">
+            @if ($requisicion_especial)
+                <div class="col-4">
+                    <x-label class="mx-1" for="select-requi-especial">Cotizacion Especializada</x-label>
+                    <select wire:model="departamento_especial" id="select-requi-especial"
+                        class="border-1 border-slate-900 rounded-md w-full text-black text-md capitalize">
+                        <option value="0" selected disabled>Seleccione departamento</option>
+                        @foreach ($departamentos as $departamento)
+                            <option value="{{ $departamento['id'] }}">{{ $departamento['name'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+            <div class="col-3 d-flex align-items-center">
+                <x-checkbox class="mx-1" wire:click="checkCotizacionEspecial()" type="checkbox"
+                    id="check-requi-especial" />
+                <x-label class="mx-1" for="check-requi-especial">Cotizacion Especializada</x-label>
+            </div>
 
+        </div>
 
 
         <div class="flex items-center">

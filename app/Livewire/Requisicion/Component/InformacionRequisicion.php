@@ -17,11 +17,9 @@ class InformacionRequisicion extends Component
     public $requisicion;
     public $archivo;
 
-  
-    public $openComentarios = false;
 
-    
-  
+    public $openComentarios = false;
+    public $productosRequisicion = []; // DESARROLLO
 
     public function download($id)
     {
