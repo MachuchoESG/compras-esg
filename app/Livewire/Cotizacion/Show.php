@@ -372,6 +372,9 @@ class Show extends Component
                 $this->proveedores[] = $pa;  // Agregar el proveedor a la lista
             }
         }
+        usort($this->proveedores, function ($a, $b) {
+            return strcmp($a['crazonsocial'], $b['crazonsocial']);
+        });
     }
 
     public function mount()
@@ -400,6 +403,11 @@ class Show extends Component
                 $this->proveedores[] = $pa;  // Agregar el proveedor a la lista
             }
         }
+
+
+        usort($this->proveedores, function ($a, $b) {
+            return strcmp($a['crazonsocial'], $b['crazonsocial']);
+        });
 
         if ($requisicion->cotizacion_unica) { // si la requi fue regresada, valida si es cotizacion unica y agrega las validaciones
             $this->esCotizacionUnica = true;
