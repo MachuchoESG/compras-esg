@@ -37,7 +37,7 @@ class Create extends Component
     public $productosinregistro = false;
     public $productoscargados = false;
     public $cargandoproductos = false;
-
+    public $showProductos = true;
     public $urlApi;
 
 
@@ -115,8 +115,13 @@ class Create extends Component
         if ($this->sucursal) {
             $this->cargandoproductos = true;
 
-            $this->productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
+            $productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
 
+            usort($productos, function ($a, $b) {
+                return strcmp($a['cnombreproducto'], $b['cnombreproducto']);
+            });
+
+            $this->productos = $productos;
             //dd($this->productos);
 
             $this->productoscargados = ($this->productos !== false);
@@ -124,6 +129,7 @@ class Create extends Component
             $this->cargandoproductos = false;
 
             $this->unidades = UnidadService::ListaUnidades($this->sucursal->nomenclatura);
+            $this->dispatch('renderProductos', ['productos' => $this->productos]);
         }
     }
 

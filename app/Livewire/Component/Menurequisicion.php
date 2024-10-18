@@ -3,13 +3,18 @@
 namespace App\Livewire\Component;
 
 use App\Models\Evidencia;
+use App\Models\Requisicion;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 
 class Menurequisicion extends Component
 {
-    public $requisicion = [];
+    use LivewireAlert;
+
+    public $requisicion;
 
     public $esjefe = false;
     public $escompras = false;
@@ -48,6 +53,39 @@ class Menurequisicion extends Component
             }
         }
     }
+
+    public function borrarRequisicion()
+    {
+        if (Auth::id() == 30 || Auth::id() == 33) {
+            $requiBorrar = Requisicion::find($this->requisicion->id);
+            if (!$requiBorrar) {
+                $this->alert('error', 'La requisicion seleccionada no se encontro en el sistema.');
+                return 0;
+                $this->dispatch('cerrar-modal-borrar');
+            }
+            $requiBorrar->borrado = 1;
+            $requiBorrar->fecha_borrado = Carbon::now();
+            $requiBorrar->user_borrado = Auth::id();
+
+            try {
+                $requiBorrar->save();
+                $this->alert('success', 'La requisicion: ' . $this->requisicion->folio . ' se a Borrado.');
+            } catch (\Exception $e) {
+                $this->alert('error', 'La requisicion: ' . $this->requisicion->folio . ' no se puede Borrar.');
+            }
+            
+        } else {
+            $this->alert('error', 'La requisicion: ' . $this->requisicion->folio . ' no se puede Borrar.'); 
+        }
+
+        $this->dispatch('cerrar-modal-borrar');
+    }
+
+    public function renderRequisiciones(){
+        $requisiciones = Requisicion::getRequisiciones('', 5);
+        return view('livewire.requisicion.index', ['requisiciones' => $requisiciones]);
+    }
+
     public function render()
     {
         return view('livewire.component.menurequisicion');
