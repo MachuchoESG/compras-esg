@@ -42,6 +42,7 @@ class Autorizar extends Component
     public $comentariofinalautorizar = "";
     public $cotizacionPrevAutorizada = [];
     public $indexProdAdded = [];
+    public $totalPermitidoAutorizar = 0;
 
     public function download($id)
     {
@@ -437,6 +438,8 @@ class Autorizar extends Component
 
     public function saveComentario()
     {
+        $userLogin = auth()->user();
+        $user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
 
         $this->validate([
             'comentario' => 'required',
@@ -449,6 +452,16 @@ class Autorizar extends Component
             'requisicion_id' => $this->requisicion->id,
             'user_id' => Auth::id(),
             'comentario' => $this->comentario,
+        ]);
+
+        $historial = autorizacionhistorial::firstOrCreate([
+            'requisicion_id' => $this->requisicion->id,
+            'user_id' => $user->puesto->id,
+            'user_solicita' => auth()->user()->puesto->id,
+            'departamento_id' =>  $userLogin->departamento_id,
+        ], [
+            'autorizado' => false,
+            'visto' => false
         ]);
 
         if ($comentario) {
@@ -490,14 +503,7 @@ class Autorizar extends Component
 
     public function saveComentarioFinalAutorizar()
     {
-        if ($this->comentariofinalautorizar !== '') {
-            $comentario = Comentarios::create([
-                'requisicion_id' => $this->requisicion->id,
-                'user_id' => Auth::id(),
-                'comentario' => $this->comentariofinalautorizar,
-            ]);
-        }
-        $this->comentariofinalautorizar = '';
+
         $this->save();
         /* if ($comentario) {
             return redirect()->route('requisicion.index');
@@ -656,12 +662,44 @@ class Autorizar extends Component
         return redirect()->route('requisicion.index');
     }
 
+    public function continuarAutorizar()
+    {
+        if ($this->totalPermitidoAutorizar > $this->obtenerTotalAutorizar()) {
+            $this->comentarioFinalAutorizar = true;
+        } else {
+            $userLogin = auth()->user();
+            $user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+            //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
+            if ($user == null) {
+
+                $this->alert('info', 'Requisición', [
+                    'position' => 'center',
+                    'timer' => '6000',
+                    'toast' => true,
+                    'text' => '¡No se encontro el autorizador del siguiente nivel , aun no cuentas con uno  ',
+                ]);
+                return;
+            }
+            $this->jefe = $user->name;
+            $this->comentarioOpen = true;
+        }
+    }
+
     public function save()
     {
         $this->comentarioFinalAutorizar = false;
         $total = $this->obtenerTotalAutorizar();
 
         if ($this->tienespermiso($total)) {
+            if ($this->comentariofinalautorizar !== '') {
+                $comentario = Comentarios::create([
+                    'requisicion_id' => $this->requisicion->id,
+                    'user_id' => Auth::id(),
+                    'comentario' => $this->comentariofinalautorizar,
+                ]);
+                $this->comentariofinalautorizar = '';
+            }
+
             $this->generarorden();
         } else {
             $this->autorizarsiguientenivel();
@@ -717,7 +755,12 @@ class Autorizar extends Component
 
     public function mount($requisicion)
     {
-
+        $user = auth()->user();
+        $userSolictante = User::find($requisicion->user_id);
+        $permiso = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto->id)
+            ->where('departamento_id', $userSolictante->departamento_id)
+            ->first();
+        $this->totalPermitidoAutorizar = $permiso->monto;
         $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicion->id)->get();
         $allCotizaciones = [];
         foreach ($cotizacionesRequisicion as $cr) {

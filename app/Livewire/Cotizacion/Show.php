@@ -226,7 +226,7 @@ class Show extends Component
     }
     public function autorizarCotizacion()
     {
-
+        //dd('se ejecuta');
         if ($this->esCotizacionUnica && $this->requisicion->cotizaciones()->count() > 1) {
             $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
             $this->esCotizacionUnica = false;
@@ -292,14 +292,31 @@ class Show extends Component
 
     public function deleteCotizacion($id)
     {
+        $allCOT = Cotizacion::where('requisicion_id','=', $this->requisicion->id)->get();
         $COT = Cotizacion::find($id);
-        if ($COT) {
+        //dd($allCOT);
+        if ($allCOT->count() === 1 && $this->esCotizacionUnica) {
+            $this->alert('error', 'Cotización unica debe contener al menos 1 cotización.');
+        } else {
+            if ($COT) {
+                //$this->cotizacion->deleteCotizacion($id);
+                Cotizacion::destroy($id);
+                $this->alert('success', 'Cotización se elimino Correctamente.');
+            } else {
+                $this->alert('error', 'Cotización no se encuentra.');
+            }
+    
+            $this->renderSelectProv();
+        }
+        /* if ($COT) {
             //$this->cotizacion->deleteCotizacion($id);
             Cotizacion::destroy($id);
             $this->alert('success', 'Cotizacion se elimino Correctamente.');
         } else {
             $this->alert('error', 'Cotizacion no se encuentra.');
         }
+
+        $this->renderSelectProv(); */
     }
 
     public function update()
@@ -309,9 +326,9 @@ class Show extends Component
 
     public function openModalRemoveCotizacion($id)
     {
-        dd($id);
+        //dd($id);
         $cotizacion = Cotizacion::find($id);
-        dd($cotizacion);
+        //dd($cotizacion);
     }
 
     public function updateProducto()
@@ -341,23 +358,34 @@ class Show extends Component
     }
     public function save()
     {
+        //dd($this->cotizacion);
         if ($this->esCotizacionUnica) { // valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
             $this->alert('error', 'No se puede dar de alta nueva cotizacion si se marco "Cotizacion Unica"');
             return view('livewire.cotizacion.show');
         }
 
-        $this->cotizacion->guardarCotizacion();
 
-        $this->alert('success', 'Cotizacion agregada con exito!');
 
-        $this->dispatch('cerrar-modal-add-cotizacion');
+        try {
+            $this->cotizacion->guardarCotizacion();
+            $this->alert('success', 'Cotizacion agregada con exito!');
 
-        $this->renderSelectProv();
+            //$this->dispatch('cerrar-modal-add-cotizacion');
+            $this->dispatch('cerrar-modal');
+
+            $this->renderSelectProv();
+        } catch (\Illuminate\Validation\ValidationException $th) {
+            //dd($th);
+            $this->dispatch('validate-errors', [ 'errors'=> $th->errors() ]);
+        }
+
+        
     }
 
 
     public function renderSelectProv()
     {
+        $this->proveedores = [];
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
 
         $this->cotizacion->requisicion =   $this->requisicion;
@@ -375,6 +403,8 @@ class Show extends Component
         usort($this->proveedores, function ($a, $b) {
             return strcmp($a['crazonsocial'], $b['crazonsocial']);
         });
+        //dd($this->proveedores);
+        $this->dispatch('nuevo_proveedores', ['proveedores' => $this->proveedores]);
     }
 
     public function mount()

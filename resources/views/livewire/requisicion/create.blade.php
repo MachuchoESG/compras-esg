@@ -326,6 +326,7 @@
         $('#producto_select').select2({
             dropdownParent: $("#modalAddProd")
         });
+        
         var valDetalleProductosEx = {
             'producto_id': '',
             'producto': '',

@@ -114,12 +114,14 @@ class Requisicion extends Model
             return Requisicion::where('estatus_id', 10)
                 //->where('user_id', Auth::id())
                 ->select('id', 'folio')
+                ->where('borrado','=',false)
                 ->get();
         }
 
         return Requisicion::where('estatus_id', 10)
             ->where('user_id', Auth::id())
             ->select('id', 'folio')
+            ->where('borrado','=', false)
             ->get();
     }
 
@@ -130,9 +132,13 @@ class Requisicion extends Model
         if (self::vertodaslasrequisicones()) {
             return self::with('estatus', 'solicitante')
                 ->where('folio', 'like', '%' . $search  . '%')
-                ->orWhere('proveedor', 'like', '%' . $search . '%')
-                ->orWhere('ordenCompra', 'like', '%' . $search . '%')
+                ->where(function($query) use ($search) {
+                    $query->where('folio', 'like', '%' . $search  . '%')
+                          ->orWhere('proveedor', 'like', '%' . $search . '%')
+                          ->orWhere('ordenCompra', 'like', '%' . $search . '%');
+                })
                 ->where('estatus_id', '!=', 9)
+                ->where('borrado', '=', false)
                 ->orderBy('created_at', 'desc')
                 ->paginate($paginate);
         } else {
@@ -145,6 +151,7 @@ class Requisicion extends Model
 
                     ->where('estatus_id', '!=', 9)
                     ->where('folio', 'like', '%' . $search  . '%')
+                    ->where('borrado', '=', false)
                     ->orderBy('created_at', 'desc')
                     ->paginate($paginate);
             } else {
@@ -153,6 +160,7 @@ class Requisicion extends Model
                         ->where('aprobado', 1)
                         ->where('folio', 'like', '%' . $search  . '%')
                         ->where('estatus_id', '!=', 9)
+                        ->where('borrado', '=', false)
                         ->orderBy('created_at', 'desc')
                         ->paginate($paginate);
                 } else {
@@ -162,6 +170,7 @@ class Requisicion extends Model
                         ->where('user_id', $user->id)
                         ->where('estatus_id', '!=', 9)
                         ->where('folio', 'like', '%' . $search  . '%')
+                        ->where('borrado', '=', false)
                         ->orderBy('created_at', 'desc')
                         ->paginate($paginate);
                 }
@@ -186,7 +195,7 @@ class Requisicion extends Model
             })
                 ->where('aprobado', 1)
                 ->where('estatus_id', 2)
-
+                ->where('borrado', '=', false)
                 ->select('id', 'folio')
                 ->get();
 
@@ -233,6 +242,7 @@ class Requisicion extends Model
                     });
             })
                 ->where('visto', 0)
+                ->where('borrado', '=', false)
                 ->where('estatus_id', 1)
                 ->select('id', 'folio')
                 ->get();
@@ -293,6 +303,7 @@ class Requisicion extends Model
                     ->where('puestoautorizador_id', $puestoIdUsuario);
             })
                 ->where('Visto', 0)
+                ->where('borrado', '=', false)
                 ->count();
         } else {
             // Si el usuario no es un jefe, devolvemos 0 requisiciones sin ver pendientes
@@ -306,6 +317,7 @@ class Requisicion extends Model
         return Requisicion::where('estatus_id', 1)
             ->where('aprobado', 1)
             ->where('visto', 1) // Filtrar por requisiciones no vistas
+            ->where('borrado', '=', false)
             ->count();
     }
     public static function  getRequisicionesPendientesdeCotizar()
@@ -316,13 +328,13 @@ class Requisicion extends Model
         /* if (Auth::user()->id == 30) {
             return collect();
         } */
-        return Requisicion::with('solicitante')->whereIn('estatus_id', [7, 5])->orderBy('updated_at', 'desc')
+        return Requisicion::with('solicitante')->whereIn('estatus_id', [7, 5])->where('borrado', '=', false)->orderBy('updated_at', 'desc')
             ->get();
     }
 
     public static function getRequisicionesVolverACotizar()
     {
-        return Requisicion::where('estatus_id', [5])->orderBy('created_at', 'desc');
+        return Requisicion::where('estatus_id', [5])->where('borrado', '=', false)->orderBy('created_at', 'desc');
     }
 
     public static function contarRequisicionesPendientesdeAutorizar()
@@ -344,6 +356,7 @@ class Requisicion extends Model
                     ->where('visto', 0);
             })
                 ->where('aprobado', 1)
+                ->where('borrado', '=', false)
                 ->where('estatus_id', 2)
                 ->count(); // Usamos count() en lugar de get()
         } else {
@@ -355,7 +368,7 @@ class Requisicion extends Model
     public static function  getRequisicionesPendientesdeAutoriarCotizar()
     {
 
-        return Requisicion::where('estatus_id', 12)
+        return Requisicion::where('estatus_id', 12)->where('borrado', '=', false)
             ->get();
     }
 }
