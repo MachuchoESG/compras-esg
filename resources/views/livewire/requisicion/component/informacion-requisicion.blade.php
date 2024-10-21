@@ -42,15 +42,6 @@
             {{ $requisicion->departamento_especial ?? 'NO APLICA' }}
         </p>
     </div>
-    <div>
-        <p>Productos a Cotizar</p>
-        <ul>
-            @foreach ($productosRequisicion as $item)
-                <li> Producto: {{$item->producto}} - {{ $item->cantidad }} </li>
-            @endforeach
-        </ul>
-    </div>
-
 
     @if ($requisicion->comentarios->count() > 0)
         <x-button wire:click="$set('openComentarios', true)" class="my-2">Ver Comentarios</x-button>

@@ -20,9 +20,6 @@
                     {{ __('Acciones') }}
                 </div>
 
-
-
-
                 @if ($requisicion->aprobado && $escompras)
                     <x-dropdown-link class="no-underline text-xs" :href="route('cotizacion.show', ['cotizacion' => $requisicion->id])">
                         {{ __('Agregar cotizacion') }}
@@ -66,6 +63,9 @@
                     <x-dropdown-link class="no-underline text-xs cursor-pointer" data-bs-toggle="modal"
                         data-bs-target="#modaldelete">
                         {{ __('Borrar') }}
+                @if ($requisicion->cotizacion_especial == 1 && $requisicion->aprobado == 1 && $requisicion->estatus_id == 13)
+                    <x-dropdown-link class="no-underline text-xs cursor-pointer" :href="route('requisicion.cotizacionespecial', ['requisicion' => $requisicion->id])">
+                        {{ __('Cotizar Especial') }}
                     </x-dropdown-link>
                 @endif
 

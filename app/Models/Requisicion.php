@@ -110,9 +110,10 @@ class Requisicion extends Model
         return $this->hasMany(Comentarios::class, 'requisicion_id')->orderBy('created_at', 'desc');
     }
 
-    public static function getRequisicionesEspeciales(){
+    public static function getRequisicionesEspeciales()
+    {
         $user = User::find(Auth::id());
-        return Requisicion::where('cotizacion_especial', '=', 1)->where('departamento_especial','=',$user->departamento_id)->where('aprobado','=',1)->get();
+        return Requisicion::where('cotizacion_especial', '=', 1)->where('departamento_especial', '=', $user->departamento_id)->where('aprobado', '=', 1)->get();
     }
 
     public static function getRequisicionesIncompletas()
@@ -159,6 +160,7 @@ class Requisicion extends Model
                     ->where('estatus_id', '!=', 9)
                     ->where('folio', 'like', '%' . $search  . '%')
                     ->where('borrado', '=', false)
+                    ->orWhere('departamento_especial', '=', $user->departamento_id)
                     ->orderBy('created_at', 'desc')
                     ->paginate($paginate);
             } else {
@@ -168,22 +170,23 @@ class Requisicion extends Model
                         ->where('folio', 'like', '%' . $search  . '%')
                         ->where('estatus_id', '!=', 9)
                         ->where('borrado', '=', false)
+                        ->orWhere('departamento_especial', '=', $user->departamento_id)
                         ->orderBy('created_at', 'desc')
                         ->paginate($paginate);
                 } else {
-
-
                     return self::with('estatus', 'solicitante')
                         ->where('user_id', $user->id)
                         ->where('estatus_id', '!=', 9)
                         ->where('folio', 'like', '%' . $search  . '%')
                         ->where('borrado', '=', false)
+                        ->orWhere('departamento_especial', '=', $user->departamento_id)
                         ->orderBy('created_at', 'desc')
                         ->paginate($paginate);
                 }
             }
         }
     }
+
     public static function getRequisicionesPendientesdeAutorizar()
     {
         // Obtener el usuario autenticado
