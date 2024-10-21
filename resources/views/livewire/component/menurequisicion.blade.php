@@ -48,7 +48,7 @@
 
                 @foreach ($requisicion->evidencia as $archivo)
                     <x-dropdown-link class="no-underline text-xs cursor-pointer"
-                        wire:click.prevent="download({{ $archivo->id }})">
+                        wire:click.p%revent="download({{ $archivo->id }})">
                         {{ __('Evidencia') }}
                     </x-dropdown-link>
                 @endforeach
@@ -63,6 +63,8 @@
                     <x-dropdown-link class="no-underline text-xs cursor-pointer" data-bs-toggle="modal"
                         data-bs-target="#modaldelete">
                         {{ __('Borrar') }}
+                    </x-dropdown-link>
+                @endif
                 @if ($requisicion->cotizacion_especial == 1 && $requisicion->aprobado == 1 && $requisicion->estatus_id == 13)
                     <x-dropdown-link class="no-underline text-xs cursor-pointer" :href="route('requisicion.cotizacionespecial', ['requisicion' => $requisicion->id])">
                         {{ __('Cotizar Especial') }}
@@ -83,11 +85,12 @@
                 </div>
                 <div class="modal-body">
                     <p><span class="fw-bold">Requisicion:</span> {{ $requisicion->folio }}</p>
-                    <p><span class="fw-bold">Estatus:</span>  {{ $requisicion->estatus->name }} </p>
+                    <p><span class="fw-bold">Estatus:</span> {{ $requisicion->estatus->name }} </p>
                     <p><span class="fw-bold">Solicitante:</span> {{ $requisicion->solicitante->name }}</p>
 
                     <div class="p-3 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-3">
-                        Al dar clic en el botón "BORRAR" la requisición seleccionada se eliminara del listado de todas las requisiciones.
+                        Al dar clic en el botón "BORRAR" la requisición seleccionada se eliminara del listado de todas
+                        las requisiciones.
                     </div>
                 </div>
                 <div class="modal-footer">
