@@ -9,13 +9,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
+use Symfony\Component\CssSelector\Node\FunctionNode;
 
 class Menurequisicion extends Component
 {
     use LivewireAlert;
 
     public $requisicion;
-
+    public $requisicionBorrar;
     public $esjefe = false;
     public $escompras = false;
 
@@ -54,10 +55,18 @@ class Menurequisicion extends Component
         }
     }
 
+    public function setRequisicionBorrar($requi)
+    {
+        //dd($requi);
+        $this->requisicionBorrar = Requisicion::find($requi);
+
+        $this->dispatch('selected-requisicion-borrar', ['requisicion' => $this->requisicionBorrar]);
+    }
+
     public function borrarRequisicion()
     {
         if (Auth::id() == 30 || Auth::id() == 33) {
-            $requiBorrar = Requisicion::find($this->requisicion->id);
+            $requiBorrar = Requisicion::find($this->requisicionBorrar->id);
             if (!$requiBorrar) {
                 $this->alert('error', 'La requisicion seleccionada no se encontro en el sistema.');
                 return 0;
@@ -73,15 +82,15 @@ class Menurequisicion extends Component
             } catch (\Exception $e) {
                 $this->alert('error', 'La requisicion: ' . $this->requisicion->folio . ' no se puede Borrar.');
             }
-            
         } else {
-            $this->alert('error', 'La requisicion: ' . $this->requisicion->folio . ' no se puede Borrar.'); 
+            $this->alert('error', 'La requisicion: ' . $this->requisicion->folio . ' no se puede Borrar.');
         }
 
         $this->dispatch('cerrar-modal-borrar');
     }
 
-    public function renderRequisiciones(){
+    public function renderRequisiciones()
+    {
         $requisiciones = Requisicion::getRequisiciones('', 5);
         return view('livewire.requisicion.index', ['requisiciones' => $requisiciones]);
     }
