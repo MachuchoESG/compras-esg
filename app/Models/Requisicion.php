@@ -138,6 +138,7 @@ class Requisicion extends Model
         $user = Auth::user();
 
         if (self::vertodaslasrequisicones()) {
+            //dd('ver todas');
             return self::with('estatus', 'solicitante')
                 ->where('folio', 'like', '%' . $search  . '%')
                 ->where(function($query) use ($search) {
@@ -160,7 +161,7 @@ class Requisicion extends Model
                     ->where('estatus_id', '!=', 9)
                     ->where('folio', 'like', '%' . $search  . '%')
                     ->where('borrado', '=', false)
-                    ->orWhere('departamento_especial', '=', $user->departamento_id)
+                    ->orWhere('departamento_especial', '=', $user->departamento_id) //1719 requi 4 codos 1 adaptador - aparece no autorizado // 4042 4043 //1613
                     ->orderBy('created_at', 'desc')
                     ->paginate($paginate);
             } else {
