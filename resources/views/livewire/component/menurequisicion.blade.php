@@ -24,9 +24,12 @@
 
 
                 @if ($requisicion->aprobado && $escompras)
-                    <x-dropdown-link class="no-underline text-xs" :href="route('cotizacion.show', ['cotizacion' => $requisicion->id])">
-                        {{ __('Agregar cotizacion') }}
-                    </x-dropdown-link>
+                    @if ($requisicion->estatus_id !== 6)
+                        <x-dropdown-link class="no-underline text-xs" :href="route('cotizacion.show', ['cotizacion' => $requisicion->id])">
+                            {{ __('Agregar cotizacion') }}
+                        </x-dropdown-link>
+                    @endif
+
                 @endif
 
                 @if ($requisicion->aprobado && $requisicion->estatus_id != 1 && $requisicion->estatus_id != 6)

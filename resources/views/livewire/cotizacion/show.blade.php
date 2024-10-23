@@ -6,33 +6,34 @@
 
 
     <div class="flex justify-end my-4 mr-2">
-        @if (!$contieneProductoSinRegistrar)
-            @if ($requisicion->cotizaciones->isNotEmpty())
-                <div class="me-5">
-                    <div class="form-check pt-1">
-                        <input class="form-check-input" type="checkbox" id="cotizacion_unica"
-                            wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
-                        <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
-                            Cotización Unica
-                        </label>
+        @if($requisicion->estatus_id !== 6)
+            @if (!$contieneProductoSinRegistrar)
+                @if ($requisicion->cotizaciones->isNotEmpty())
+                    <div class="me-5">
+                        <div class="form-check pt-1">
+                            <input class="form-check-input" type="checkbox" id="cotizacion_unica"
+                                wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
+                            <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
+                                Cotización Unica
+                            </label>
+                        </div>
+
                     </div>
+                @endif
+                {{-- <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
+                    data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
+                    Agregar Cotizacion
+                </button> --}}
 
-                </div>
+                <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
+                    data-bs-toggle="modal" data-bs-target="#modalAddCotizacion">
+                    Agregar Cotizacion
+                </button>
+            @else
+                <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
+                    sistema.</p>
             @endif
-            {{-- <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
-                data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
-                Agregar Cotizacion
-            </button> --}}
-
-            <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
-                data-bs-toggle="modal" data-bs-target="#modalAddCotizacion">
-                Agregar Cotizacion
-            </button>
-        @else
-            <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
-                sistema.</p>
         @endif
-
     </div>
 
     @if ($requisicion->detalleRequisiciones->isNotEmpty())
@@ -77,7 +78,6 @@
 
                                             <x-slot name="content">
                                                 <div class="w-60">
-
                                                     <div class="block px-4 py-2 text-xs bg-gray-400 text-gray-100">
                                                         {{ __('Acciones') }}
                                                     </div>
@@ -133,15 +133,18 @@
                             <span class="ms-2 fw-bold">Cotización</span>
                         </button>
                     </div>
-                    <div class="col-4 d-flex justify-center p-3">
-                        <i class="bi bi-trash-fill"></i>
-                        <button wire:click="deleteCotizacion({{ $cotizacion->id }})" wire:loading.attr="disabled"
-                            class="btn btn-danger btn-sm d-flex">
-                            {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
-                            <x-eva-trash class="h-5 w-5" />
-                            <span class="ms-2 fw-bold">Eliminar Cotización</span>
-                        </button>
-                    </div>
+                    @if ($requisicion->estatus_id !== 6)
+                        <div class="col-4 d-flex justify-center p-3">
+                            <i class="bi bi-trash-fill"></i>
+                            <button wire:click="deleteCotizacion({{ $cotizacion->id }})" wire:loading.attr="disabled"
+                                class="btn btn-danger btn-sm d-flex">
+                                {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
+                                <x-eva-trash class="h-5 w-5" />
+                                <span class="ms-2 fw-bold">Eliminar Cotización</span>
+                            </button>
+                        </div>
+                    @endif
+                    
                     <div class="col-4">
                         <p class="text-center">
                             Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
@@ -198,10 +201,12 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-around items-center">
-
+                                        @if ($requisicion->estatus_id !== 6)
                                         <button wire:click="editarDetalle({{ $detalle['id'] }})" class="text-blue-500">
                                             <x-far-edit class="w-6 h-6" />
                                         </button>
+                                        @endif
+                                        
 
                                     </div>
                                 </td>
