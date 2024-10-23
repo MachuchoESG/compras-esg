@@ -99,10 +99,76 @@
             </tbody>
         </table>
     </div>
+    <div class="modal fade" id="modaldelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+        wire:ignore>
+        <div class="modal-dialog">
+            <div class="modal-content" id="contenido-modal-borrar">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Borrar Requisicion: <span
+                            id="folio-requisicion">Cargando...</span></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><span class="fw-bold">Requisicion:</span> <span id="folio-requisicion-body">Cargando...</span>
+                    </p>
+
+                    <div class="p-3 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-3">
+                        Al dar clic en el botón "BORRAR" la requisición seleccionada se eliminara del listado de todas
+                        las requisiciones.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-borrar-requisicion"
+                        wire:click="borrarRequisicion()" disabled>BORRAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <div class="mt-2 mb-2">
         {{ $requisiciones->links() }}
     </div>
+
+    <script>
+        window.addEventListener('cerrar-modal-borrar', event => {
+            $(`#modaldelete`).modal('hide');
+            window.location.reload();
+            $('#folio-requisicion').text('Cargando...');
+            $('#folio-requisicion-body').text('Cargando...');
+            $('#btn-borrar-requisicion').prop("disabled", true);
+            //@this.call('renderRequisiciones');
+        });
+
+        window.addEventListener('selected-requisicion-borrar', event => {
+            var dataj = event.detail[0].requisicion; // TRAE LOS DATOS DESDE COMPONENTE MENUREQUISICION
+            $('#folio-requisicion').text('Cargando...');
+            $('#folio-requisicion-body').text('Cargando...');
+            @this.call('setValueBorrar', dataj);
+
+        });
+
+        window.addEventListener('abrir-modal-borrar', event => {
+            console.log('show');
+            var dataj = event.detail[0].requisicionborrar;
+            console.log(dataj);
+            $('#folio-requisicion').text(dataj.folio);
+            $('#folio-requisicion-body').text(dataj.folio);
+            $('#btn-borrar-requisicion').prop("disabled", false);
+
+            //$('#btn-borrar-requisicion').attr('data-id', dataj.id);
+            $(`#modaldelete`).modal('show');
+            //@this.call('renderRequisiciones');
+
+            $('#modaldelete').on('hidden.bs.modal', function(e) {
+                // Aquí puedes agregar el código que quieres ejecutar cuando el modal se cierre
+                $('#btn-borrar-requisicion').prop("disabled", true);
+                $('#folio-requisicion').text('Cargando...');
+                $('#folio-requisicion-body').text('Cargando...');
+            });
+        });
+    </script>
 
 </div>
