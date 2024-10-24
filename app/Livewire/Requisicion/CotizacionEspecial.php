@@ -33,7 +33,7 @@ class CotizacionEspecial extends Component
                 'autorizado' => false,
                 'visto' => false
             ]);
-            route('requisicion.index');
+            return redirect()->route('requisicion.index');
         } else {
             $this->alert('error', 'La observacion especial es obligatoria.');
         }
@@ -41,6 +41,10 @@ class CotizacionEspecial extends Component
 
     public function mount()
     {
+        //$vistoHistorial = Autorizacionhistorial::where('requisicion_id', '=', $this->requisicion->id)->get();
+        //dd($vistoHistorial);
+
+
         //dd($this->requisicion);
         if ($this->requisicion->observacion_especial) {
             $this->observacionEspecial = $this->requisicion->observacion_especial;

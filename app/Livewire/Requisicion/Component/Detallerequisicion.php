@@ -4,6 +4,7 @@ namespace App\Livewire\Requisicion\Component;
 
 use App\Models\Autorizacionhistorial;
 use App\Models\Cotizacion;
+use App\Models\Departamento;
 use App\Models\DetalleCotizacion;
 use App\Models\Evidencia;
 use App\Models\Requisicion;
@@ -24,19 +25,31 @@ class Detallerequisicion extends Component
     public $autorizacionHistorial = [];
     public $archivo;
     public $productosRequisicion = [];
-
+    PUBLIC $departamentoAsignado;
     use LivewireAlert;
     use WithFileUploads;
 
     public $openComentarios = false;
 
 
-    public function mount()
+    public function mount($id = null)
     {
+        //dd($id);
+        $this->requisicionid = $id;
         $this->requisicion =  Requisicion::with('cotizaciones', 'historialesAutorizacion')->find($this->requisicionid);
-        $this->autorizacionHistorial = $this->requisicion->historialesAutorizacion;
-        $this->productosRequisicion = DetalleCotizacion::where('requisicion_id', '=', $this->requisicion->id);
-        $this->cotizaciones = $this->requisicion->cotizaciones;
+        $this->autorizacionHistorial = $this->requisicion->historialesAutorizacion ?? [];
+        $cotizacion = Cotizacion::where('requisicion_id', '=', $this->requisicion->id)->get();
+        $this->departamentoAsignado = Departamento::find($this->requisicion->departamento_especial);
+        //dd($cotizacion);
+        if ($cotizacion->empty()) {
+            $this->productosRequisicion = [];
+        } else{
+            $cotizacionIds = $cotizacion->pluck('id')->toArray();
+            $this->productosRequisicion = DetalleCotizacion::whereIn($cotizacionIds)->get();
+        }
+        
+        $this->cotizaciones = $this->requisicion->cotizaciones ?? [];
+        //dd($this->requisicion->cotizaciones);
     }
 
 
@@ -72,6 +85,7 @@ class Detallerequisicion extends Component
 
         return '';
     }
+
     public function downloadevidencia($id)
     {
 
@@ -125,6 +139,7 @@ class Detallerequisicion extends Component
             }
         }
     }
+
     public function render()
     {
         return view('livewire.requisicion.component.detallerequisicion');

@@ -43,6 +43,7 @@ class requisicionController extends Controller
      */
     public function show(Requisicion $requisicion)
     {
+        //dd($requisicion);
         return view('requisicion.show', ['requisicion' => $requisicion]);
     }
 

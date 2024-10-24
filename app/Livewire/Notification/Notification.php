@@ -100,14 +100,14 @@ class Notification extends Component
             }
 
             $requisicionesEpeciales = Requisicion::getRequisicionesEspeciales();
+            $requisicionesEpecialesNotify = Requisicion::getRequisicionesEspecialesNotifys();
             $this->CotizacionesEspecial = $requisicionesEpeciales;
             //dd($requisicionesEpeciales);
             $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();
-            $this->cantidadNotiCotizacionEspecial =$requisicionesEpeciales->count();
+            $this->cantidadNotiCotizacionEspecial = $requisicionesEpecialesNotify->count();
             $this->pendienteIncompletas = $requisicionesIncompletas;
             $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas + $this->cantidadNotiCotizacionEspecial;;
-
         }
     }
 

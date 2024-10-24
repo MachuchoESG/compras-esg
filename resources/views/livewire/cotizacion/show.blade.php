@@ -118,7 +118,7 @@
 
 
 
-    @if ($requisicion->cotizaciones->isNotEmpty())
+    @if ($requisicion->cotizaciones->isNotEmpty()) 
         <div class="mt-3 px-3 w-100">
             @foreach ($requisicion->cotizaciones as $cotizacion)
                 <div class="row bg-gray-200 px-1">

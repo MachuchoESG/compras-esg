@@ -113,8 +113,21 @@ class Requisicion extends Model
     public static function getRequisicionesEspeciales()
     {
         $user = User::find(Auth::id());
-        return Requisicion::where('cotizacion_especial', '=', 1)->where('departamento_especial', '=', $user->departamento_id)->where('aprobado', '=', 1)->get();
+        return Requisicion::where('cotizacion_especial', '=', 1)
+            ->where('departamento_especial', '=', $user->departamento_id)
+            ->where('estatus_id', '=', 13) //ESTATUS COTIZACION ESPECIAL
+            ->where('aprobado', '=', 1)->get();
     }
+
+    public static function getRequisicionesEspecialesNotifys()
+    {
+        $user = User::find(Auth::id());
+        return Requisicion::where('cotizacion_especial', '=', 1)
+            ->where('departamento_especial', '=', $user->departamento_id)
+            ->where('visto', '=', 0)
+            ->where('aprobado', '=', 1)->get();
+    }
+
 
     public static function getRequisicionesIncompletas()
     {
@@ -122,14 +135,14 @@ class Requisicion extends Model
             return Requisicion::where('estatus_id', 10)
                 //->where('user_id', Auth::id())
                 ->select('id', 'folio')
-                ->where('borrado','=',false)
+                ->where('borrado', '=', false)
                 ->get();
         }
 
         return Requisicion::where('estatus_id', 10)
             ->where('user_id', Auth::id())
             ->select('id', 'folio')
-            ->where('borrado','=', false)
+            ->where('borrado', '=', false)
             ->get();
     }
 
@@ -141,10 +154,10 @@ class Requisicion extends Model
             //dd('ver todas');
             return self::with('estatus', 'solicitante')
                 ->where('folio', 'like', '%' . $search  . '%')
-                ->where(function($query) use ($search) {
+                ->where(function ($query) use ($search) {
                     $query->where('folio', 'like', '%' . $search  . '%')
-                          ->orWhere('proveedor', 'like', '%' . $search . '%')
-                          ->orWhere('ordenCompra', 'like', '%' . $search . '%');
+                        ->orWhere('proveedor', 'like', '%' . $search . '%')
+                        ->orWhere('ordenCompra', 'like', '%' . $search . '%');
                 })
                 ->where('estatus_id', '!=', 9)
                 ->where('borrado', '=', false)

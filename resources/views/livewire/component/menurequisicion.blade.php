@@ -36,7 +36,7 @@
                         </x-dropdown-link>
                     @endcan
                 @endif
-
+  
 
 
                 @if (!$requisicion->aprobado && $esjefe)
