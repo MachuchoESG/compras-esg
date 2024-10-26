@@ -84,123 +84,108 @@
         }
 
         function construirNotificaciones(data) {
-            var resp = {
-                "pendientesaprobar": [{
-                        "id": 1490,
-                        "folio": "Mty-1487"
-                    },
-                    {
-                        "id": 1491,
-                        "folio": "Mty-1488"
-                    },
-                    {
-                        "id": 1492,
-                        "folio": "Mty-1489"
-                    },
-                    {
-                        "id": 1493,
-                        "folio": "Mty-1490"
-                    },
-                    {
-                        "id": 1494,
-                        "folio": "Mty-1491"
-                    },
-                    {
-                        "id": 1495,
-                        "folio": "Mty-1492"
-                    },
-                    {
-                        "id": 1496,
-                        "folio": "Mty-1493"
-                    },
-                    {
-                        "id": 1497,
-                        "folio": "Mty-1494"
-                    },
-                    {
-                        "id": 1498,
-                        "folio": "Mty-1495"
-                    },
-                    {
-                        "id": 1499,
-                        "folio": "Mty-1496"
-                    },
-                    {
-                        "id": 1500,
-                        "folio": "Mty-1497"
-                    },
-                    {
-                        "id": 1501,
-                        "folio": "Mty-1498"
-                    },
-                    {
-                        "id": 1502,
-                        "folio": "Mty-1499"
-                    },
-                    {
-                        "id": 1503,
-                        "folio": "Mty-1500"
-                    },
-                    {
-                        "id": 1504,
-                        "folio": "Mty-1501"
-                    },
-                    {
-                        "id": 1505,
-                        "folio": "Mty-1502"
-                    },
-                    {
-                        "id": 1506,
-                        "folio": "Mty-1503"
-                    },
-                    {
-                        "id": 1507,
-                        "folio": "Mty-1504"
-                    },
-                    {
-                        "id": 1508,
-                        "folio": "Mty-1505"
-                    }
-                ],
-                "pendienteautorizar": [],
-                "pendientecotizacion": [],
-                "pendienteIncompletas": [],
-                "pendienteAutorizarCotizacion": [],
-                "totalNotificaciones": 19,
-                "sizeNotification": 20
-            }
 
             $('#counter-notifications').text(data.totalNotificaciones)
-            if (data.pendientesaprobar) {
-                var initString = `<div class="col block px-2 py-2 text-xs text-gray-400">`;
-                var contentString = '';
-                var endString = `</div>`;
+            var contentString = '';
+            var initString = `<div class="col block px-2 py-2 text-xs text-gray-400">`;
+            var endString = `</div>`;
+            var PendientesAprobar = '';
+            var PendientesAutorizar = '';
+            var PendientesCotizacion = '';
+            var PendientesIncompletas = '';
+            var PendientesAutorizarCotizacion = '';
+
+            $('#content-notifications').css("width", data.sizeNotification + 'vw');
+
+            if (data
+                .pendientesaprobar) { //pendientesaprobar 'requisicion.aprobacion', ['requisicion' => $requisicion]) }}">
+                var contentPendienteAprobar = ''
                 if (data.pendientesaprobar.length > 0) {
                     data.pendientesaprobar.forEach(requisicion => {
-                    const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/requisicion/${requisicion.id}/aprobacion">
                                         <p>${requisicion.folio}</p>
                                     </x-dropdown-link>`;
-                        contentString += link;
+                        contentPendienteAprobar += link;
                     });
                 } else {
-                    contentString = `<p>No hay requisiciones pendientes de subir cotizaciones.</p>`
+                    contentPendienteAprobar = `<p>No hay requisiciones pendientes de aprobar.</p>`
                 }
+                PendientesAprobar = initString + '<p class="">Requisiciones - Pendientes de aprobar</p>' +
+                    contentPendienteAprobar + endString
             }
 
-            document.getElementById('content-notifications').innerHTML = initString + contentString + endString;
+            if (data
+                .pendienteautorizar) { // pendienteautorizar 'requisicion.autorizar', ['requisicion' => $requisicion]) }}">
+                var contentPendienteAutorizar = '';
+                if (data.pendienteautorizar.length > 0) {
+                    data.pendienteautorizar.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/requisicion/${requisicion.id}/autorizar">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendienteAutorizar += link;
+                    });
+                } else {
+                    contentPendienteAutorizar = `<p>No hay requisiciones pendientes de autorizar.</p>`
+                }
+                PendientesAutorizar = initString + contentPendienteAutorizar + endString
 
-            if (data.pendienteautorizar) {
-                
             }
-            if (data.pendientecotizacion) {
-                
+
+            if (data
+                .pendientecotizacion) { // pendientecotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+                var contentPendienteCotizacion = '';
+
+                if (data.pendientecotizacion.length > 0) {
+                    data.pendientecotizacion.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendienteCotizacion += link;
+                    });
+                } else {
+                    contentPendienteCotizacion = `<p>No hay requisiciones pendientes de subir cotizaciones.</p>`
+                }
+                PendientesCotizacion = initString + contentPendienteCotizacion + endString
             }
-            if (data.pendienteIncompletas) {
-                
+
+            if (data
+                .pendienteIncompletas
+                ) { // pendienteIncompletas 'requisicion.edit', ['requisicion' => $requisicion->id]) }}">
+                var contentPendieteIncompletas = '';
+                if (data.pendienteIncompletas.length > 0) {
+                    data.pendienteIncompletas.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/requisicion/${requisicion.id}/edit">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendieteIncompletas += link;
+                    });
+                } else {
+                    contentPendieteIncompletas = `<p>No hay requisiciones Incompletas.</p>`
+                }
+                PendientesAutorizarCotizacion = initString + contentPendieteIncompletas + endString
             }
-            if (data.pendienteAutorizarCotizacion) {
-                
+
+            if (data
+                .pendienteAutorizarCotizacion
+                ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+                var contentPendieteAutorizarCotizacion = '';
+                if (data.pendienteAutorizarCotizacion.length > 0) {
+                    data.pendienteAutorizarCotizacion.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendieteAutorizarCotizacion += link;
+                    });
+                } else {
+                    contentPendieteAutorizarCotizacion = `<p>No hay requisiciones pendientes de autorizar cotización.</p>`
+                }
+                PendientesAutorizarCotizacion = initString + contentPendieteAutorizarCotizacion + endString
+
             }
+
+            document.getElementById('content-notifications').innerHTML = PendientesAprobar + PendientesAutorizar +
+                PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion;
+
         }
 
         function getDataNotificaciones() {

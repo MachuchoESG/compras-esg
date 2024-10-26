@@ -49,7 +49,14 @@ class Create extends Component
 
     public function save()
     {
-        $userToken = Token::where('user_id', '=', Auth::id())->first();
+        /* $user = User::find(Auth::id());
+        $permiso = permisosrequisicion::where('PuestoSolicitante_id','=', $user->puesto->id)
+            ->where('departamento_id', $user->departamento_id)
+            ->first();
+        $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first();
+        dd(['autori'=>$userAutorizador, 'permiso'=> $permiso]); */
+
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
         $requisicionCreada =  $this->requisicion->save();
 
         if ($requisicionCreada->estatus_id === 1) {
@@ -59,10 +66,10 @@ class Create extends Component
                 ->first();
             //dd($permiso);
             $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first();
-            //dd($userAutorizador);
+            //dd(['autori'=>$userAutorizador, 'permiso'=> $permiso]);
             $this->dispatch('nueva-requisicion-creada');
 
-            $dataPost = [ 'id_puesto_solicitante' => $user->puesto_id, 'id_puesto_autorizador' => $permiso->PuestoAutorizador, 'id_usuario_alertar' => $userAutorizador->id];
+            $dataPost = [ 'id_puesto_solicitante' => $user->puesto_id, 'id_puesto_autorizador' => $permiso->PuestoAutorizador_id, 'id_usuario_alertar' => $userAutorizador->id];
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $userToken->token,
             ])->post(
