@@ -64,14 +64,221 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
         crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 
     {{-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
+    <script>
+        function mostrarNotificacion(mensaje) {
+            console.log('ejecutar Notification');
 
+            const options = {
+                body: mensaje, // Texto de la notificación
+                icon: 'https://esg.com.mx/wp-content/uploads/2019/07/logo-esg-2023mex.png' // Icono que acompañará la notificación
+            };
 
+            new Notification('Título de la notificación', options);
+        }
+
+        function construirNotificaciones(data) {
+            var resp = {
+                "pendientesaprobar": [{
+                        "id": 1490,
+                        "folio": "Mty-1487"
+                    },
+                    {
+                        "id": 1491,
+                        "folio": "Mty-1488"
+                    },
+                    {
+                        "id": 1492,
+                        "folio": "Mty-1489"
+                    },
+                    {
+                        "id": 1493,
+                        "folio": "Mty-1490"
+                    },
+                    {
+                        "id": 1494,
+                        "folio": "Mty-1491"
+                    },
+                    {
+                        "id": 1495,
+                        "folio": "Mty-1492"
+                    },
+                    {
+                        "id": 1496,
+                        "folio": "Mty-1493"
+                    },
+                    {
+                        "id": 1497,
+                        "folio": "Mty-1494"
+                    },
+                    {
+                        "id": 1498,
+                        "folio": "Mty-1495"
+                    },
+                    {
+                        "id": 1499,
+                        "folio": "Mty-1496"
+                    },
+                    {
+                        "id": 1500,
+                        "folio": "Mty-1497"
+                    },
+                    {
+                        "id": 1501,
+                        "folio": "Mty-1498"
+                    },
+                    {
+                        "id": 1502,
+                        "folio": "Mty-1499"
+                    },
+                    {
+                        "id": 1503,
+                        "folio": "Mty-1500"
+                    },
+                    {
+                        "id": 1504,
+                        "folio": "Mty-1501"
+                    },
+                    {
+                        "id": 1505,
+                        "folio": "Mty-1502"
+                    },
+                    {
+                        "id": 1506,
+                        "folio": "Mty-1503"
+                    },
+                    {
+                        "id": 1507,
+                        "folio": "Mty-1504"
+                    },
+                    {
+                        "id": 1508,
+                        "folio": "Mty-1505"
+                    }
+                ],
+                "pendienteautorizar": [],
+                "pendientecotizacion": [],
+                "pendienteIncompletas": [],
+                "pendienteAutorizarCotizacion": [],
+                "totalNotificaciones": 19,
+                "sizeNotification": 20
+            }
+
+            $('#counter-notifications').text(data.totalNotificaciones)
+            if (data.pendientesaprobar) {
+                var initString = `<div class="col block px-2 py-2 text-xs text-gray-400">`;
+                var contentString = '';
+                var endString = `</div>`;
+                if (data.pendientesaprobar.length > 0) {
+                    data.pendientesaprobar.forEach(requisicion => {
+                    const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentString += link;
+                    });
+                } else {
+                    contentString = `<p>No hay requisiciones pendientes de subir cotizaciones.</p>`
+                }
+            }
+
+            document.getElementById('content-notifications').innerHTML = initString + contentString + endString;
+
+            if (data.pendienteautorizar) {
+                
+            }
+            if (data.pendientecotizacion) {
+                
+            }
+            if (data.pendienteIncompletas) {
+                
+            }
+            if (data.pendienteAutorizarCotizacion) {
+                
+            }
+        }
+
+        function getDataNotificaciones() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                url: window.location.origin + "/notificaciones/all",
+                type: 'POST',
+                //data: data,
+                success: function(res) {
+                    console.log(res);
+                    construirNotificaciones(res)
+
+                },
+                error: function(err) {
+                    console.error('Error:', err);
+                }
+            });
+        }
+
+        function renderNotifications() {
+            $('#counter-notifications').empty();
+            $('#content-notifications').empty();
+            getDataNotificaciones()
+        }
+
+        const token = "{{ session('tokenUser') }}";
+
+        // Conectar al servidor Socket.IO con el token JWT
+        const socket = io('http://localhost:8888', {
+            query: {
+                token: token
+            }
+        });
+
+        socket.on('connect', () => {
+            console.log('Conectado al canal privado Socket.IO');
+
+            // Enviar un mensaje privado a otro usuario (ejemplo: usuario 3)
+            const mensajePrivado = {
+                toUserId: {{ Auth::id() }}, // ID del usuario destinatario
+                message: 'Hola usuario {{ Auth::id() }}, este mensaje es solo para ti.'
+            };
+
+            // Enviar el mensaje al servidor
+            socket.emit('mensaje-privado', mensajePrivado);
+        });
+
+        socket.on('mensaje-recibido', (data) => {
+            console.log(`Mensaje recibido de usuario ${data.fromUserId}: ${data.message}`);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Desconectado del canal privado Socket.IO');
+        });
+
+        socket.on('pa-todos', (data) => {
+            console.log('pa todos');
+        })
+
+        socket.on('channel-user-{{ Auth::id() }}', (data) => {
+            mostrarNotificacion(data.message)
+            renderNotifications()
+        })
+
+        socket.on('channel-departemento-{{ session('id_departamento') }}', (data) => {
+            console.log('mensaje para departamentos');
+            //mostrarNotificacion(data.message)
+        })
+
+        socket.on('channel-puesto-{{ session('id_puesto') }}', (data) => {
+            console.log('mensaje para puestos');
+            //mostrarNotificacion(data.message)
+        })
+    </script>
 
 </body>
 

@@ -34,8 +34,6 @@ class Notification extends Component
 
     public $sizeNotification = 10; //no toma query sizes se usa backend para modificar tamaño
 
-
-
     public function mount()
     {
         $this->cargarDepartamento();
@@ -105,6 +103,10 @@ class Notification extends Component
         }
     }
 
+
+    public function renderNotificationsData(){
+        dd('hola');
+    }
 
     public function render()
     {

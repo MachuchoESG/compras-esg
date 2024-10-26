@@ -4,7 +4,9 @@ namespace App\Livewire\Requisicion;
 
 use App\Livewire\Forms\Requisicion\RequisicionCreateForm;
 use App\Models\Empresa;
+use App\Models\permisosrequisicion;
 use App\Models\Sucursal;
+use App\Models\Token;
 use App\Models\User;
 use App\Service\ApiUrl;
 use App\Service\ProductoService;
@@ -42,15 +44,32 @@ class Create extends Component
     public $existencias = 0;
     public $user;
 
-
-
     public RequisicionCreateForm $requisicion;
 
 
     public function save()
     {
-
+        $userToken = Token::where('user_id', '=', Auth::id())->first();
         $requisicionCreada =  $this->requisicion->save();
+
+        if ($requisicionCreada->estatus_id === 1) {
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id','=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            //dd($permiso);
+            $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first();
+            //dd($userAutorizador);
+            $this->dispatch('nueva-requisicion-creada');
+
+            $dataPost = [ 'id_puesto_solicitante' => $user->puesto_id, 'id_puesto_autorizador' => $permiso->PuestoAutorizador, 'id_usuario_alertar' => $userAutorizador->id];
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-creada',
+                $dataPost);
+            //dd($response);
+        }
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);
 
         return redirect()->route('requisicion.index');

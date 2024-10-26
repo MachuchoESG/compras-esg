@@ -9,6 +9,7 @@
         "barryvdh/laravel-dompdf": "^2.1",
         "blade-ui-kit/blade-icons": "^1.7",
         "codedge/laravel-fpdf": "^1.12",
+        "firebase/php-jwt": "^6.10",
         "guzzlehttp/guzzle": "^7.2",
         "hasnayeen/blade-eva-icons": "^2.0",
         "jantinnerezo/livewire-alert": "^3.0",
@@ -17,7 +18,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.5",
-        "owenvoke/blade-fontawesome": "^2.6"
+        "owenvoke/blade-fontawesome": "^2.6",
+        "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.10",

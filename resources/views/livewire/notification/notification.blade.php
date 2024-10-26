@@ -11,7 +11,7 @@
                     </svg>
 
                     @if ($totalnotificaciones != 0)
-                        <span
+                        <span id="counter-notifications"
                             class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex justify-center items-center rounded-full text-xs">{{ $totalnotificaciones }}</span>
                     @endif
 
@@ -21,7 +21,7 @@
         </x-slot>
 
         <x-slot name="content">
-            <div class="row mx-0" style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
+            <div id="content-notifications" class="row mx-0" style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
 
                 @if ($escompras)
                     <div class="col block px-2 py-2 text-xs text-gray-400">
