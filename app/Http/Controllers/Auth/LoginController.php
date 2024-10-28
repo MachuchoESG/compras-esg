@@ -48,14 +48,12 @@ class LoginController extends Controller
 
             session(['tokenUser' => $jwt, 'id_departamento' => $user->departamento_id, 'id_puesto' => $user->puesto_id]);
 
-            return view('dashboard');
+            //return view('dashboard');
+            return redirect()->route('dashboard');
         } else {
             // Si las credenciales son incorrectas
-            return view('login');
-            return response()->json([
-                'success' => false,
-                'message' => 'Credenciales incorrectas'
-            ], 401);
+            //return view('login');
+            return redirect()->back()->withErrors(['message' => 'Credenciales incorrectas']);
         }
     }
 }

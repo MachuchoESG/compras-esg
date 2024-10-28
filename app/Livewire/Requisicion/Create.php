@@ -69,12 +69,20 @@ class Create extends Component
             //dd(['autori'=>$userAutorizador, 'permiso'=> $permiso]);
             $this->dispatch('nueva-requisicion-creada');
 
-            $dataPost = [ 'id_puesto_solicitante' => $user->puesto_id, 'id_puesto_autorizador' => $permiso->PuestoAutorizador_id, 'id_usuario_alertar' => $userAutorizador->id];
+            $dataPost = [ 
+                'id_puesto_solicitante' => $user->puesto_id, 
+                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id, 
+                'id_usuario_alertar' => $userAutorizador->id,
+                'estatus' => $requisicionCreada->estatus->name,
+                'folio' => $requisicionCreada->folio,
+            ];
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $userToken->token,
             ])->post(
                 env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-creada',
                 $dataPost);
+            
             //dd($response);
         }
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);

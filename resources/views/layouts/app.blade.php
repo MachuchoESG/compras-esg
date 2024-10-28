@@ -79,8 +79,13 @@
                 body: mensaje, // Texto de la notificación
                 icon: 'https://esg.com.mx/wp-content/uploads/2019/07/logo-esg-2023mex.png' // Icono que acompañará la notificación
             };
+            try {
+                new Notification('Título de la notificación', options);
+            } catch (error) {
+                console.log(error);
 
-            new Notification('Título de la notificación', options);
+            }
+
         }
 
         function construirNotificaciones(data) {
@@ -150,7 +155,7 @@
 
             if (data
                 .pendienteIncompletas
-                ) { // pendienteIncompletas 'requisicion.edit', ['requisicion' => $requisicion->id]) }}">
+            ) { // pendienteIncompletas 'requisicion.edit', ['requisicion' => $requisicion->id]) }}">
                 var contentPendieteIncompletas = '';
                 if (data.pendienteIncompletas.length > 0) {
                     data.pendienteIncompletas.forEach(requisicion => {
@@ -167,7 +172,7 @@
 
             if (data
                 .pendienteAutorizarCotizacion
-                ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+            ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
                 var contentPendieteAutorizarCotizacion = '';
                 if (data.pendienteAutorizarCotizacion.length > 0) {
                     data.pendienteAutorizarCotizacion.forEach(requisicion => {
