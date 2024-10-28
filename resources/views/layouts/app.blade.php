@@ -72,15 +72,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
     <script>
-        function mostrarNotificacion(mensaje) {
+        function mostrarNotificacion(data) {
             console.log('ejecutar Notification');
 
             const options = {
-                body: mensaje, // Texto de la notificación
+                body: data.message, // Texto de la notificación
                 icon: 'https://esg.com.mx/wp-content/uploads/2019/07/logo-esg-2023mex.png' // Icono que acompañará la notificación
             };
             try {
-                new Notification('Título de la notificación', options);
+                new Notification('Nueva Notificacion de Requisición', options).onclick = function() {
+                    window.open(window.location.origin + data.url); // Cambia esta URL a la que necesites
+                };
+                
             } catch (error) {
                 console.log(error);
 
@@ -255,7 +258,7 @@
         })
 
         socket.on('channel-user-{{ Auth::id() }}', (data) => {
-            mostrarNotificacion(data.message)
+            mostrarNotificacion(data)
             renderNotifications()
         })
 

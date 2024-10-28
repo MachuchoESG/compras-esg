@@ -23,7 +23,7 @@ class Show extends Component
     public function mount($requisicion)
     {
         // Requisicion::with('detalleRequisiciones', 'cotizaciones.detalleCotizaciones')->find($requisicion->id);
-
+        
         $this->urlApi = ApiUrl::urlApi();
         $this->requisicion = $requisicion;
     }
@@ -67,18 +67,21 @@ class Show extends Component
 
     public function delete()
     {
-
-        $this->authorize('delete', $this->requisicion);
-        $this->alert('warning', 'Estas seguro de eliminar la requisición?', [
-            'position' => 'center',
-            'timer' => 6000,
-            'toast' => true,
-            'showCancelButton' => true,
-            'cancelButtonText' => 'Cancelar',
-            'showDenyButton' => true,
-            'denyButtonText' => 'Eliminar',
-            'onDenied' => 'confirmed'
-        ]);
+        $permiso = false;
+        /* if($permiso) {
+            $this->authorize('delete', $this->requisicion);
+            $this->alert('warning', 'Estas seguro de eliminar la requisición?', [
+                'position' => 'center',
+                'timer' => 6000,
+                'toast' => true,
+                'showCancelButton' => true,
+                'cancelButtonText' => 'Cancelar',
+                'showDenyButton' => true,
+                'denyButtonText' => 'Eliminar',
+                'onDenied' => 'confirmed'
+            ]);
+        } */
+        
     }
     protected $listeners = [
         'confirmed'

@@ -61,28 +61,30 @@ class Create extends Component
 
         if ($requisicionCreada->estatus_id === 1) {
             $user = User::find(Auth::id());
-            $permiso = permisosrequisicion::where('PuestoSolicitante_id','=', $user->puesto->id)
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
                 ->where('departamento_id', $user->departamento_id)
                 ->first();
             //dd($permiso);
-            $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first();
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
             //dd(['autori'=>$userAutorizador, 'permiso'=> $permiso]);
             $this->dispatch('nueva-requisicion-creada');
 
-            $dataPost = [ 
-                'id_puesto_solicitante' => $user->puesto_id, 
-                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id, 
+            $dataPost = [
+                'id_puesto_solicitante' => $user->puesto_id,
+                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
                 'id_usuario_alertar' => $userAutorizador->id,
                 'estatus' => $requisicionCreada->estatus->name,
                 'folio' => $requisicionCreada->folio,
+                'url_requisicion' => "/requisicion" . "/" . $requisicionCreada->id . '/aprobacion'
             ];
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $userToken->token,
             ])->post(
-                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-creada',
-                $dataPost);
-            
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                $dataPost
+            );
+
             //dd($response);
         }
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);
