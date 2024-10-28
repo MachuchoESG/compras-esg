@@ -6,28 +6,34 @@
 
 
     <div class="flex justify-end my-4 mr-2">
-        @if (!$contieneProductoSinRegistrar)
-            @if ($requisicion->cotizaciones->isNotEmpty())
-                <div class="me-5">
-                    <div class="form-check pt-1">
-                        <input class="form-check-input" type="checkbox" id="cotizacion_unica"
-                            wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
-                        <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
-                            Cotización Unica
-                        </label>
+        @if($requisicion->estatus_id !== 6)
+            @if (!$contieneProductoSinRegistrar)
+                @if ($requisicion->cotizaciones->isNotEmpty())
+                    <div class="me-5">
+                        <div class="form-check pt-1">
+                            <input class="form-check-input" type="checkbox" id="cotizacion_unica"
+                                wire:click="toggleCotizacionUnica($event.target.checked)" @checked($requisicion->cotizacion_unica)>
+                            <label class="fw-bold" class="form-check-label" for="flexCheckDefault">
+                                Cotización Unica
+                            </label>
+                        </div>
+
                     </div>
+                @endif
+                {{-- <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
+                    data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
+                    Agregar Cotizacion
+                </button> --}}
 
-                </div>
+                <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
+                    data-bs-toggle="modal" data-bs-target="#modalAddCotizacion">
+                    Agregar Cotizacion
+                </button>
+            @else
+                <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
+                    sistema.</p>
             @endif
-            <button @disabled($esCotizacionUnica) id="btnModalAddCotizacion" type="button" class="btn btn-primary"
-                data-bs-toggle="modal" data-bs-target="#ModalAddCotizacion">
-                Agregar Cotizacion
-            </button>
-        @else
-            <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
-                sistema.</p>
         @endif
-
     </div>
 
     @if ($requisicion->detalleRequisiciones->isNotEmpty())
@@ -72,7 +78,6 @@
 
                                             <x-slot name="content">
                                                 <div class="w-60">
-
                                                     <div class="block px-4 py-2 text-xs bg-gray-400 text-gray-100">
                                                         {{ __('Acciones') }}
                                                     </div>
@@ -114,9 +119,9 @@
 
 
     @if ($requisicion->cotizaciones->isNotEmpty())
-        <div class="container mt-3 mx-0 w-100">
+        <div class="mt-3 px-3 w-100">
             @foreach ($requisicion->cotizaciones as $cotizacion)
-                <div class="row bg-gray-200 ">
+                <div class="row bg-gray-200 px-1">
                     <div class="col-4 d-flex justify-center align-items-center">
                         <p class="m-0 text-center"> Proveedor: <span>{{ $cotizacion['proveedor'] }}</span> </p>
 
@@ -128,15 +133,18 @@
                             <span class="ms-2 fw-bold">Cotización</span>
                         </button>
                     </div>
-                    <div class="col-4 d-flex justify-center p-3">
-                        <i class="bi bi-trash-fill"></i>
-                        <button wire:click="deleteCotizacion({{ $cotizacion->id }})"
-                            class="btn btn-danger btn-sm d-flex">
-                            {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
-                            <x-eva-trash class="h-5 w-5" />
-                            <span class="ms-2 fw-bold">Eliminar Cotización</span>
-                        </button>
-                    </div>
+                    @if ($requisicion->estatus_id !== 6)
+                        <div class="col-4 d-flex justify-center p-3">
+                            <i class="bi bi-trash-fill"></i>
+                            <button wire:click="deleteCotizacion({{ $cotizacion->id }})" wire:loading.attr="disabled"
+                                class="btn btn-danger btn-sm d-flex">
+                                {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
+                                <x-eva-trash class="h-5 w-5" />
+                                <span class="ms-2 fw-bold">Eliminar Cotización</span>
+                            </button>
+                        </div>
+                    @endif
+                    
                     <div class="col-4">
                         <p class="text-center">
                             Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
@@ -193,10 +201,12 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-around items-center">
-
+                                        @if ($requisicion->estatus_id !== 6)
                                         <button wire:click="editarDetalle({{ $detalle['id'] }})" class="text-blue-500">
                                             <x-far-edit class="w-6 h-6" />
                                         </button>
+                                        @endif
+                                        
 
                                     </div>
                                 </td>
@@ -212,7 +222,7 @@
     @endif
 
 
-    <div wire:ignore.self class="modal fade" id="ModalAddCotizacion" aria-hidden="true"
+    {{-- <div wire:ignore.self class="modal fade" id="ModalAddCotizacion" aria-hidden="true"
         aria-labelledby="exampleModalToggleLabel" tabindex="-10">
         <div class="modal-dialog modal-dialog-centered modal-dialog-top">
             <div class="modal-content">
@@ -223,8 +233,8 @@
                 <div class="modal-body">
                     <label for="proveedorSelect">Proveedor</label>
                     <div class="w-full">
-                        <select class="select2 w-full" name="cotizacion.proveedor_id" id="selectProveedor"
-                            wire:model.live="cotizacion.proveedor_id">
+                        <select wire:ignore class="select2 w-full" name="cotizacion.proveedor_id"
+                            id="selectProveedor" wire:model.live="cotizacion.proveedor_id">
                             <option value="">Selecciona un proveedor</option>
                             @foreach ($proveedores as $proveedor)
                                 <option value="{{ $proveedor['cidclienteproveedor'] }}">
@@ -317,7 +327,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <x-dialog-modal wire:model="cotizacion.openEditarDetalle">
         <x-slot name="title">
@@ -344,6 +354,105 @@
         </x-slot>
     </x-dialog-modal>
 
+    <div class="modal fade" id="modalAddCotizacion" data-bs-backdrop="static" data-bs-keyboard="false"
+        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" wire:ignore>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Agregar Cotizacion</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="w-full mb-2">
+                        <label for="select_proveedor">Proveedor</label>
+                        <select wire:ignore class="w-full" name="cotizacion.proveedor_id" id="select_proveedor"
+                            wire:model.live="cotizacion.proveedor_id" style="width: 100%!important">
+                            <option value="0">Selecciona un proveedor</option>
+                        </select>
+                    </div>
+                    <div class="w-full file-input-container" x-data="{ uploading: false, progress: 0, fileUploaded: false }"
+                        x-on:livewire-upload-start="uploading = true" x-on:livewire-upload-finish="uploading = false"
+                        x-on:livewire-upload-error="uploading = false"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                        <label for="cotizacion">Cotizacion</label>
+                        <input wire:model.live="cotizacion.image" class="w-full" type="file" id="cotizacion"
+                            name="cotizacion.image">
+                        <!-- Progress Bar -->
+                        <div class="w-full" x-show="uploading">
+                            <progress class="w-full bg-red-200" max="100"
+                                x-bind:value="progress"></progress>
+                        </div>
+                        {{-- <x-input-error for="cotizacion.image" /> --}}
+                        <span class="font-danger fw-bold" id='error-file'></span>
+
+                    </div>
+
+                    <div style="overflow-y: auto; max-height: 30vh" class="mb-2">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Cantidad</th>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col">Precio</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($requisicion->detalleRequisiciones as $detalle)
+                                    <tr>
+
+                                        <td class="col-2" style="font-size: 0.9rem;">{{ $detalle->cantidad }}</td>
+                                        <td style="font-size: 0.9rem;">{{ $detalle->producto }}</td>
+                                        <td class="col-3" style="font-size: 0.9rem;">
+                                            <input wire:model="cotizacion.precios.{{ $detalle->id }}" value="1"
+                                                type="number" class="form-control col-3">
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row">
+                        <div class="col p-0">
+                            <x-label for="cantidad">Tiempo de Entrega</x-label>
+                            <input wire:model="cotizacion.dias_entrega" class="w-full h-10 border rounded-lg mb-2"
+                                type="number" id="cantidad" name="cantidad">
+                            <x-input-error for="cotizacion.dias_entrega" />
+                        </div>
+                        <div class="col p-0">
+                            <x-label for="cantidad">Dias de Credito</x-label>
+                            <input wire:model="cotizacion.dias_credito" class="w-full h-10 border rounded-lg mb-2"
+                                type="number" id="diascredito" name="diascredito">
+                        </div>
+                        <div class="col p-0">
+                            <x-label for="formaPago">Forma de Pago</x-label>
+                            <select name="cotizacion.formapago" id="cotizacion.formapago"
+                                wire:model.live="cotizacion.formapago" class=" border-[#dee2e6] rounded-lg"
+                                id="formaPago">
+                                <option value="">Selecciona una opción</option>
+                                <option value="Contado">Contado</option>
+                                <option value="Credito">Credito</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-label for="observaciones">Comentarios</x-label>
+                        <textarea wire:model="cotizacion.comentarios" class="w-full border rounded-lg p-2" placeholder="Comentarios..."
+                            id="observaciones" name="cotizacion.comentarios" rows="2"></textarea>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="save"
+                        wire:loading.attr="disabled">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <div wire:ignore.self class="modal fade" id="ModalEditProducto" aria-hidden="true"
@@ -503,6 +612,7 @@
             {{-- <x-button wire:click="autorizarCotizacion()"
                 class="bg-green-500 hover:bg-green-400 active:bg-green-300 focus:bg-green-400">Autorizar</x-button> --}}
         @endcan
+        
 
     </div>
 
@@ -511,6 +621,12 @@
         var comentPreAutorizar = ''
         var comentCotUnica = ''
         var valueProveedorSelected = ''
+        var proveedorSelected = {
+            'id': '',
+            'name': '',
+        }
+
+        var allProveedores = @json($proveedores)
 
         function InicializarSelect() {
 
@@ -558,16 +674,73 @@
         }
 
         function cerrarModalAddCotizacion() {
-            console.log("cerrar modal cotizacion");
-            var closeButton = $('#ModalAddCotizacion .btn-close');
-            closeButton.click();
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            $('#cotizacion').val('')
+            $('#modalAddCotizacion').modal('hide');
+            $("#select_proveedor").prop('selectedIndex', 0)
+            proveedorSelected.id = ''
+            proveedorSelected.name = ''
+
+            @this.set('cotizacion.proveedor_id', '');
+            @this.set('cotizacion.proveedor', '');
         }
+
+        function renderOptionsSelectProveedores(proveedores) {
+            $("#select_proveedor").empty().append('<option value="0">Seleccione un Proveedor</option>');
+            $.each(proveedores, function(i, item) {
+                $('#select_proveedor').append($('<option>', {
+                    value: item.cidclienteproveedor,
+                    text: item.crazonsocial
+                }))
+            });
+        }
+
+        function mostrarErrores(errors) {
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+            Object.keys(errors).forEach((key) => {
+                console.log(key);
+                const field = document.querySelector(`[name="${key}"]`);
+
+                if (field) {
+                    const errorMessage = document.createElement('span');
+                    errorMessage.classList.add('error-message');
+                    errorMessage.style.color = 'red'; // Puedes estilizarlo como desees
+                    errorMessage.style.fontSize = '0.8rem';
+                    errorMessage.style.whiteSpace = 'pre';
+                    errorMessage.innerText = errors[key][0]; // Mostrar solo el primer mensaje de error
+
+                    field.parentNode.insertBefore(errorMessage, field.nextSibling);
+                }
+            });
+        }
+
+        document.addEventListener('renderProveedores', event => {
+            const proveedores = event.detail[0].proveedores; // Aquí obtienes la lista de productos
+            renderOptionsSelectProveedores(proveedores);
+        });
+
+        document.addEventListener('cerrar-modal', event => {
+            cerrarModalAddCotizacion();
+        });
+
+        document.addEventListener('nuevo_proveedores', event => {
+            //console.log(event.detail[0].proveedores);
+            allProveedores = event.detail[0].proveedores
+            renderOptionsSelectProveedores(allProveedores)
+        });
+
+        document.addEventListener('validate-errors', event => {
+            var errores = event.detail[0].errors
+            //console.log(errores);
+            mostrarErrores(errores)
+        });
 
 
         $(document).on('change', '.form-check-input', function(e) {
-            console.log('algo cambió');
+            //console.log('algo cambió');
             var isChecked = $(this).is(':checked');
-            console.log(isChecked);
+            //console.log(isChecked);
         });
 
         $(document).on('cerrar-modal-edit-producto', function() {
@@ -583,16 +756,36 @@
 
         });
 
+        $('#select_proveedor').select2({
+            dropdownParent: $("#modalAddCotizacion")
+        });
+
+        $('#select_proveedor').on('change', function(e) {
+            //console.log(e);
+            var provId = e.target.value;
+            var provText = e.target.options[e.target.selectedIndex].text;
+
+            proveedorSelected.id = provId
+            proveedorSelected.name = provText
+
+            @this.set('cotizacion.proveedor_id', provId);
+            @this.set('cotizacion.proveedor', provText);
+        })
+
+        renderOptionsSelectProveedores(allProveedores)
+
         $(document).ready(function() {
+
+
 
             $('#input_preautorizacion').on('keyup', function(e) {
 
                 comentPreAutorizar = e.target.value
                 if (comentPreAutorizar === '') {
-                    console.log('Comentario obligarotiros');
+                    //console.log('Comentario obligarotiros');
                     $('#btn-preautorizar').prop('disabled', true);
                 } else {
-                    console.log('coment valido');
+                    //console.log('coment valido');
                     $('#btn-preautorizar').prop('disabled', false);
                 }
 
@@ -602,11 +795,11 @@
 
                 comentPreAutorizar = e.target.value
                 if (comentPreAutorizar === '') {
-                    console.log('Comentario obligarotiros');
+                    //console.log('Comentario obligarotiros');
                     $('#btn-autorizar-unica').prop('disabled', true);
                     alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
                 } else {
-                    console.log('coment valido');
+                    //console.log('coment valido');
                     $('#btn-autorizar-unica').prop('disabled', false);
                 }
 
@@ -614,7 +807,7 @@
 
 
             $('#selectProveedor').on('change', function(e) {
-                console.log(e.target.value);
+                //console.log(e.target.value);
                 valueProveedorSelected = e.target.value
                 @this.set('cotizacion.proveedor_id', $(this).val());
                 @this.set('cotizacion.proveedor', $(this).find('option:selected').text());

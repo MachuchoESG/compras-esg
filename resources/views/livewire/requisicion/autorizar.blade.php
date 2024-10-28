@@ -4,7 +4,7 @@
 
     <div>
         @if ($requisicion->cotizaciones->count() != 0)
-            <form wire:submit.prevent="$set('comentarioFinalAutorizar', true)">
+            <form wire:submit.prevent="continuarAutorizar()">
                 <div class="w-full">
                     @foreach ($requisicion->cotizaciones as $cotizacion)
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 mt-4">
@@ -106,7 +106,16 @@
                 </div>
 
                 <div class="my-3 d-flex justify-between">
-                    <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
+                    {{-- <p>{{ $this->obtenerTotalAutorizar() }}</p>
+                    <p>{{ $totalPermitidoAutorizar }}</p>
+                    <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p> --}}
+                    @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
+                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
+                    @else
+                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente
+                            Nivel</x-button>
+                    @endif
+
                     <x-danger-button wire:click.prevent="noAutorizar">No autorizar</x-danger-button>
                     <x-button wire:click.prevent="volverCotizar">Volver a cotizar</x-button>
                 </div>
@@ -188,7 +197,7 @@
         </x-slot>
         <x-slot name="footer">
             <x-button wire:click="saveComentario()">Guardar</x-button>
-
+            <x-button wire:click="$set('comentarioOpen', false)">Cancelar</x-button>
         </x-slot>
     </x-alpine-modal>
 
@@ -247,7 +256,7 @@
         <x-slot name="footer">
             <x-button class="btn btn-secondary btn-sm me-3"
                 wire:click="$set('comentarioFinalAutorizar', false)">Cancelar</x-button>
-            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Guardar</x-button>
+            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Autorizar</x-button>
         </x-slot>
     </x-alpine-modal>
 
