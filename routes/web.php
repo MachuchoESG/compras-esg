@@ -63,6 +63,7 @@ Route::middleware([
     Route::get('/requisicion/{requisicion}/autorizar', [requisicionController::class, 'autorizar'])->name('requisicion.autorizar');
     Route::get('/requisicion/{requisicion}/aprobacion', [requisicionController::class, 'aprobacion'])->name('requisicion.aprobacion');
     Route::get('/requisicion/{requisicion}/formato', [requisicionController::class, 'formato'])->name('requisicion.formato');
+    Route::get('/requisicion/{requisicion}/especial', [requisicionController::class, 'cotizacionespecial'])->name('requisicion.cotizacionespecial');
     Route::resource('cotizacion', CotizacionController::class);
     Route::get('/run-migrations', [App\Http\Controllers\MigrationsRun::class, 'runMigrations']);
     Route::get('/clear-view-cache', [App\Http\Controllers\MigrationsRun::class, 'clearViewCache']);

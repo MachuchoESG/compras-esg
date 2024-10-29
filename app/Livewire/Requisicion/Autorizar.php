@@ -519,7 +519,6 @@ class Autorizar extends Component
 
         try {
             $cotizaciones = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
-
             $alMenosUnaCotizacionActiva = false;
 
             foreach ($cotizaciones as $cotizacion) {
@@ -691,14 +690,14 @@ class Autorizar extends Component
         $total = $this->obtenerTotalAutorizar();
 
         if ($this->tienespermiso($total)) {
-            if ($this->comentariofinalautorizar !== '') {
+            /* if ($this->comentariofinalautorizar !== '') {
                 $comentario = Comentarios::create([
                     'requisicion_id' => $this->requisicion->id,
                     'user_id' => Auth::id(),
                     'comentario' => $this->comentariofinalautorizar,
                 ]);
                 $this->comentariofinalautorizar = '';
-            }
+            } */
 
             $this->generarorden();
         } else {

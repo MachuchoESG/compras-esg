@@ -32,7 +32,12 @@ class Aprobacion extends Component
     public function aprobar()
     {
         if ($this->requisicion) {
-            $this->requisicion->estatus_id = 7;
+            if ($this->requisicion->cotizacion_especial !== 1) {
+                $this->requisicion->estatus_id = 7; // APROBADO
+            } else {
+                $this->requisicion->estatus_id = 13; // COTIZACION ESPECIAL
+            }
+            
             $this->requisicion->aprobado = 1;
             $this->requisicion->fechaaprobacion = now();
              
@@ -45,7 +50,7 @@ class Aprobacion extends Component
         $userToken = Token::where('user_id', Auth::id())->latest()->first();
         if ($this->requisicion) {
             $this->requisicion->aprobado = 0;
-            $this->requisicion->estatus_id = 4;
+            $this->requisicion->estatus_id = 4; // NO AUTORIZADO
             $this->requisicion->save();
             $user = $this->requisicion->solicitante;
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto_id)

@@ -3,7 +3,8 @@
         <div class="flex flex-col">
             <span class="text-sm text-gray-500"> Fecha Creacion
                 {{ \Carbon\Carbon::parse($requisicion->created_at)->locale('es')->isoFormat('LL') }}</span>
-            <p class="text-gray-500 text-md font-bold">Folio: {{ $requisicion->folio }}</p>
+            <p class="text-gray-500 text-md font-bold m-0">Folio: {{ $requisicion->folio }}</p>
+            <p class="text-gray-500 text-md font-bold">Estatus: {{ $requisicion->estatus->name }}</p>
         </div>
         @if ($requisicion->evidencia()->exists())
             <button wire:click.prevent="download({{ $requisicion->evidencia()->first()->id }})"
@@ -35,13 +36,29 @@
     @if (!empty($requisicion->unidad))
         <p class="text-gray-500 text-md">Unidad de Taller: {{ $requisicion->unidad }}</p>
     @endif
+    <div class="d-flex justify-content-between">
+        <p class="text-gray-500 text-md">Cotización Unica: {{ $requisicion->cotizacion_unica ? 'Si' : 'No' }}</p>
 
-    <p class="text-gray-500 text-md">Cotización Unica: {{ $requisicion->cotizacion_unica ? 'Si' : 'No' }}</p>
+        @if ($requisicion->cotizacion_especial)
+            <p class="text-gray-500 text-md">Cotización Especial: {{ $requisicion->cotizacion_especial ? 'Si' : 'No' }}
+            </p>
+            <p class="text-gray-500 text-md">Cotización Departamento Asignado:
+                {{ $departamentoAsignado->name ?? 'NO APLICA' }}
+            </p>
+        @endif
+
+    </div>
+    @if ($requisicion->cotizacion_especial)
+        <div class="">
+            <p class="fw-bold m-0">Observacion Especial:</p>
+            <p>{{ $requisicion->observacion_especial ?? 'NO CONTIENE OBSERVACION' }}</p>
+        </div>
+    @endif
+
 
     @if ($requisicion->comentarios->count() > 0)
         <x-button wire:click="$set('openComentarios', true)" class="my-2">Ver Comentarios</x-button>
     @endif
-
 
     <livewire:requisicion.component.comentarios :requisicion="$requisicion" wire:model="openComentarios" />
 

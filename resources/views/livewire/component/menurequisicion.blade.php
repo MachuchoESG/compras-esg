@@ -20,9 +20,6 @@
                     {{ __('Acciones') }}
                 </div>
 
-
-
-
                 @if ($requisicion->aprobado && $escompras)
                     @if ($requisicion->estatus_id !== 6)
                         <x-dropdown-link class="no-underline text-xs" :href="route('cotizacion.show', ['cotizacion' => $requisicion->id])">
@@ -39,7 +36,7 @@
                         </x-dropdown-link>
                     @endcan
                 @endif
-
+  
 
 
                 @if (!$requisicion->aprobado && $esjefe)
@@ -54,7 +51,7 @@
 
                 @foreach ($requisicion->evidencia as $archivo)
                     <x-dropdown-link class="no-underline text-xs cursor-pointer"
-                        wire:click.prevent="download({{ $archivo->id }})">
+                        wire:click.p%revent="download({{ $archivo->id }})">
                         {{ __('Evidencia') }}
                     </x-dropdown-link>
                 @endforeach
@@ -69,6 +66,11 @@
                     <x-dropdown-link class="no-underline text-xs cursor-pointer" data-bs-toggle="modal"
                         wire:click="setRequisicionBorrar({{ $requisicion->id }})" data-bs-target="#modaldelete">
                         {{ __('Borrar') }} - {{ $requisicion->folio }}
+                    </x-dropdown-link>
+                @endif
+                @if ($requisicion->cotizacion_especial == 1 && $requisicion->aprobado == 1 && $requisicion->estatus_id == 13)
+                    <x-dropdown-link class="no-underline text-xs cursor-pointer" :href="route('requisicion.cotizacionespecial', ['requisicion' => $requisicion->id])">
+                        {{ __('Cotizar Especial') }}
                     </x-dropdown-link>
                 @endif
 

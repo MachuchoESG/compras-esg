@@ -109,6 +109,23 @@
                     </div>
                 @endif
 
+                @if ($cantidadNotiCotizacionEspecial > 0)
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
+
+                        <p class="mb-1">{{ __('Requisiciones') }} - Especiales</p>
+                        @foreach ($CotizacionesEspecial as $CE)
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
+                                href="{{ route('requisicion.cotizacionespecial', ['requisicion' => $CE->id]) }}">
+                                {{ $CE->folio }}
+                            </x-dropdown-link>
+                        @endforeach
+
+
+
+
+                    </div>
+                @endif
+
 
             </div>
         </x-slot>
