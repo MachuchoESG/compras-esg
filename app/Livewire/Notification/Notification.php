@@ -107,7 +107,8 @@ class Notification extends Component
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();
             $this->cantidadNotiCotizacionEspecial = $requisicionesEpecialesNotify->count();
             $this->pendienteIncompletas = $requisicionesIncompletas;
-            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas + $this->cantidadNotiCotizacionEspecial;;
+            //dd($requisicionesEpecialesNotify->count());
+            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas + $this->cantidadNotiCotizacionEspecial;
         }
     }
 

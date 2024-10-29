@@ -124,7 +124,8 @@ class Requisicion extends Model
         $user = User::find(Auth::id());
         return Requisicion::where('cotizacion_especial', '=', 1)
             ->where('departamento_especial', '=', $user->departamento_id)
-            ->where('visto', '=', 0)
+            //->where('visto', '=', 0)
+            ->where('estatus_id', '=', 13)
             ->where('aprobado', '=', 1)->get();
     }
 
