@@ -29,14 +29,18 @@
 
                 @endif
 
-                @if ($requisicion->aprobado && $requisicion->estatus_id != 1 && $requisicion->estatus_id != 6)
+                @if (
+                    $requisicion->aprobado &&
+                        $requisicion->estatus_id != 1 &&
+                        $requisicion->estatus_id != 6 &&
+                        $requisicion->estatus_id != 13)
                     @can('autorizar', $requisicion)
                         <x-dropdown-link class="no-underline text-xs" :href="route('requisicion.autorizar', ['requisicion' => $requisicion->id])">
                             {{ __('Autorizar') }}
                         </x-dropdown-link>
                     @endcan
                 @endif
-  
+
 
 
                 @if (!$requisicion->aprobado && $esjefe)

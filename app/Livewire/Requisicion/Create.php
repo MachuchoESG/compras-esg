@@ -62,6 +62,7 @@ class Create extends Component
         $requisicionCreada =  $this->requisicion->save();
 
         if ($requisicionCreada->estatus_id === 1) {
+            
             $user = User::find(Auth::id());
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
                 ->where('departamento_id', $user->departamento_id)
@@ -88,6 +89,45 @@ class Create extends Component
             );
 
             //dd($response);
+        }
+
+        if ($requisicionCreada->estatus_id === 7 || $requisicionCreada->estatus_id === 13) {
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            if ($requisicionCreada->cotizacion_especial === 1 || $requisicionCreada->cotizacion_especial === true) {
+                $dataPost = [
+                    'cotizacion_especial' => true,
+                    'departamento_especial' => $requisicionCreada->departamento_especial,
+                    'departamento' => null,
+                    'id_puesto_solicitante' => $user->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => $user->id,
+                    'estatus' => $requisicionCreada->estatus->name,
+                    'folio' => $requisicionCreada->folio,
+                    'url_requisicion' => "/requisicion" . "/" . $requisicionCreada->id . "/especial",
+                ];
+            } else {
+                $dataPost = [
+                    'cotizacion_especial' => false,
+                    'departamento_especial' => null,
+                    'departamento' => 2,
+                    'id_puesto_solicitante' => $user->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => null,
+                    'estatus' => $requisicionCreada->estatus->name,
+                    'folio' => $requisicionCreada->folio,
+                    'url_requisicion' => "/cotizacion" . "/" . $requisicionCreada->id,
+                ];
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion/departamento',
+                $dataPost
+            );
         }
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);
 

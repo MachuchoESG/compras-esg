@@ -178,7 +178,12 @@ class RequisicionCreateForm extends Form
 
             if (User::jefe()) {
                 $requisicionNueva->aprobado = true;
-                $requisicionNueva->estatus_id = 7;
+                if ($requisicionNueva->cotizacion_especial === 1 || $requisicionNueva->cotizacion_especial === true) {
+                    $requisicionNueva->estatus_id = 13;// COTIZACION ESPECIAL
+                } else {
+                    $requisicionNueva->estatus_id = 7;//APROBADO
+                }
+                
                 $requisicionNueva->visto = true;
                 $requisicionNueva->save();
 

@@ -83,7 +83,7 @@
                 new Notification('Nueva Notificacion de Requisición', options).onclick = function() {
                     window.open(window.location.origin + data.url); // Cambia esta URL a la que necesites
                 };
-                
+
             } catch (error) {
                 console.log(error);
 
@@ -102,6 +102,7 @@
             var PendientesCotizacion = '';
             var PendientesIncompletas = '';
             var PendientesAutorizarCotizacion = '';
+            var PendietesCotizacionEspecial = '';
 
             $('#content-notifications').css("width", data.sizeNotification + 'vw');
 
@@ -135,7 +136,7 @@
                 } else {
                     contentPendienteAutorizar = `<p>No hay requisiciones pendientes de autorizar.</p>`
                 }
-                PendientesAutorizar = initString + contentPendienteAutorizar + endString
+                PendientesAutorizar = initString + '<p>Pendientes de autorizar</p>' + contentPendienteAutorizar + endString
 
             }
 
@@ -153,7 +154,8 @@
                 } else {
                     contentPendienteCotizacion = `<p>No hay requisiciones pendientes de subir cotizaciones.</p>`
                 }
-                PendientesCotizacion = initString + contentPendienteCotizacion + endString
+                PendientesCotizacion = initString + '<p>Requisiciones - Pendientes de subir cotizacion</p>' +
+                    contentPendienteCotizacion + endString
             }
 
             if (data
@@ -170,7 +172,8 @@
                 } else {
                     contentPendieteIncompletas = `<p>No hay requisiciones Incompletas.</p>`
                 }
-                PendientesAutorizarCotizacion = initString + contentPendieteIncompletas + endString
+                PendientesIncompletas = initString + '<p>Requisiones - Incompletas</p>' + contentPendieteIncompletas +
+                    endString
             }
 
             if (data
@@ -187,12 +190,32 @@
                 } else {
                     contentPendieteAutorizarCotizacion = `<p>No hay requisiciones pendientes de autorizar cotización.</p>`
                 }
-                PendientesAutorizarCotizacion = initString + contentPendieteAutorizarCotizacion + endString
+                PendientesAutorizarCotizacion = initString + '<p>Requisiciones - Pendientes Autorizar</p>' +
+                    contentPendieteAutorizarCotizacion + endString
+
+            }
+
+            if (data
+                .pendietesCotizacionEspecial
+            ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+                var contentPendieteCotizacionEspecial = '';
+                if (data.pendietesCotizacionEspecial.length > 0) {
+                    data.pendietesCotizacionEspecial.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendieteCotizacionEspecial += link;
+                    });
+                } else {
+                    contentPendieteCotizacionEspecial = `<p>No hay Requisiciones Especiales para cotización.</p>`
+                }
+                PendietesCotizacionEspecial = initString + '<p>Requisiciones - Especiales</p>' +
+                    contentPendieteCotizacionEspecial + endString
 
             }
 
             document.getElementById('content-notifications').innerHTML = PendientesAprobar + PendientesAutorizar +
-                PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion;
+                PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion + PendietesCotizacionEspecial;
 
         }
 
@@ -235,36 +258,21 @@
         socket.on('connect', () => {
             console.log('Conectado al canal privado Socket.IO');
 
-            // Enviar un mensaje privado a otro usuario (ejemplo: usuario 3)
-            const mensajePrivado = {
-                toUserId: {{ Auth::id() }}, // ID del usuario destinatario
-                message: 'Hola usuario {{ Auth::id() }}, este mensaje es solo para ti.'
-            };
-
-            // Enviar el mensaje al servidor
-            socket.emit('mensaje-privado', mensajePrivado);
-        });
-
-        socket.on('mensaje-recibido', (data) => {
-            console.log(`Mensaje recibido de usuario ${data.fromUserId}: ${data.message}`);
         });
 
         socket.on('disconnect', () => {
             console.log('Desconectado del canal privado Socket.IO');
         });
 
-        socket.on('pa-todos', (data) => {
-            console.log('pa todos');
-        })
-
         socket.on('channel-user-{{ Auth::id() }}', (data) => {
             mostrarNotificacion(data)
             renderNotifications()
         })
 
-        socket.on('channel-departemento-{{ session('id_departamento') }}', (data) => {
+        socket.on('channel-departamento-{{ session('id_departamento') }}', (data) => {
             console.log('mensaje para departamentos');
-            //mostrarNotificacion(data.message)
+            mostrarNotificacion(data)
+            renderNotifications()
         })
 
         socket.on('channel-puesto-{{ session('id_puesto') }}', (data) => {

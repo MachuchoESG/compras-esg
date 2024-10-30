@@ -27,7 +27,9 @@ class NotificacionesController extends Controller
     
         $cantidadPendienteAutorizarCotizacion = 0;
         $pendienteAutorizarCotizacion = [];
-    
+        
+        $cantidadPendienteCotizacionEspecial = 0;
+        $pendienteCotizacionEspecial = [];
     
         $totalnotificaciones = 0;
     
@@ -90,14 +92,16 @@ class NotificacionesController extends Controller
                 $sizeNotification = 50;
             }
 
+            $pendienteCotizacionEspecial = Requisicion::getRequisicionesEspecialesNotifys();
             $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $cantidadPendienteIncompletas = $requisicionesIncompletas->count();
             $pendienteIncompletas = $requisicionesIncompletas;
-            $totalnotificaciones = $totalnotificaciones + $cantidadPendienteIncompletas;
+            $totalnotificaciones = $totalnotificaciones + $cantidadPendienteIncompletas + $pendienteCotizacionEspecial->count();
 
         }
         
         $data = [
+            'pendietesCotizacionEspecial' => $pendienteCotizacionEspecial,
             'pendientesaprobar'=>  $esjefe || auth()->id() == 30 ? $pendientesaprobar : null, 
             'pendienteautorizar' => $esjefe || auth()->id() == 30 ? $pendienteautorizar : null,
             'pendientecotizacion' => $user->compras() ? $pendientecotizacion : null,
