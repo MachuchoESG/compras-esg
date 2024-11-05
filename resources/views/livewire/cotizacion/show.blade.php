@@ -6,7 +6,7 @@
 
 
     <div class="flex justify-end my-4 mr-2">
-        @if($requisicion->estatus_id !== 6)
+        @if ($requisicion->estatus_id !== 6)
             @if (!$contieneProductoSinRegistrar)
                 @if ($requisicion->cotizaciones->isNotEmpty())
                     <div class="me-5">
@@ -30,7 +30,8 @@
                     Agregar Cotizacion
                 </button>
             @else
-                <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en el
+                <p class="text-danger font-bold">Antes de cotizar se debe Registrar y Asignar los productos faltantes en
+                    el
                     sistema.</p>
             @endif
         @endif
@@ -144,7 +145,7 @@
                             </button>
                         </div>
                     @endif
-                    
+
                     <div class="col-4">
                         <p class="text-center">
                             Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
@@ -202,11 +203,12 @@
                                 <td>
                                     <div class="flex justify-around items-center">
                                         @if ($requisicion->estatus_id !== 6)
-                                        <button wire:click="editarDetalle({{ $detalle['id'] }})" class="text-blue-500">
-                                            <x-far-edit class="w-6 h-6" />
-                                        </button>
+                                            <button wire:click="editarDetalle({{ $detalle['id'] }})"
+                                                class="text-blue-500">
+                                                <x-far-edit class="w-6 h-6" />
+                                            </button>
                                         @endif
-                                        
+
 
                                     </div>
                                 </td>
@@ -599,6 +601,10 @@
         @endcan
     @else
         <p class="text-center">Se necesitan {{ $cantMinimaCotizaciones }} Cotización para poder finalizar</p>
+        <div class="d-flex justify-content-center">
+            <x-button class="text-center" wire:click="$set('openIncompleta',true)">Incompleta</x-button>
+        </div>
+
     @endif
 
 
@@ -612,7 +618,7 @@
             {{-- <x-button wire:click="autorizarCotizacion()"
                 class="bg-green-500 hover:bg-green-400 active:bg-green-300 focus:bg-green-400">Autorizar</x-button> --}}
         @endcan
-        
+
 
     </div>
 
@@ -644,7 +650,7 @@
         function resetInputFile() {
             //$(`#selectProveedor option[value="${valueProveedorSelected}"]`).remove();
             let numero = Math.floor(Math.random() * 10);
-            console.log(numero);
+            //console.log(numero);
             var container = document.querySelector('.file-input-container');
             var inputElement = document.getElementById("cotizacion");
 
@@ -699,7 +705,7 @@
             document.querySelectorAll('.error-message').forEach(el => el.remove());
 
             Object.keys(errors).forEach((key) => {
-                console.log(key);
+                //console.log(key);
                 const field = document.querySelector(`[name="${key}"]`);
 
                 if (field) {
@@ -749,7 +755,7 @@
         });
 
         $(document).on('cerrar-modal-add-cotizacion', function() {
-            console.log('se cerro modal');
+            //console.log('se cerro modal');
 
             resetInputFile();
             cerrarModalAddCotizacion();
