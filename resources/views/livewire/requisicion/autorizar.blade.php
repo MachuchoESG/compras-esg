@@ -215,8 +215,8 @@
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="saveComentario()">Guardar</x-button>
-
+            <x-button wire:click="saveComentarioCancelado()">Guardar</x-button>
+            <x-button wire:click="$set('openCancelacion', false)">Cancelar</x-button>
         </x-slot>
     </x-alpine-modal>
 

@@ -296,7 +296,8 @@ class Autorizar extends Component
 
     public function noAutorizar()
     {
-        $requisicion = Requisicion::find($this->requisicion->id);
+        $this->openCancelacion = true;
+        /* $requisicion = Requisicion::find($this->requisicion->id);
 
         if ($requisicion) {
             $requisicion->estatus_id = 4;
@@ -318,7 +319,7 @@ class Autorizar extends Component
             }
 
             $this->openCancelacion = true;
-        }
+        } */
     }
 
     public function volverCotizar()
@@ -437,11 +438,68 @@ class Autorizar extends Component
         dd("Saliendo sin comentario");
     }
 
+    public function saveComentarioCancelado()
+    {
+        $this->validate([
+            'comentario' => 'required',
+        ], [], [
+            'comentario' => 'Comentario',
+        ]);
+
+        // Crear el comentario
+        $comentario = Comentarios::create([
+            'requisicion_id' => $this->requisicion->id,
+            'user_id' => Auth::id(),
+            'comentario' => $this->comentario,
+        ]);
+
+        if ($comentario) {
+            return redirect()->route('requisicion.index');
+        } else {
+
+            $this->alert('error', 'Error al agregar el comentario');
+            return redirect()->route('requisicion.index');
+        }
+
+        $requisicion = Requisicion::find($this->requisicion->id);
+
+        if ($requisicion) {
+            $requisicion->estatus_id = 4;
+            $requisicion->fechanoautorizacion = now();
+            $requisicion->save();
+
+
+
+            $user = auth()->user();
+
+            $autorizacion = autorizacionhistorial::where('requisicion_id', $this->requisicion->id)
+                ->where('user_id', $user->puesto->id)
+                ->where('autorizado', 0)
+                ->first();
+            if ($autorizacion) {
+
+                $autorizacion->updated_at = now();
+                $autorizacion->save();
+            }
+            $this->alert('success', 'Folio ' . $requisicion->folio . 'cambio a estatus NO AUTORIZADO.');
+        }
+
+        
+    }
+
     public function saveComentario()
     {
         $userLogin = auth()->user();
-        $userToken = Token::where('user_id', Auth::id())->latest()->first();
-        $user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+        //$user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+        $userSolictante = User::find($this->requisicion->user_id);
+        $permiso = permisosrequisicion::where('PuestoSolicitante_id', $userLogin->puesto_id)
+            ->where('departamento_id', $userSolictante->departamento_id)
+            ->first();
+        //dd($permiso);
+
+        //$userLogin = auth()->user();
+        $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); 
+        //dd($userAutorizador);
 
         $this->validate([
             'comentario' => 'required',
@@ -458,9 +516,9 @@ class Autorizar extends Component
 
         $historial = autorizacionhistorial::firstOrCreate([
             'requisicion_id' => $this->requisicion->id,
-            'user_id' => $user->puesto->id,
+            'user_id' => $userAutorizador->puesto_id,
             'user_solicita' => auth()->user()->puesto->id,
-            'departamento_id' =>  $userLogin->departamento_id,
+            'departamento_id' =>  $userSolictante->departamento_id,
         ], [
             'autorizado' => false,
             'visto' => false
@@ -688,11 +746,19 @@ class Autorizar extends Component
         if ($this->totalPermitidoAutorizar > $this->obtenerTotalAutorizar()) {
             $this->comentarioFinalAutorizar = true;
         } else {
-            $userLogin = auth()->user();
-            $user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
-            //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
-            if ($user == null) {
+            $user = auth()->user();
+            $userSolictante = User::find($this->requisicion->user_id);
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', $user->puesto->id)
+                ->where('departamento_id', $userSolictante->departamento_id)
+                ->first();
+                //dd($permiso);
 
+            //$userLogin = auth()->user();
+            $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+            //dd($userAutorizador);
+            //dd($user);
+            //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
+            if ($userAutorizador == null) {
                 $this->alert('info', 'Requisición', [
                     'position' => 'center',
                     'timer' => '6000',
@@ -701,7 +767,7 @@ class Autorizar extends Component
                 ]);
                 return;
             }
-            $this->jefe = $user->name;
+            $this->jefe = $userAutorizador->name;
             $this->comentarioOpen = true;
         }
     }
@@ -710,7 +776,8 @@ class Autorizar extends Component
     {
         $this->comentarioFinalAutorizar = false;
         $total = $this->obtenerTotalAutorizar();
-
+        /* dd($this->tienespermiso($total));
+        return 0; */
         if ($this->tienespermiso($total)) {
             /* if ($this->comentariofinalautorizar !== '') {
                 $comentario = Comentarios::create([

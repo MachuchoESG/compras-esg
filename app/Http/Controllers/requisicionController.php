@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Requisicion;
 use App\Service\EnviarWhatsApp;
+use App\Service\ProductoService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -67,6 +68,12 @@ class requisicionController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Requisicion $requisicion) {}
+
+    public function getTotalExistenciaProducto($nom, $id)
+    {
+        $existencias = ProductoService::VerificarExistencia($nom, $id);
+        return $existencias;
+    }
 
     public function autorizar(Requisicion $requisicion)
     {

@@ -52,6 +52,7 @@ Route::middleware([
     Route::resource('proveedor', proveedorController::class);
     Route::resource('producto', ProductoController::class);
     Route::resource('requisicion', requisicionController::class);
+    Route::get('/{nom}/producto/{id}/existencia', [requisicionController::class, 'getTotalExistenciaProducto']);
     Route::resource('departamento', DepartamentoController::class);
     Route::resource('puesto', PuestoController::class);
     Route::resource('usuario', UsuarioController::class);
