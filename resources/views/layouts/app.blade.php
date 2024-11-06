@@ -74,15 +74,23 @@
     <script>
         function mostrarNotificacion(data) {
             console.log('ejecutar Notification');
-
+            console.log(data.url);
+            
             const options = {
                 body: data.message, // Texto de la notificación
                 icon: 'https://esg.com.mx/wp-content/uploads/2019/07/logo-esg-2023mex.png' // Icono que acompañará la notificación
             };
             try {
-                new Notification('Nueva Notificacion de Requisición', options).onclick = function() {
-                    window.open(window.location.origin + data.url); // Cambia esta URL a la que necesites
-                };
+                if (data.url.includes('http')) {
+                    new Notification('Nueva Notificacion de Requisición', options).onclick = function() {
+                        window.open(data.url); // Cambia esta URL a la que necesites
+                    };
+                } else {
+                    new Notification('Nueva Notificacion de Requisición', options).onclick = function() {
+                        window.open(window.location.origin + data.url); // Cambia esta URL a la que necesites
+                    };
+                }
+                
 
             } catch (error) {
                 console.log(error);

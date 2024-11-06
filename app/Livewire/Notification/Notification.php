@@ -110,11 +110,6 @@ class Notification extends Component
         }
     }
 
-
-    public function renderNotificationsData(){
-        dd('hola');
-    }
-
     public function render()
     {
         return view('livewire.notification.notification');

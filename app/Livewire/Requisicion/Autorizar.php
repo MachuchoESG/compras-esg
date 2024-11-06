@@ -9,6 +9,7 @@ use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
 use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
+use App\Models\Token;
 use App\Models\User;
 use App\Service\ApiUrl;
 use Carbon\Carbon;
@@ -439,6 +440,7 @@ class Autorizar extends Component
     public function saveComentario()
     {
         $userLogin = auth()->user();
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
         $user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
 
         $this->validate([
@@ -464,14 +466,34 @@ class Autorizar extends Component
             'visto' => false
         ]);
 
+
+        $user = User::find(Auth::id());
+        $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+            ->where('departamento_id', $user->departamento_id)
+            ->first();
+        $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+        //
+        $dataPost = [
+            'id_puesto_solicitante' => $user->puesto_id,
+            'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+            'id_usuario_alertar' => $userAutorizador->id,
+            'estatus' => $this->requisicion->estatus->name,
+            'folio' => $this->requisicion->requisicionCreada->folio,
+            'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/aprobacion'
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $userToken->token,
+        ])->post(
+            env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+            $dataPost
+        );
+
         if ($comentario) {
 
             return redirect()->route('requisicion.index');
 
-            // Redirigir o hacer lo que necesites después de agregar el comentario
         } else {
-            // Manejar el caso de error si es necesario
-            // Por ejemplo, mostrar un mensaje de error
             $this->alert('error', 'Error al agregar el comentario');
             return redirect()->route('requisicion.index');
         }

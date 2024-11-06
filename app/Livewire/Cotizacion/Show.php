@@ -7,7 +7,10 @@ use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
 use App\Models\DetalleRequisicion;
+use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
+use App\Models\Token;
+use App\Models\User;
 use App\Service\ApiUrl;
 use App\Service\ProductoService;
 use App\Service\ProveedorService;
@@ -84,7 +87,7 @@ class Show extends Component
 
 
         $requisicion = Requisicion::find($this->requisicion->id);
-
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
 
 
         if ($requisicion->cotizaciones()->count() > 0) {
@@ -93,6 +96,28 @@ class Show extends Component
             if ($requisicion) {
                 $requisicion->estatus_id = 12;
                 $requisicion->save();
+
+                $userPro = User::find($this->requisicion->user_id);
+                $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userPro->puesto->id)
+                    ->where('departamento_id', $userPro->departamento_id)
+                    ->first();
+                $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+
+                $dataPost = [
+                    'id_puesto_solicitante' => $userPro->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => 30, // ALERTA PARA LMVILLARREAL DEBE AUTORIZAR
+                    'estatus' => $requisicion->estatus->name,
+                    'folio' => $requisicion->folio,
+                    'url_requisicion' => route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), //"/cotizacion" . "/" . $requisicion->id
+                ];
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $userToken->token,
+                ])->post(
+                    env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                    $dataPost
+                );
 
 
                 $this->alert('success', 'Requisicion', [
@@ -117,7 +142,8 @@ class Show extends Component
     public function liberarRequisicionCotUnica()
     {
         $requisicion = Requisicion::find($this->requisicion->id);
-
+        //dd($requisicion);
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
 
         $this->validate([
             'comentario_cotizacionunica' => 'required',
@@ -140,13 +166,34 @@ class Show extends Component
                 $requisicion->cotizacion_unica = $this->esCotizacionUnica;
                 $requisicion->save();
 
-
                 $this->alert('success', 'Requisicion', [
                     'position' => 'center',
                     'timer' => '5000',
                     'toast' => true,
                     'text' => 'Requisción liberada correctamente',
                 ]);
+
+                $userPro = User::find($this->requisicion->user_id);
+                $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userPro->puesto->id)
+                    ->where('departamento_id', $userPro->departamento_id)
+                    ->first();
+                $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+
+                $dataPost = [
+                    'id_puesto_solicitante' => $userPro->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => 30, // ALERTA PARA LMVILLARREAL DEBE AUTORIZAR
+                    'estatus' => $requisicion->estatus->name,
+                    'folio' => $requisicion->folio,
+                    'url_requisicion' => route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), //"/cotizacion" . "/" . $requisicion->id
+                ];
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $userToken->token,
+                ])->post(
+                    env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                    $dataPost
+                );
 
                 return redirect()->route('requisicion.index');
             }
@@ -252,6 +299,31 @@ class Show extends Component
             $this->requisicion->cotizacion_unica = $this->esCotizacionUnica;
             $this->requisicion->save();
 
+            /* PROCESO PARA ENVIAR NTIFICACION DEL NAVEGADOR */
+            $userToken = Token::where('user_id', Auth::id())->latest()->first();
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+            //
+            $dataPost = [
+                'id_puesto_solicitante' => $user->puesto_id,
+                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                'id_usuario_alertar' => $userAutorizador->id,
+                'estatus' => $this->requisicion->estatus->name,
+                'folio' => $this->requisicion->folio,
+                'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/aprobacion'
+            ];
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                $dataPost
+            );
+
+
 
             $this->alert('success', 'Requisicion', [
                 'position' => 'top-end',
@@ -292,7 +364,7 @@ class Show extends Component
 
     public function deleteCotizacion($id)
     {
-        $allCOT = Cotizacion::where('requisicion_id','=', $this->requisicion->id)->get();
+        $allCOT = Cotizacion::where('requisicion_id', '=', $this->requisicion->id)->get();
         $COT = Cotizacion::find($id);
         //dd($allCOT);
         if ($allCOT->count() === 1 && $this->esCotizacionUnica) {
@@ -305,7 +377,7 @@ class Show extends Component
             } else {
                 $this->alert('error', 'Cotización no se encuentra.');
             }
-    
+
             $this->renderSelectProv();
         }
         /* if ($COT) {
@@ -376,10 +448,8 @@ class Show extends Component
             $this->renderSelectProv();
         } catch (\Illuminate\Validation\ValidationException $th) {
             //dd($th);
-            $this->dispatch('validate-errors', [ 'errors'=> $th->errors() ]);
+            $this->dispatch('validate-errors', ['errors' => $th->errors()]);
         }
-
-        
     }
 
 
@@ -412,7 +482,7 @@ class Show extends Component
 
 
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
-
+        //dd($this->requisicion);
 
         foreach ($this->requisicion->detalleRequisiciones as $dr) { // recorre los productos de requi, si uno no existe bloquea registro de cotizacion
             if ($dr->producto_id === 0) {

@@ -10,32 +10,33 @@ use Illuminate\Support\Facades\Auth;
 class NotificacionesController extends Controller
 {
     //
-    public function getAllNotificaciones(Request $request){
+    public function getAllNotificaciones(Request $request)
+    {
         $cantidadPendienteAprobar = 0;
         $pendientesaprobar = [];
-    
+
         $cantidadPendienteAutorizar = 0;
         $pendienteautorizar = [];
-    
-    
+
+
         $cantidadPendienteCotizacion = 0;
         $pendientecotizacion = [];
-    
-    
+
+
         $cantidadPendienteIncompletas = 0;
         $pendienteIncompletas = [];
-    
+
         $cantidadPendienteAutorizarCotizacion = 0;
         $pendienteAutorizarCotizacion = [];
-        
+
         $cantidadPendienteCotizacionEspecial = 0;
         $pendienteCotizacionEspecial = [];
-    
+
         $totalnotificaciones = 0;
-    
+
         $esjefe = false;
         $escompras = false;
-    
+
         $sizeNotification = 10;
 
         $user = Auth::user(); // Obtener el usuario autenticado
@@ -78,7 +79,7 @@ class NotificacionesController extends Controller
                 $totalnotificaciones = $totalnotificaciones + $cantidadPendienteAprobar + $cantidadPendienteAutorizar;
             }
 
-            if ($user->cotizacionesAutorizar()) { //lmvilla // ESTAUS 12
+            if ($user->cotizacionesAutorizar() || $esjefe) { //lmvilla // ESTAUS 12
                 $sizeNotification = $sizeNotification + 10;
                 $pendientesAutorizarCotizacion = Requisicion::getRequisicionesPendientesdeAutoriarCotizar();
                 $cantidadPendienteAutorizarCotizacion = $pendientesAutorizarCotizacion->count();
@@ -97,19 +98,18 @@ class NotificacionesController extends Controller
             $cantidadPendienteIncompletas = $requisicionesIncompletas->count();
             $pendienteIncompletas = $requisicionesIncompletas;
             $totalnotificaciones = $totalnotificaciones + $cantidadPendienteIncompletas + $pendienteCotizacionEspecial->count();
-
         }
-        
+
         $data = [
             'pendietesCotizacionEspecial' => $pendienteCotizacionEspecial,
-            'pendientesaprobar'=>  $esjefe || auth()->id() == 30 ? $pendientesaprobar : null, 
+            'pendientesaprobar' =>  $esjefe || auth()->id() == 30 ? $pendientesaprobar : null,
             'pendienteautorizar' => $esjefe || auth()->id() == 30 ? $pendienteautorizar : null,
             'pendientecotizacion' => $user->compras() ? $pendientecotizacion : null,
             'pendienteIncompletas' => $pendienteIncompletas,
             'pendienteAutorizarCotizacion' => $user->cotizacionesAutorizar() ? $pendienteAutorizarCotizacion : null,
             'totalNotificaciones' => $totalnotificaciones,
             'sizeNotification' => $sizeNotification,
-            
+
         ];
         return response($data, 201);
     }
