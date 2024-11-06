@@ -295,7 +295,8 @@ class Autorizar extends Component
 
     public function noAutorizar()
     {
-        $requisicion = Requisicion::find($this->requisicion->id);
+        $this->openCancelacion = true;
+        /* $requisicion = Requisicion::find($this->requisicion->id);
 
         if ($requisicion) {
             $requisicion->estatus_id = 4;
@@ -317,7 +318,7 @@ class Autorizar extends Component
             }
 
             $this->openCancelacion = true;
-        }
+        } */
     }
 
     public function volverCotizar()
@@ -434,6 +435,55 @@ class Autorizar extends Component
     public function exitComentario()
     {
         dd("Saliendo sin comentario");
+    }
+
+    public function saveComentarioCancelado()
+    {
+        $this->validate([
+            'comentario' => 'required',
+        ], [], [
+            'comentario' => 'Comentario',
+        ]);
+
+        // Crear el comentario
+        $comentario = Comentarios::create([
+            'requisicion_id' => $this->requisicion->id,
+            'user_id' => Auth::id(),
+            'comentario' => $this->comentario,
+        ]);
+
+        if ($comentario) {
+            return redirect()->route('requisicion.index');
+        } else {
+
+            $this->alert('error', 'Error al agregar el comentario');
+            return redirect()->route('requisicion.index');
+        }
+
+        $requisicion = Requisicion::find($this->requisicion->id);
+
+        if ($requisicion) {
+            $requisicion->estatus_id = 4;
+            $requisicion->fechanoautorizacion = now();
+            $requisicion->save();
+
+
+
+            $user = auth()->user();
+
+            $autorizacion = autorizacionhistorial::where('requisicion_id', $this->requisicion->id)
+                ->where('user_id', $user->puesto->id)
+                ->where('autorizado', 0)
+                ->first();
+            if ($autorizacion) {
+
+                $autorizacion->updated_at = now();
+                $autorizacion->save();
+            }
+            $this->alert('success', 'Folio ' . $requisicion->folio . 'cambio a estatus NO AUTORIZADO.');
+        }
+
+        
     }
 
     public function saveComentario()

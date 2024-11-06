@@ -86,8 +86,10 @@ class Create extends Component
             $this->reset(['usuario']);
         } catch (ValidationException $e) {
             // Manejar errores de validación
+            $this->alert('error', "Error al validar datos.");
             // ...
         } catch (QueryException $e) {
+            $this->alert('error', "Error al guardar datos.");
             // Manejar errores de consulta
             // ...
         }
