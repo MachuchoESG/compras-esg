@@ -210,7 +210,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="sendAddProduct()">Agregar</button>
+                    <button type="button" class="btn btn-primary" id="btnSendAddProduct"
+                        onclick="sendAddProduct()">Agregar</button>
                 </div>
             </div>
         </div>
@@ -269,6 +270,7 @@
     }
 
     function cerrarModal() {
+        $('#btnSendAddProduct').prop('disabled', false);
         $('#modalAddProd').modal('hide');
         showProductos = true
         $('#container-select2').show()
@@ -285,6 +287,7 @@
     }
 
     function sendAddProduct() {
+        $('#btnSendAddProduct').prop('disabled', true);
         var observacion = $('#observaciones').val();
         var cantidad = $('#cantidad').val();
         var data;

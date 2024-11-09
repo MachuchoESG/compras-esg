@@ -185,17 +185,16 @@ class Autorizar extends Component
     public function obtenerTotalAutorizar()
     {
         $cotizaciones = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
-
         $totalrequisicion = 0;
         foreach ($cotizaciones as $cotizacion) {
             $totalrequisicion += $cotizacion->detalleCotizaciones->sum(function ($detalle) {
                 if ($detalle->autorizado) {
-                    return $detalle->cantidad * $detalle->precio;
+                    return $detalle->cantidad * $detalle->precio * 1.16;
                 }
                 return 0;
             });
         }
-
+        //dd($totalrequisicion);
         return $totalrequisicion;
     }
 
@@ -340,6 +339,26 @@ class Autorizar extends Component
             $requisicion->estatus_id = 5;
             $requisicion->save();
 
+            Autorizacionhistorial::where('requisicion_id', $requisicion->id)->delete();
+
+            $userSolictante = User::find($requisicion->user_id);
+            $userToken = Token::where('user_id', Auth::id())->latest()->first();
+            $dataPost = [
+                'id_puesto_solicitante' => $userSolictante->puesto_id,
+                'id_puesto_autorizador' => null,
+                'id_usuario_alertar' => 30, // VENTAS LMVILLAREAL
+                'estatus' => 'VOLVER A COTIZAR', // ESTATUS 5
+                'folio' => $requisicion->folio,
+                'url_requisicion' => "/cotizacion" . "/" . $requisicion->id
+            ];
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                $dataPost
+            );
+
             $this->alert('success', 'Se cambio correctamente el estatus a volver a cotizar la requisicion con folio ' . $requisicion->folio);
             return redirect()->route('requisicion.index');
         }
@@ -412,11 +431,7 @@ class Autorizar extends Component
             'visto' => false
         ]);
 
-
-
         if (!$historial->wasRecentlyCreated) {
-
-
 
             $this->alert('info', 'Requisición', [
                 'position' => 'center',
@@ -483,13 +498,12 @@ class Autorizar extends Component
             }
             $this->alert('success', 'Folio ' . $requisicion->folio . 'cambio a estatus NO AUTORIZADO.');
         }
-
-        
     }
 
     public function saveComentario()
     {
         $userLogin = auth()->user();
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
         //$user = permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
         $userSolictante = User::find($this->requisicion->user_id);
         $permiso = permisosrequisicion::where('PuestoSolicitante_id', $userLogin->puesto_id)
@@ -498,7 +512,7 @@ class Autorizar extends Component
         //dd($permiso);
 
         //$userLogin = auth()->user();
-        $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); 
+        $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
         //dd($userAutorizador);
 
         $this->validate([
@@ -506,6 +520,8 @@ class Autorizar extends Component
         ], [], [
             'comentario' => 'Comentario',
         ]);
+
+        //dd($userAutorizador);
 
         // Crear el comentario
         $comentario = Comentarios::create([
@@ -529,15 +545,15 @@ class Autorizar extends Component
         $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
             ->where('departamento_id', $user->departamento_id)
             ->first();
-        $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+        //$userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
         //
         $dataPost = [
             'id_puesto_solicitante' => $user->puesto_id,
             'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
             'id_usuario_alertar' => $userAutorizador->id,
             'estatus' => $this->requisicion->estatus->name,
-            'folio' => $this->requisicion->requisicionCreada->folio,
-            'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/aprobacion'
+            'folio' => $this->requisicion->folio,
+            'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/autorizar'
         ];
 
         $response = Http::withHeaders([
@@ -550,7 +566,6 @@ class Autorizar extends Component
         if ($comentario) {
 
             return redirect()->route('requisicion.index');
-
         } else {
             $this->alert('error', 'Error al agregar el comentario');
             return redirect()->route('requisicion.index');
@@ -743,7 +758,7 @@ class Autorizar extends Component
 
     public function continuarAutorizar()
     {
-        if ($this->totalPermitidoAutorizar > $this->obtenerTotalAutorizar()) {
+        if ($this->totalPermitidoAutorizar >= $this->obtenerTotalAutorizar()) {
             $this->comentarioFinalAutorizar = true;
         } else {
             $user = auth()->user();
@@ -751,10 +766,10 @@ class Autorizar extends Component
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', $user->puesto->id)
                 ->where('departamento_id', $userSolictante->departamento_id)
                 ->first();
-                //dd($permiso);
+            //dd($permiso);
 
             //$userLogin = auth()->user();
-            $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
             //dd($userAutorizador);
             //dd($user);
             //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
@@ -790,7 +805,8 @@ class Autorizar extends Component
 
             $this->generarorden();
         } else {
-            $this->autorizarsiguientenivel();
+            //$this->autorizarsiguientenivel();
+            $this->alert('error', 'No cuenta con el permiso para autorizar el total a cotizar.');
         }
 
 

@@ -242,7 +242,7 @@ class Requisicion extends Model
             //     ->get();
         } else {
             // Si el usuario no es un jefe, devolvemos 0 requisiciones sin ver pendientes
-            return 0;
+            return [];
         }
     }
 

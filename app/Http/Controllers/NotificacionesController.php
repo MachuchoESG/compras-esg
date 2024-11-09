@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Autorizacionhistorial;
+use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +34,8 @@ class NotificacionesController extends Controller
         $cantidadPendienteCotizacionEspecial = 0;
         $pendienteCotizacionEspecial = [];
 
+        $requisicionesPendientesAutorizarJefe = [];
+        $cantidadRequisicionesPendientesAutorizarJefe = 0;
         $totalnotificaciones = 0;
 
         $esjefe = false;
@@ -79,14 +83,22 @@ class NotificacionesController extends Controller
                 $totalnotificaciones = $totalnotificaciones + $cantidadPendienteAprobar + $cantidadPendienteAutorizar;
             }
 
-            if ($user->cotizacionesAutorizar() || $esjefe) { //lmvilla // ESTAUS 12
+            if ($user->cotizacionesAutorizar() /* || $esjefe */) { //lmvilla // ESTAUS 12
                 $sizeNotification = $sizeNotification + 10;
                 $pendientesAutorizarCotizacion = Requisicion::getRequisicionesPendientesdeAutoriarCotizar();
                 $cantidadPendienteAutorizarCotizacion = $pendientesAutorizarCotizacion->count();
                 $pendienteAutorizarCotizacion = $pendientesAutorizarCotizacion;
 
-
                 $totalnotificaciones = $totalnotificaciones + $cantidadPendienteAutorizarCotizacion;
+            }
+
+            //GET DE NOTIFICACIONES POR AUTORIZAR COMO JEFE DE DEPARTAMENTO
+            $esJefeAutorizador = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto_id)->first();
+            if ($esJefeAutorizador) {
+                $sizeNotification = $sizeNotification + 10;
+                $PendientesAutorizarJefe = Autorizacionhistorial::where('user_id', $user->puesto_id)->where('visto', 0)->where('autorizado', 0)->pluck('requisicion_id');
+                $requisicionesPendientesAutorizarJefe = Requisicion::whereIn('id', $PendientesAutorizarJefe)->where('estatus_id', 2)->select('id', 'folio')->orderBy('id', 'desc')->get();
+                //dd($requisicionesPendientesAutorizarJefe);
             }
 
             if ($sizeNotification === 40) {
@@ -106,6 +118,8 @@ class NotificacionesController extends Controller
             'pendienteautorizar' => $esjefe || auth()->id() == 30 ? $pendienteautorizar : null,
             'pendientecotizacion' => $user->compras() ? $pendientecotizacion : null,
             'pendienteIncompletas' => $pendienteIncompletas,
+            //'totales'=> ' | ' . $cantidadPendienteAutorizarCotizacion . ' | ' . $cantidadPendienteIncompletas . ' | ' . $pendienteCotizacionEspecial->count() . ' | ',
+            'pendientesAutorizarJefe' => $requisicionesPendientesAutorizarJefe->count() === 0 ? null : $requisicionesPendientesAutorizarJefe,
             'pendienteAutorizarCotizacion' => $user->cotizacionesAutorizar() ? $pendienteAutorizarCotizacion : null,
             'totalNotificaciones' => $totalnotificaciones,
             'sizeNotification' => $sizeNotification,

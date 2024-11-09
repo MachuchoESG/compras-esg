@@ -21,7 +21,8 @@
         </x-slot>
 
         <x-slot name="content">
-            <div id="content-notifications" class="row mx-0" style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
+            <div id="content-notifications" class="row mx-0"
+                style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
 
                 @if ($escompras)
                     <div class="col block px-2 py-2 text-xs text-gray-400">
@@ -87,6 +88,20 @@
 
 
 
+
+                    </div>
+                @endif
+
+                @if ($autorizador)
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
+
+                        <p class="">{{ __('Requisiciones') }} - Asignadas para Autorizarar </p>
+                        @foreach ($requisicionesPendientesAutorizarJefe as $requisicion)
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
+                                href="{{ route('requisicion.autorizar', ['requisicion' => $requisicion]) }}">
+                                {{ $requisicion->folio }}
+                            </x-dropdown-link>
+                        @endforeach
 
                     </div>
                 @endif

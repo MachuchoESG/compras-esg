@@ -3,6 +3,7 @@
 namespace App\Livewire\Cotizacion;
 
 use App\Livewire\Forms\Cotizacion\CotizacionShowForm;
+use App\Models\Autorizacionhistorial;
 use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
@@ -101,7 +102,7 @@ class Show extends Component
                 $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userPro->puesto->id)
                     ->where('departamento_id', $userPro->departamento_id)
                     ->first();
-                $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+                //$userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
 
                 $dataPost = [
                     'id_puesto_solicitante' => $userPro->puesto_id,
@@ -109,7 +110,7 @@ class Show extends Component
                     'id_usuario_alertar' => 30, // ALERTA PARA LMVILLARREAL DEBE AUTORIZAR
                     'estatus' => $requisicion->estatus->name,
                     'folio' => $requisicion->folio,
-                    'url_requisicion' => route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), //"/cotizacion" . "/" . $requisicion->id
+                    'url_requisicion' => "/cotizacion" . "/" . $requisicion->id //route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), //"/cotizacion" . "/" . $requisicion->id
                 ];
 
                 $response = Http::withHeaders([
@@ -177,7 +178,7 @@ class Show extends Component
                 $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userPro->puesto->id)
                     ->where('departamento_id', $userPro->departamento_id)
                     ->first();
-                $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+                //$userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
 
                 $dataPost = [
                     'id_puesto_solicitante' => $userPro->puesto_id,
@@ -185,7 +186,7 @@ class Show extends Component
                     'id_usuario_alertar' => 30, // ALERTA PARA LMVILLARREAL DEBE AUTORIZAR
                     'estatus' => $requisicion->estatus->name,
                     'folio' => $requisicion->folio,
-                    'url_requisicion' => route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), //"/cotizacion" . "/" . $requisicion->id
+                    'url_requisicion' =>  "/cotizacion" . "/" . $requisicion->id, //route('cotizacion.show', ['cotizacion' => $this->requisicion->id]), 
                 ];
 
                 $response = Http::withHeaders([
@@ -209,6 +210,8 @@ class Show extends Component
 
     public function incompleta()
     {
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
+
         $this->validate([
             'comentario' => 'required',
         ], [], [
@@ -224,11 +227,32 @@ class Show extends Component
 
         if ($comentario) {
             // Actualizar el estatus de la requisición si es necesario
-            $this->requisicion->estatus_id = 10;
+            $this->requisicion->estatus_id = 10; // INCOMPLETA
             $this->requisicion->save();
 
             // Mostrar un mensaje de éxito
             $this->alert('success', 'Comentario agregado con éxito');
+            $userPro = User::find($this->requisicion->user_id);
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userPro->puesto->id)
+                ->where('departamento_id', $userPro->departamento_id)
+                ->first();
+            //$userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+
+            $dataPost = [
+                'id_puesto_solicitante' => $userPro->puesto_id,
+                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                'id_usuario_alertar' => $this->requisicion->user_id,
+                'estatus' => $this->requisicion->estatus->name,
+                'folio' => $this->requisicion->folio,
+                'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . "/edit"
+            ];
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                $dataPost
+            );
 
             // Reiniciar el campo de comentario
             $this->comentario = '';
@@ -273,6 +297,14 @@ class Show extends Component
     }
     public function autorizarCotizacion()
     {
+        /* $userToken = Token::where('user_id', Auth::id())->latest()->first();
+            
+            $userRequi = User::find($this->requisicion->user_id);
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userRequi->puesto_id)
+                ->where('departamento_id', $userRequi->departamento_id)
+                ->first();
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+            dd($userAutorizador); */
         //dd('se ejecuta');
         if ($this->esCotizacionUnica && $this->requisicion->cotizaciones()->count() > 1) {
             $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
@@ -301,19 +333,20 @@ class Show extends Component
 
             /* PROCESO PARA ENVIAR NTIFICACION DEL NAVEGADOR */
             $userToken = Token::where('user_id', Auth::id())->latest()->first();
-            $user = User::find(Auth::id());
-            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
-                ->where('departamento_id', $user->departamento_id)
+
+            $userRequi = User::find($this->requisicion->user_id);
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userRequi->puesto_id)
+                ->where('departamento_id', $userRequi->departamento_id)
                 ->first();
             $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
-            //
+            //dd($userAutorizador);
             $dataPost = [
-                'id_puesto_solicitante' => $user->puesto_id,
+                'id_puesto_solicitante' => $userRequi->puesto_id,
                 'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
                 'id_usuario_alertar' => $userAutorizador->id,
                 'estatus' => $this->requisicion->estatus->name,
                 'folio' => $this->requisicion->folio,
-                'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/aprobacion'
+                'url_requisicion' => "/requisicion" . "/" . $this->requisicion->id . '/autorizar'
             ];
 
             $response = Http::withHeaders([
@@ -323,6 +356,14 @@ class Show extends Component
                 $dataPost
             );
 
+            Autorizacionhistorial::create([
+                'requisicion_id' => $this->requisicion->id,
+                'user_id' => $permiso->PuestoAutorizador_id,
+                'user_solicita' => $permiso->PuestoSolicitante_id,
+                'departamento_id' => $userRequi->departamento_id,
+                'autorizado' => false,
+                'visto' => false
+            ]);
 
 
             $this->alert('success', 'Requisicion', [

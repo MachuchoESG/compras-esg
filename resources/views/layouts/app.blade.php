@@ -75,7 +75,7 @@
         function mostrarNotificacion(data) {
             console.log('ejecutar Notification');
             console.log(data.url);
-            
+
             const options = {
                 body: data.message, // Texto de la notificación
                 icon: 'https://esg.com.mx/wp-content/uploads/2019/07/logo-esg-2023mex.png' // Icono que acompañará la notificación
@@ -90,7 +90,7 @@
                         window.open(window.location.origin + data.url); // Cambia esta URL a la que necesites
                     };
                 }
-                
+
 
             } catch (error) {
                 console.log(error);
@@ -100,6 +100,8 @@
         }
 
         function construirNotificaciones(data) {
+            console.log('construyemndo...');
+            console.log(data);
 
             $('#counter-notifications').text(data.totalNotificaciones)
             var contentString = '';
@@ -111,6 +113,7 @@
             var PendientesIncompletas = '';
             var PendientesAutorizarCotizacion = '';
             var PendietesCotizacionEspecial = '';
+            var PendientesAutorizarJefe = '';
 
             $('#content-notifications').css("width", data.sizeNotification + 'vw');
 
@@ -222,8 +225,28 @@
 
             }
 
+            if (data
+                .pendientesAutorizarJefe
+            ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
+                var contentPendientesAutorizarJefe = '';
+                if (data.pendientesAutorizarJefe.length > 0) {
+                    data.pendientesAutorizarJefe.forEach(requisicion => {
+                        const link = `<x-dropdown-link style="padding-inline: .5rem!important;" href="/cotizacion/${requisicion.id}">
+                                        <p>${requisicion.folio}</p>
+                                    </x-dropdown-link>`;
+                        contentPendientesAutorizarJefe += link;
+                    });
+                } else {
+                    contentPendientesAutorizarJefe = `<p>No hay Requisiciones Asignadas para Autorizar.</p>`
+                }
+                PendientesAutorizarJefe = initString + '<p>Requisiciones - Asignadas para Autorizar</p>' +
+                    contentPendientesAutorizarJefe + endString
+
+            }
+
             document.getElementById('content-notifications').innerHTML = PendientesAprobar + PendientesAutorizar +
-                PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion + PendietesCotizacionEspecial;
+                PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion + PendientesAutorizarJefe +
+                PendietesCotizacionEspecial;
 
         }
 
@@ -273,14 +296,16 @@
         });
 
         socket.on('channel-user-{{ Auth::id() }}', (data) => {
-            mostrarNotificacion(data)
             renderNotifications()
+            mostrarNotificacion(data)
+
         })
 
         socket.on('channel-departamento-{{ session('id_departamento') }}', (data) => {
             console.log('mensaje para departamentos');
-            mostrarNotificacion(data)
             renderNotifications()
+            mostrarNotificacion(data)
+
         })
 
         socket.on('channel-puesto-{{ session('id_puesto') }}', (data) => {
