@@ -93,7 +93,8 @@ class NotificacionesController extends Controller
             }
 
             //GET DE NOTIFICACIONES POR AUTORIZAR COMO JEFE DE DEPARTAMENTO
-            $esJefeAutorizador = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto_id)->first();
+            $esJefeAutorizador = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto_id)->exists();
+            //return $esJefeAutorizador;
             if ($esJefeAutorizador) {
                 $sizeNotification = $sizeNotification + 10;
                 $PendientesAutorizarJefe = Autorizacionhistorial::where('user_id', $user->puesto_id)->where('visto', 0)->where('autorizado', 0)->pluck('requisicion_id');
@@ -119,7 +120,7 @@ class NotificacionesController extends Controller
             'pendientecotizacion' => $user->compras() ? $pendientecotizacion : null,
             'pendienteIncompletas' => $pendienteIncompletas,
             //'totales'=> ' | ' . $cantidadPendienteAutorizarCotizacion . ' | ' . $cantidadPendienteIncompletas . ' | ' . $pendienteCotizacionEspecial->count() . ' | ',
-            'pendientesAutorizarJefe' => $requisicionesPendientesAutorizarJefe->count() === 0 ? null : $requisicionesPendientesAutorizarJefe,
+            'pendientesAutorizarJefe' => empty($requisicionesPendientesAutorizarJefe) ? null : $requisicionesPendientesAutorizarJefe,
             'pendienteAutorizarCotizacion' => $user->cotizacionesAutorizar() ? $pendienteAutorizarCotizacion : null,
             'totalNotificaciones' => $totalnotificaciones,
             'sizeNotification' => $sizeNotification,

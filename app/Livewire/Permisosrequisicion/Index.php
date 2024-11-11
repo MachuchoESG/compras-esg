@@ -101,7 +101,12 @@ class Index extends Component
 
     public function filtrarFlujosDepartamento($departamentoId){
         $this->departamento_id = $departamentoId;
-        $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->where('Departamento_id', $departamentoId)->get();
+        if ($departamentoId == '0' || $departamentoId == 0) {
+            $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->get();
+        } else {
+            $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->where('Departamento_id', $departamentoId)->get();
+        }
+        
     }
 
     public function filtrarPorBusqueda($busqueda){
@@ -117,6 +122,7 @@ class Index extends Component
             ->where('Departamento_id', $this->departamento_id)
             ->get();
         } else {
+            
             $busqueda = $this->search;
             $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
             ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {

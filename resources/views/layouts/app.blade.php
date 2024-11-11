@@ -225,7 +225,7 @@
 
             }
 
-            if (data
+            /* if (data
                 .pendientesAutorizarJefe
             ) { // pendienteAutorizarCotizacion 'cotizacion.show', ['cotizacion' => $requisicion->id]) }}">
                 var contentPendientesAutorizarJefe = '';
@@ -242,7 +242,7 @@
                 PendientesAutorizarJefe = initString + '<p>Requisiciones - Asignadas para Autorizar</p>' +
                     contentPendientesAutorizarJefe + endString
 
-            }
+            } */
 
             document.getElementById('content-notifications').innerHTML = PendientesAprobar + PendientesAutorizar +
                 PendientesCotizacion + PendientesIncompletas + PendientesAutorizarCotizacion + PendientesAutorizarJefe +

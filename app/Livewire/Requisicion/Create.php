@@ -62,7 +62,7 @@ class Create extends Component
         $requisicionCreada =  $this->requisicion->save();
 
         if ($requisicionCreada->estatus_id === 1) {
-            
+
             $user = User::find(Auth::id());
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
                 ->where('departamento_id', $user->departamento_id)
@@ -92,6 +92,12 @@ class Create extends Component
         }
 
         if ($requisicionCreada->estatus_id === 7 || $requisicionCreada->estatus_id === 13) {
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            //dd($permiso);
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
             if ($requisicionCreada->cotizacion_especial === 1 || $requisicionCreada->cotizacion_especial === true) {
                 $dataPost = [
                     'cotizacion_especial' => true,
