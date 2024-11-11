@@ -16,8 +16,10 @@ class Index extends Component
     public $openEdit = false;
     public $puestos = [];
     public $departamentos = [];
+    public $departamento_id = '0';
     public $permisos = [];
     public $search = '';
+    public $puestosAtorizadores = [];
 
     #[Rule([
         'permisoEdit.PuestoSolicitante_id' => 'required',
@@ -96,9 +98,45 @@ class Index extends Component
     {
         return view('livewire.placeholder.loading');
     }
+
+    public function filtrarFlujosDepartamento($departamentoId){
+        $this->departamento_id = $departamentoId;
+        $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->where('Departamento_id', $departamentoId)->get();
+    }
+
+    public function filtrarPorBusqueda($busqueda){
+        if ($this->departamento_id !== '0') {
+            $busqueda = $this->search;
+            $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
+            ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {
+                $query->where('name', 'like', '%' . $busqueda . '%');
+            })
+            ->orWhereHas('puestoAutorizador', function ($query) use ($busqueda) {
+                $query->where('name', 'like', '%' . $busqueda . '%');
+            })
+            ->where('Departamento_id', $this->departamento_id)
+            ->get();
+        } else {
+            $busqueda = $this->search;
+            $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
+            ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {
+                $query->where('name', 'like', '%' . $busqueda . '%');
+            })
+            ->orWhereHas('puestoAutorizador', function ($query) use ($busqueda) {
+                $query->where('name', 'like', '%' . $busqueda . '%');
+            })
+            ->get();
+        }
+    }
+
+    public function updatedSearch($value)
+    {
+        $this->filtrarPorBusqueda($value);
+    }
+
     public function render()
     {
-        $busqueda = $this->search;
+        /* $busqueda = $this->search;
 
         $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
             ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {
@@ -107,7 +145,7 @@ class Index extends Component
             ->orWhereHas('puestoAutorizador', function ($query) use ($busqueda) {
                 $query->where('name', 'like', '%' . $busqueda . '%');
             })
-            ->get();
+            ->get(); */
 
         return view('livewire.permisosrequisicion.index');
     }
