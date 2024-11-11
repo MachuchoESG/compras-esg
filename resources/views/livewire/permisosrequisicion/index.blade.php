@@ -1,14 +1,31 @@
 <div class="p-2">
 
-    <div class="flex justify-between py-2 mb-2">
+    <div class="d-flex py-2 mb-2">
 
         <form method="get" class="relative w-1/2">
             <svg width="20" height="20" fill="currentColor" class="absolute left-3 top-1/2 -mt-2.5 text-slate-400 pointer-events-none group-focus-within:text-blue-500" aria-hidden="true">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" />
             </svg>
-            <input type="text" class="w-full focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm" type="text" placeholder="Buscador ..." wire:model.live="search">
+            <input type="text" class="w-full focus:ring-2 focus:ring-blue-500 focus:outline-none 
+            appearance-none text-sm leading-6 text-slate-900 placeholder-slate-400 
+            rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm" type="text" placeholder="Buscador ..." wire:model.live="search">
 
         </form>
+
+        <div class="mx-2">
+            <select wire:model="departamento_id" wire:change="filtrarFlujosDepartamento($event.target.value)"
+                class="border-1 border-slate-900 rounded-md w-full text-black text-md capitalize">
+                <option value="0" selected>
+                    Departamento
+                </option>
+
+                @foreach ($departamentos as $departamento)
+                    <option value="{{ $departamento['id'] }}">
+                        {{ $departamento->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
     </div>
 
