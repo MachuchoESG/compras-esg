@@ -50,7 +50,7 @@
                                 type="password" name="password" required autocomplete="new-password" />
                         </div>
                         <div class="col-2 d-flex align-items-end">
-                            <button class="btn btn-primary " wire:click="generarPasswordRandom()">
+                            <button class="btn btn-primary" type="button" wire:click="generarPasswordRandom()">
                                 <x-eva-sync class="w-6 h-6" />
                             </button>
                         </div>
