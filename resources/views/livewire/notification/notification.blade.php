@@ -98,7 +98,7 @@
                     </div>
                 @endif
 
-               {{--  @if ($autorizador)
+                @if ($autorizador)
                     <div class="col block px-2 py-2 text-xs text-gray-400">
 
                         <p class="">{{ __('Requisiciones') }} - Asignadas para Autorizarar </p>
@@ -110,7 +110,7 @@
                         @endforeach
 
                     </div>
-                @endif --}}
+                @endif
 
 
                 @if ($cantidadPendienteIncompletas > 0)

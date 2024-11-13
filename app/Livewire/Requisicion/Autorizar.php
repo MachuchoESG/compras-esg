@@ -543,9 +543,9 @@ class Autorizar extends Component
 
         $user = User::find(Auth::id());
         $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
-            ->where('departamento_id', $user->departamento_id)
+            ->where('departamento_id', $userSolictante->departamento_id)
             ->first();
-        //$userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+        $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
         //
         $dataPost = [
             'id_puesto_solicitante' => $user->puesto_id,

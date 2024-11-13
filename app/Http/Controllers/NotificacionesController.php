@@ -99,6 +99,7 @@ class NotificacionesController extends Controller
                 $sizeNotification = $sizeNotification + 10;
                 $PendientesAutorizarJefe = Autorizacionhistorial::where('user_id', $user->puesto_id)->where('visto', 0)->where('autorizado', 0)->pluck('requisicion_id');
                 $requisicionesPendientesAutorizarJefe = Requisicion::whereIn('id', $PendientesAutorizarJefe)->where('estatus_id', 2)->select('id', 'folio')->orderBy('id', 'desc')->get();
+                $totalnotificaciones = $totalnotificaciones + $requisicionesPendientesAutorizarJefe->count();
                 //dd($requisicionesPendientesAutorizarJefe);
             }
 
@@ -114,11 +115,11 @@ class NotificacionesController extends Controller
         }
 
         $data = [
-            'pendietesCotizacionEspecial' => $pendienteCotizacionEspecial,
-            'pendientesaprobar' =>  $esjefe || auth()->id() == 30 ? $pendientesaprobar : null,
-            'pendienteautorizar' => $esjefe || auth()->id() == 30 ? $pendienteautorizar : null,
+            'pendietesCotizacionEspecial' => empty($pendienteCotizacionEspecial) ? null : $pendienteCotizacionEspecial,//$pendienteCotizacionEspecial->count() == 0 ? null : $pendienteCotizacionEspecial,
+            'pendientesaprobar' =>  $esjefe || auth()->id() == 30 ? (empty($pendientesaprobar) ? null : $pendientesaprobar) : null,
+            'pendienteautorizar' => $esjefe || auth()->id() == 30 ? (empty($pendienteautorizar) ? null : $pendienteautorizar) : null,
             'pendientecotizacion' => $user->compras() ? $pendientecotizacion : null,
-            'pendienteIncompletas' => $pendienteIncompletas,
+            'pendienteIncompletas' => empty($pendienteIncompletas) ? null : $pendienteIncompletas,
             //'totales'=> ' | ' . $cantidadPendienteAutorizarCotizacion . ' | ' . $cantidadPendienteIncompletas . ' | ' . $pendienteCotizacionEspecial->count() . ' | ',
             'pendientesAutorizarJefe' => empty($requisicionesPendientesAutorizarJefe) ? null : $requisicionesPendientesAutorizarJefe,
             'pendienteAutorizarCotizacion' => $user->cotizacionesAutorizar() ? $pendienteAutorizarCotizacion : null,
