@@ -43,6 +43,8 @@ class Autorizar extends Component
     public $cotizacionPrevAutorizada = [];
     public $indexProdAdded = [];
     public $totalPermitidoAutorizar = 0;
+    public $contieneDiesel = false;
+    public $contieneProductoDifDiesel = false;
 
     public function download($id)
     {
@@ -211,7 +213,7 @@ class Autorizar extends Component
     }
     public function toggleSelection($index, $id, $check)
     {
-
+        $allproductos = [];
         $detalle = DetalleCotizacion::find($id);
         //Validar que otras cotizaciones no tengan autorizadas el mismo producto
         $cotizacionDelDetalle = Cotizacion::where('id', '=', $detalle->cotizacion_id)->first();
@@ -220,9 +222,12 @@ class Autorizar extends Component
         $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
         $allCotizaciones = [];
         foreach ($cotizacionesRequisicion as $cr) {
-            $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id')->where('cotizacion_id', '=', $cr->id)->get();
+            $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+            //array_push($allproductos, $coti);
             array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
         }
+        //dd($allproductos);
+        //dd($this->indexProdAdded);
 
         if (!$this->requisicion->cotizacion_unica) {
             if ($check != false) {
@@ -279,7 +284,44 @@ class Autorizar extends Component
             //dd($this->indexProdAdded);
         }
 
+        $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
+        foreach ($cotizacionesRequisicion as $cr) {
+            $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+            //array_push($allproductos, $coti);
 
+            foreach ($coti as $producto) {
+                array_push($allproductos, $producto);
+            }
+        }
+
+        //dd($allproductos);
+        $this->contieneDiesel = false;
+        $this->contieneProductoDifDiesel = false;
+
+        foreach ($allproductos as $producto) {
+            if ($producto->autorizado == 1) {
+                if ($producto->producto_id == 4155) {
+                    $this->contieneDiesel = true;
+                } elseif ($producto->producto_id != 4155) {
+                    $this->contieneProductoDifDiesel = true;
+                }
+            }
+        }
+        /* foreach($allproductos as $producto){
+            if ($producto->autorizado == 1) {
+                if ($producto['producto_id'] == 4155) {
+                    $this->contieneDiesel = true;
+                }
+            }
+        }
+
+        foreach($allproductos as $producto){
+            if ($producto['autorizado'] == 1) {
+                if ($producto['producto_id'] != 4155) {
+                    $this->contieneProductoDifDiesel = true;
+                }
+            }
+        } */
         // $check;
         // $objeto = ['id' => $id];
 
@@ -482,8 +524,6 @@ class Autorizar extends Component
             }
             $this->alert('success', 'Folio ' . $requisicion->folio . 'cambio a estatus NO AUTORIZADO.');
         }
-
-        
     }
 
     public function saveComentario()
@@ -497,7 +537,7 @@ class Autorizar extends Component
         //dd($permiso);
 
         //$userLogin = auth()->user();
-        $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); 
+        $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
         //dd($userAutorizador);
 
         $this->validate([
@@ -731,10 +771,10 @@ class Autorizar extends Component
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', $user->puesto->id)
                 ->where('departamento_id', $userSolictante->departamento_id)
                 ->first();
-                //dd($permiso);
+            //dd($permiso);
 
             //$userLogin = auth()->user();
-            $userAutorizador = User::where('puesto_id','=',$permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
             //dd($userAutorizador);
             //dd($user);
             //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
@@ -837,10 +877,17 @@ class Autorizar extends Component
         }
 
         $index = 0;
+        $allProcudots = [];
         foreach ($allCotizaciones as $AC) {
             foreach ($AC['cotizaciones'] as $producto) {
+                array_push($allProcudots, $producto);
                 if ($producto['autorizado'] == 1) {
                     array_push($this->indexProdAdded, $index); // En caso de recargar pagina valida los index agregados previamente
+                    /* if ($producto['producto_id'] === '4155') {
+                        $this->contieneDiesel = true;
+                    } else {
+                        $this->contieneProductoDifDiesel = true;
+                    }  */
                 }
                 $index++;
             }
@@ -848,6 +895,31 @@ class Autorizar extends Component
         }
         //dd($this->indexProdAdded);
         // Requisicion::with('detalleRequisiciones', 'cotizaciones.detalleCotizaciones')->find($requisicion->id);
+        //d($allProcudots);
+        foreach ($allProcudots as $producto) {
+            if ($producto->autorizado == 1) {
+                if ($producto->producto_id == 4155) {
+                    $this->contieneDiesel = true;
+                } elseif ($producto->producto_id != 4155) {
+                    $this->contieneProductoDifDiesel = true;
+                }
+            }
+        }
+        /* foreach ($allProcudots as $producto) {
+            if ($producto->autorizado == 1) {
+                if ($producto->producto_id == 4155) {
+                    $this->contieneDiesel = true;
+                }
+            }
+        }
+
+        foreach ($allProcudots as $producto) {
+            if ($producto->autorizado == 1) {
+                if ($producto->producto_id != 4155) {
+                    $this->contieneProductoDifDiesel = true;
+                }
+            }
+        } */
 
         $this->urlApi = ApiUrl::urlApi();
         $this->requisicion = $requisicion;

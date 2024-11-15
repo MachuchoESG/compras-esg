@@ -109,7 +109,7 @@
                     {{-- <p>{{ $this->obtenerTotalAutorizar() }}</p>
                     <p>{{ $totalPermitidoAutorizar }}</p>
                     <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p> --}}
-                    @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
+                    @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar() || ($contieneDiesel && !$contieneProductoDifDiesel))
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
                     @else
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente
