@@ -3,11 +3,13 @@
 namespace App\Livewire\Cotizacion;
 
 use App\Livewire\Forms\Cotizacion\CotizacionShowForm;
+use App\Models\Autorizacionhistorial;
 use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
 use App\Models\DetalleRequisicion;
 use App\Models\Requisicion;
+use App\Models\User;
 use App\Service\ApiUrl;
 use App\Service\ProductoService;
 use App\Service\ProveedorService;
@@ -226,6 +228,8 @@ class Show extends Component
     }
     public function autorizarCotizacion()
     {
+        /* dd($this->requisicion);
+        return 0; */
         //dd('se ejecuta');
         if ($this->esCotizacionUnica && $this->requisicion->cotizaciones()->count() > 1) {
             $this->alert('error', 'Las requisiciones con "Cotizacion Unica" deben contener una cotización.');
@@ -251,6 +255,57 @@ class Show extends Component
             $this->requisicion->estatus_id = 2;
             $this->requisicion->cotizacion_unica = $this->esCotizacionUnica;
             $this->requisicion->save();
+
+            $contieneDiesel = false;
+            $contieneProductosDifDiesel = false;
+
+            $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $this->requisicion->id)->get();
+            $allCotizaciones = [];
+            foreach ($cotizacionesRequisicion as $cr) {
+                $coti = DetalleCotizacion::select('id', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+                array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
+            }
+
+            $index = 0;
+            $allProcudots = [];
+            $indexProdAdded = [];
+
+            foreach ($allCotizaciones as $AC) {
+                foreach ($AC['cotizaciones'] as $producto) {
+                    array_push($allProcudots, $producto);
+                    if ($producto['autorizado'] == 1) {
+                        array_push($indexProdAdded, $index); // En caso de recargar pagina valida los index agregados previamente
+                    }
+                    $index++;
+                }
+                $index = 0;
+            }
+            //dd($allProcudots);
+            foreach ($allProcudots as $producto) {
+                if ($producto->producto_id === 4155) {
+                    $contieneDiesel = true;
+                } elseif ($producto->producto_id !== 4155) {
+                    $contieneProductosDifDiesel = true;
+                }
+            }
+
+            //dd($contieneDiesel, $contieneProductosDifDiesel);
+
+            if ($contieneDiesel && !$contieneProductosDifDiesel) {
+                $userAlta = User::find($this->requisicion->user_id);
+                $autorizacion = Autorizacionhistorial::create([
+                    'requisicion_id' => $this->requisicion->id,
+                    'user_id' => 5, // puesto quien llega
+                    'user_solicita' => $userAlta->puesto_id, // puesto quien pide
+                    'departamento_id' => $userAlta->departamento_id, // departamento de la requi
+                    'autorizado' => false,
+                    'visto' => false
+                ]);
+            }
+
+
+
+            //$this->;
 
 
             $this->alert('success', 'Requisicion', [
@@ -292,7 +347,7 @@ class Show extends Component
 
     public function deleteCotizacion($id)
     {
-        $allCOT = Cotizacion::where('requisicion_id','=', $this->requisicion->id)->get();
+        $allCOT = Cotizacion::where('requisicion_id', '=', $this->requisicion->id)->get();
         $COT = Cotizacion::find($id);
         //dd($allCOT);
         if ($allCOT->count() === 1 && $this->esCotizacionUnica) {
@@ -305,7 +360,7 @@ class Show extends Component
             } else {
                 $this->alert('error', 'Cotización no se encuentra.');
             }
-    
+
             $this->renderSelectProv();
         }
         /* if ($COT) {
@@ -376,10 +431,8 @@ class Show extends Component
             $this->renderSelectProv();
         } catch (\Illuminate\Validation\ValidationException $th) {
             //dd($th);
-            $this->dispatch('validate-errors', [ 'errors'=> $th->errors() ]);
+            $this->dispatch('validate-errors', ['errors' => $th->errors()]);
         }
-
-        
     }
 
 

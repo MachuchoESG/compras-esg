@@ -3,6 +3,8 @@
 namespace App\Livewire\Forms\Requisicion;
 
 use App\Models\Autorizacionhistorial;
+use App\Models\Cotizacion;
+use App\Models\DetalleCotizacion;
 use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use App\Models\User;
@@ -60,7 +62,7 @@ class RequisicionCreateForm extends Form
     public $f = false;
     public $openProductoSR = true;
     public $contieneDiesel = false;
-
+    public $contieneProductosDifDiesel = false;
 
 
     public $listaProductos = [];
@@ -94,9 +96,11 @@ class RequisicionCreateForm extends Form
     public function save()
     {
         //dd($this->listaProductos);
-        foreach($this->listaProductos as $lp){
+        foreach ($this->listaProductos as $lp) {
             if ($lp['producto_id'] == 4155 || $lp['producto_id'] == "4155") { // SI LA LISTA DE PRODUCTOS CONTIENE DIESEL PASA DIRECTO A COMPRAS
                 $this->contieneDiesel = true;
+            } else {
+                $this->contieneProductosDifDiesel = true;
             }
         }
 
@@ -117,11 +121,11 @@ class RequisicionCreateForm extends Form
                     'proyecto_id' => '',
                     'observaciones' => 'required',
                     'listaProductos' => 'required|array|min:1'
-        
+
                 ]
             );
         }
-        
+
         $this->user_id = $this->user->id;
 
         if ($this->empleado_id == '') {
@@ -160,8 +164,8 @@ class RequisicionCreateForm extends Form
                 )
             );
         }
-        
-        
+
+
 
 
         $requisicionNueva->detalleRequisiciones()->createMany($this->listaProductos);
@@ -182,7 +186,7 @@ class RequisicionCreateForm extends Form
 
         if ($requisicionNueva) {
 
-            if (User::jefe() || $this->contieneDiesel) {
+            if (User::jefe() || ($this->contieneDiesel === true && $this->contieneProductosDifDiesel === false)) {
                 $requisicionNueva->aprobado = true;
                 $requisicionNueva->estatus_id = 7;
                 $requisicionNueva->visto = true;
