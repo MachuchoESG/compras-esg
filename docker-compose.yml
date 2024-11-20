@@ -8,3 +8,4 @@ services:
       - .:/var/www/html
     ports:
       - "8000:80"
+    command: sh -c "php artisan migrate && service nginx start && php-fpm"

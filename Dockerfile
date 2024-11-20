@@ -28,6 +28,3 @@ COPY ./nginx/laravel.conf /etc/nginx/conf.d/default.conf
 
 # Exponer los puertos necesarios
 EXPOSE 80
-
-# Define el comando de inicio
-CMD service nginx start && php-fpm

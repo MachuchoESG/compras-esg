@@ -75,7 +75,7 @@ class Aprobacion extends Component
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $userToken->token,
             ])->post(
-                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion/departamento',
+                env('SERVICE_SOCKET_HOST', 'http://laravel_notifications') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion/departamento',
                 $dataPost
             );
         }
@@ -105,7 +105,7 @@ class Aprobacion extends Component
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $userToken->token,
             ])->post(
-                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                env('SERVICE_SOCKET_HOST', 'http://laravel_notifications') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
                 $dataPost
             );
         }

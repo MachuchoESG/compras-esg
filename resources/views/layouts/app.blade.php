@@ -72,6 +72,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
     <script>
+
+        const token = "{{ session('tokenUser') }}";
+
+        // Conectar al servidor Socket.IO con el token JWT
+        const socket = io("{{  env('SERVICE_SOCKET_HOST_OUTSIDE', 'http://localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') }}", {
+            query: {
+                token: token
+            }
+        });
         function mostrarNotificacion(data) {
             console.log('ejecutar Notification');
             console.log(data.url);
@@ -276,15 +285,6 @@
             $('#content-notifications').empty();
             getDataNotificaciones()
         }
-
-        const token = "{{ session('tokenUser') }}";
-
-        // Conectar al servidor Socket.IO con el token JWT
-        const socket = io('http://localhost:8888', {
-            query: {
-                token: token
-            }
-        });
 
         socket.on('connect', () => {
             console.log('Conectado al canal privado Socket.IO');
