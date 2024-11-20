@@ -18,19 +18,24 @@
                                             <p>
                                                 Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
                                             </p>
-                                            <p>
-                                                Total Cotizacion =
-                                                ${{ number_format(
-                                                    $cotizacion->detalleCotizaciones->sum(function ($detalle) {
-                                                        return $detalle->cantidad * $detalle->precio * 1.16;
-                                                    }),
-                                                    2,
-                                                    '.',
-                                                    ',',
-                                                ) }}
+                                            <div class="">
+                                                <p>
+                                                    Total Cotizacion =
+                                                    ${{ number_format(
+                                                        $cotizacion->detalleCotizaciones->sum(function ($detalle) {
+                                                            return $detalle->cantidad * $detalle->precio * 1.16;
+                                                        }),
+                                                        2,
+                                                        '.',
+                                                        ',',
+                                                    ) }}
+                                                </p>
+                                                <p>
+                                                    Maximo a Autorizar =
+                                                    ${{ number_format($totalPermitidoAutorizar, 2, '.', ',') }}
+                                                </p>
+                                            </div>
 
-
-                                            </p>
                                             <button wire:click.prevent="download({{ $cotizacion->id }})">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -84,7 +89,7 @@
                                                 <input
                                                     wire:change="updateCantidad( {{ $detalle['id'] }} , $event.target.value)"
                                                     type="number" value="{{ $detalle['cantidad'] }}"
-                                                    id="{{ $detalle['id'] }}">
+                                                    wire:keydown.enter.prevent id="{{ $detalle['id'] }}">
                                             </td>
                                             <td class="px-6 py-4">
                                                 {{ $loop->index + 1 }}. {{ $detalle['producto'] }}
@@ -106,10 +111,10 @@
                 </div>
 
                 <div class="my-3 d-flex justify-between">
-                    {{-- <p>{{ $this->obtenerTotalAutorizar() }}</p>
-                    <p>{{ $totalPermitidoAutorizar }}</p>
-                    <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p> --}}
-                    @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
+                    {{-- <p>{{ $this->obtenerTotalAutorizar() }}</p> --}}
+                    {{-- <p>{{ $totalPermitidoAutorizar }}</p>
+                    <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p>  --}}
+                    @if ($totalPermitidoAutorizar >= $this->obtenerTotalAutorizar())
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
                     @else
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente

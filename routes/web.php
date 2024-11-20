@@ -6,6 +6,7 @@ use App\Http\Controllers\empresaController;
 use App\Http\Controllers\EstatusController;
 use App\Http\Controllers\GastosFijosController;
 use App\Http\Controllers\MigrationsRun;
+use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\PermisosrequisicionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\proveedorController;
@@ -32,6 +33,8 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/login', function () {
 //     return view('auth.login');
 // })->name('login');
+Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -43,7 +46,6 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-
 
     Route::resource('empresa', empresaController::class);
     Route::resource('sucursal', sucursalController::class);
@@ -62,7 +64,9 @@ Route::middleware([
     Route::get('/requisicion/{requisicion}/autorizar', [requisicionController::class, 'autorizar'])->name('requisicion.autorizar');
     Route::get('/requisicion/{requisicion}/aprobacion', [requisicionController::class, 'aprobacion'])->name('requisicion.aprobacion');
     Route::get('/requisicion/{requisicion}/formato', [requisicionController::class, 'formato'])->name('requisicion.formato');
+    Route::get('/requisicion/{requisicion}/especial', [requisicionController::class, 'cotizacionespecial'])->name('requisicion.cotizacionespecial');
     Route::resource('cotizacion', CotizacionController::class);
     Route::get('/run-migrations', [App\Http\Controllers\MigrationsRun::class, 'runMigrations']);
     Route::get('/clear-view-cache', [App\Http\Controllers\MigrationsRun::class, 'clearViewCache']);
+    Route::post('/notificaciones/all', [NotificacionesController::class, 'getAllNotificaciones']);
 });

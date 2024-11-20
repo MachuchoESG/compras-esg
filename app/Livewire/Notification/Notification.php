@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Notification;
 
+use App\Models\Autorizacionhistorial;
+use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -26,15 +28,19 @@ class Notification extends Component
     public $cantidadPendienteAutorizarCotizacion = 0;
     public $pendienteAutorizarCotizacion = [];
 
+    public $cantidadNotiCotizacionEspecial = 0;
+    public $CotizacionesEspecial = [];
+
+    public $requisicionesPendientesAutorizarJefe = [];
+    public $cantidadPendientesAutorizarJefe = 0;
 
     public $totalnotificaciones = 0;
 
     public $esjefe = false;
     public $escompras = false;
+    public $autorizador = false;
 
     public $sizeNotification = 10; //no toma query sizes se usa backend para modificar tamaño
-
-
 
     public function mount()
     {
@@ -72,10 +78,11 @@ class Notification extends Component
                 $this->pendientesaprobar = $requisionesPendientesAprobar;
 
                 $requisionesPendientesAutorizar = Requisicion::getRequisicionesPendientesdeAutorizar();
-                if ($requisionesPendientesAutorizar === 0) {
-                    $this->cantidadPendienteAutorizar = 0;
-                } else {
+                if ($requisionesPendientesAutorizar) {
                     $this->cantidadPendienteAutorizar = $requisionesPendientesAutorizar->count();
+                } else {
+
+                    $this->cantidadPendienteAutorizar = 0;
                 }
 
                 $this->pendienteautorizar = $requisionesPendientesAutorizar;
@@ -93,18 +100,33 @@ class Notification extends Component
                 $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteAutorizarCotizacion;
             }
 
+            $esJefeAutorizador = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto_id)->first();
+            if ($esJefeAutorizador) {
+                $this->autorizador = true;
+                $this->sizeNotification = $this->sizeNotification + 10;
+                $PendientesAutorizarJefe = Autorizacionhistorial::where('user_id', $user->puesto_id)->where('visto', 0)->where('autorizado', 0)->pluck('requisicion_id');
+                $PendientesAutorizarJefeRequi = Requisicion::whereIn('id', $PendientesAutorizarJefe)->where('estatus_id', 2)->select('id', 'folio')->orderBy('id', 'desc')->get();
+                $this->cantidadPendientesAutorizarJefe = $PendientesAutorizarJefeRequi->count();
+                $this->requisicionesPendientesAutorizarJefe = $PendientesAutorizarJefeRequi;
+                //dd($requisicionesPendientesAutorizarJefe);
+            }
+
             if ($this->sizeNotification === 40) {
                 $this->sizeNotification = 50;
             }
 
+            $requisicionesEpeciales = Requisicion::getRequisicionesEspeciales();
+            $requisicionesEpecialesNotify = Requisicion::getRequisicionesEspecialesNotifys();
+            $this->CotizacionesEspecial = $requisicionesEpeciales;
+            //dd($requisicionesEpeciales);
             $requisicionesIncompletas = Requisicion::getRequisicionesIncompletas(); // ESTATUS 10
             $this->cantidadPendienteIncompletas = $requisicionesIncompletas->count();
+            $this->cantidadNotiCotizacionEspecial = $requisicionesEpecialesNotify->count();
             $this->pendienteIncompletas = $requisicionesIncompletas;
-            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas;
-
+            //dd($requisicionesEpecialesNotify->count());
+            $this->totalnotificaciones = $this->totalnotificaciones + $this->cantidadPendienteIncompletas + $this->cantidadNotiCotizacionEspecial + $this->cantidadPendientesAutorizarJefe;
         }
     }
-
 
     public function render()
     {

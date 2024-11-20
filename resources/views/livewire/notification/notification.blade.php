@@ -11,7 +11,7 @@
                     </svg>
 
                     @if ($totalnotificaciones != 0)
-                        <span
+                        <span id="counter-notifications"
                             class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex justify-center items-center rounded-full text-xs">{{ $totalnotificaciones }}</span>
                     @endif
 
@@ -21,7 +21,8 @@
         </x-slot>
 
         <x-slot name="content">
-            <div class="row mx-0" style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
+            <div id="content-notifications" class="row mx-0"
+                style="overflow-y: auto; max-height: 50vh; width: {{ $sizeNotification . 'vw' }};">
 
                 @if ($escompras)
                     <div class="col block px-2 py-2 text-xs text-gray-400">
@@ -58,6 +59,12 @@
                             <p>No hay requisiciones pendientes de aprobar.</p>
                         @endif
 
+                    </div>
+                @endif
+
+                @if ($esjefe)
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
+
                         @if ($cantidadPendienteAutorizar > 0)
                             <p class="">Pendientes de autorizar</p>
                             @foreach ($pendienteautorizar as $requisicion)
@@ -91,6 +98,20 @@
                     </div>
                 @endif
 
+                @if ($autorizador)
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
+
+                        <p class="">{{ __('Requisiciones') }} - Asignadas para Autorizarar </p>
+                        @foreach ($requisicionesPendientesAutorizarJefe as $requisicion)
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
+                                href="{{ route('requisicion.autorizar', ['requisicion' => $requisicion]) }}">
+                                {{ $requisicion->folio }}
+                            </x-dropdown-link>
+                        @endforeach
+
+                    </div>
+                @endif
+
 
                 @if ($cantidadPendienteIncompletas > 0)
                     <div class="col block px-2 py-2 text-xs text-gray-400">
@@ -100,6 +121,23 @@
                             <x-dropdown-link style="padding-inline: .5rem!important;"
                                 href="{{ route('requisicion.edit', ['requisicion' => $requisicion->id]) }}">
                                 {{ $requisicion->folio }}
+                            </x-dropdown-link>
+                        @endforeach
+
+
+
+
+                    </div>
+                @endif
+
+                @if ($cantidadNotiCotizacionEspecial > 0)
+                    <div class="col block px-2 py-2 text-xs text-gray-400">
+
+                        <p class="mb-1">{{ __('Requisiciones') }} - Especiales</p>
+                        @foreach ($CotizacionesEspecial as $CE)
+                            <x-dropdown-link style="padding-inline: .5rem!important;"
+                                href="{{ route('requisicion.cotizacionespecial', ['requisicion' => $CE->id]) }}">
+                                {{ $CE->folio }}
                             </x-dropdown-link>
                         @endforeach
 

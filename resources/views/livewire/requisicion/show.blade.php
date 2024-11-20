@@ -1,23 +1,7 @@
 <div>
-    <livewire:requisicion.component.detallerequisicion :requisicionid="$requisicion->id" />
-
-
-
-    <div class="my-4 mx-2 flex justify-around">
-
-        @can('delete',$requisicion)
-        <x-button wire:click="delete" class="bg-red-500 hover:bg-red-400 active:bg-red-300 focus:bg-red-400">Eliminar</x-button>
-
-        <x-button-nav class="bg-blue-500 hover:bg-blue-400 active:bg-blue-300 focus:bg-blue-400" :href="route('requisicion.edit', ['requisicion' => $requisicion->id]) ">Editar</x-button-nav>
-
-        @endcan
-
-    </div>
-
-
-  
-
-        
+    @if($requisicion)
+        <livewire:requisicion.component.detallerequisicion :id="$requisicion->id" />
+    @endif
     <x-dialog-modal wire:model="openIncompleta">
         <x-slot name="title">
            Requisicion Incompleta

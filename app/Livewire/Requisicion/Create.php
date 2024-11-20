@@ -3,8 +3,11 @@
 namespace App\Livewire\Requisicion;
 
 use App\Livewire\Forms\Requisicion\RequisicionCreateForm;
+use App\Models\Departamento;
 use App\Models\Empresa;
+use App\Models\permisosrequisicion;
 use App\Models\Sucursal;
+use App\Models\Token;
 use App\Models\User;
 use App\Service\ApiUrl;
 use App\Service\ProductoService;
@@ -30,6 +33,9 @@ class Create extends Component
     public $solicitantes = [];
     public $productos = [];
     public $proyectos = [];
+    public $departamentos = [];
+    public $departamento_especial;
+    public $requisicion_especial = false;
     public $productosinregistro = false;
     public $productoscargados = false;
     public $cargandoproductos = false;
@@ -42,18 +48,97 @@ class Create extends Component
     public $existencias = 0;
     public $user;
 
-
-
     public RequisicionCreateForm $requisicion;
 
 
     public function save()
     {
+        if ($this->requisicion_especial) {
+            $this->requisicion->cotizacion_especial = 1;
+            $this->requisicion->departamento_especial = $this->departamento_especial;
+        }
 
+        $userToken = Token::where('user_id', Auth::id())->latest()->first();
         $requisicionCreada =  $this->requisicion->save();
+
+        if ($requisicionCreada->estatus_id === 1) {
+
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            //dd($permiso);
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+            //dd(['autori'=>$userAutorizador, 'permiso'=> $permiso]);
+            $this->dispatch('nueva-requisicion-creada');
+
+            $dataPost = [
+                'id_puesto_solicitante' => $user->puesto_id,
+                'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                'id_usuario_alertar' => $userAutorizador->id,
+                'estatus' => $requisicionCreada->estatus->name,
+                'folio' => $requisicionCreada->folio,
+                'url_requisicion' => "/requisicion" . "/" . $requisicionCreada->id . '/aprobacion'
+            ];
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion-actualizada',
+                $dataPost
+            );
+
+            //dd($response);
+        }
+
+        if ($requisicionCreada->estatus_id === 7 || $requisicionCreada->estatus_id === 13) {
+            $user = User::find(Auth::id());
+            $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $user->puesto->id)
+                ->where('departamento_id', $user->departamento_id)
+                ->first();
+            //dd($permiso);
+            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first();
+            if ($requisicionCreada->cotizacion_especial === 1 || $requisicionCreada->cotizacion_especial === true) {
+                $dataPost = [
+                    'cotizacion_especial' => true,
+                    'departamento_especial' => $requisicionCreada->departamento_especial,
+                    'departamento' => null,
+                    'id_puesto_solicitante' => $user->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => $user->id,
+                    'estatus' => $requisicionCreada->estatus->name,
+                    'folio' => $requisicionCreada->folio,
+                    'url_requisicion' => "/requisicion" . "/" . $requisicionCreada->id . "/especial",
+                ];
+            } else {
+                $dataPost = [
+                    'cotizacion_especial' => false,
+                    'departamento_especial' => null,
+                    'departamento' => 2,
+                    'id_puesto_solicitante' => $user->puesto_id,
+                    'id_puesto_autorizador' => $permiso->PuestoAutorizador_id,
+                    'id_usuario_alertar' => null,
+                    'estatus' => $requisicionCreada->estatus->name,
+                    'folio' => $requisicionCreada->folio,
+                    'url_requisicion' => "/cotizacion" . "/" . $requisicionCreada->id,
+                ];
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $userToken->token,
+            ])->post(
+                env('SERVICE_SOCKET_HOST', 'localhost') . ':' . env('SERVICE_SOCKET_PORT', '8888') . '/send/requisicion/departamento',
+                $dataPost
+            );
+        }
         $this->alert('success', 'Se creo correctamente la requisicion con el folio' . $requisicionCreada->folio);
 
         return redirect()->route('requisicion.index');
+    }
+
+    public function checkCotizacionEspecial()
+    {
+        $this->requisicion_especial = !$this->requisicion_especial;
     }
 
 
@@ -142,6 +227,8 @@ class Create extends Component
     public function mount()
     {
 
+        $this->departamentos = Departamento::all();
+        $this->departamento_especial = $this->departamentos[0]->id;
         // $this->urlApi  = ApiUrl::urlApi();
         // Obtener el usuario autenticado
         $this->user = Auth::user();

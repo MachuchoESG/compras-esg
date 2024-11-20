@@ -54,6 +54,9 @@ class RequisicionCreateForm extends Form
     public $empleado_id = '';
     public $proyecto_id = '';
     public $proyecto = '';
+    public $cotizacion_especial = false;
+    public $departamento_especial;
+    public $observacion_especial = '';
     public $unidad = '';
     public $image;
     public $imageKey;
@@ -106,11 +109,11 @@ class RequisicionCreateForm extends Form
                     'proyecto_id' => '',
                     'observaciones' => 'required',
                     'listaProductos' => 'required|array|min:1'
-        
+
                 ]
             );
         }
-        
+
         $this->user_id = $this->user->id;
 
         if ($this->empleado_id == '') {
@@ -131,7 +134,9 @@ class RequisicionCreateForm extends Form
                     'unidad',
                     'seguimiento',
                     'proyecto_id',
-                    'proyecto'
+                    'proyecto',
+                    'cotizacion_especial',
+                    'departamento_especial'
                 )
             );
         } else {
@@ -149,8 +154,8 @@ class RequisicionCreateForm extends Form
                 )
             );
         }
-        
-        
+
+
 
 
         $requisicionNueva->detalleRequisiciones()->createMany($this->listaProductos);
@@ -173,7 +178,12 @@ class RequisicionCreateForm extends Form
 
             if (User::jefe()) {
                 $requisicionNueva->aprobado = true;
-                $requisicionNueva->estatus_id = 7;
+                if ($requisicionNueva->cotizacion_especial === 1 || $requisicionNueva->cotizacion_especial === true) {
+                    $requisicionNueva->estatus_id = 13;// COTIZACION ESPECIAL
+                } else {
+                    $requisicionNueva->estatus_id = 7;//APROBADO
+                }
+                
                 $requisicionNueva->visto = true;
                 $requisicionNueva->save();
 
