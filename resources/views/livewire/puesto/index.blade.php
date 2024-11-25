@@ -10,9 +10,10 @@
             <input type="text" class="w-full focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm" type="text" placeholder="Buscador ..." wire:model.live="search">
 
         </form>
+        @livewire('puesto.create')
 
     </div>
-    <div class="relative overflow-x-auto rounded-lg">
+    <div class="relative overflow-x-auto rounded-lg" style="height: 50vh">
         <table class="w-full  text-sm text-left rtl:text-right text-gray-500 ">
             <thead class="text-xs text-gray-700 uppercase bg-gray-200 ">
                 <tr>
