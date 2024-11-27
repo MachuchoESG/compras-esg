@@ -761,6 +761,155 @@ class Autorizar extends Component
         return redirect()->route('requisicion.index');
     }
 
+    public function generarordenTEST()
+    {
+
+
+        try {
+            $cotizaciones = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
+
+            $alMenosUnaCotizacionActiva = false;
+
+            foreach ($cotizaciones as $cotizacion) {
+                if ($cotizacion->estatus == true) {
+                    $alMenosUnaCotizacionActiva = true;
+                    break; // Termina el bucle si se encuentra una cotización activa
+                }
+            }
+
+            if (!$alMenosUnaCotizacionActiva) {
+                $this->alert('info', 'Requisición', [
+                    'position' => 'center',
+                    'timer' => '6000',
+                    'toast' => true,
+                    'text' => '¡Favor de seleccionar al menos una cotizacion!',
+                ]);
+                return;
+            }
+
+            $ordenesCompra = [];
+
+            foreach ($cotizaciones as $cotizacion) {
+
+
+                if ($cotizacion->estatus != false) {
+
+
+                    $ComercialDocumento = [
+                        "cidclienteproveedor" => $cotizacion->proveedor_id,
+                        'cidproyecto' =>   $this->requisicion->proyecto_id ?? 0,
+                        "ctextoextrA1" => $this->requisicion->folio,
+                        "ctextoextrA2" => $this->requisicion->unidad ?? ''
+
+                    ];
+
+                    // //mandar al api
+                    //$response = Http::post($this->urlApi  . $this->requisicion->sucursal->nomenclatura . '/ComercialDocumento', $ComercialDocumento);
+
+                    if (true/* $response->successful() */) {
+                        //$documento = $response->json();
+                        $ciddocuemento = '777TEST';//$documento['ciddocumento'];
+                        $foliooc = '000000';//$documento['cfolio'];
+
+
+
+                        $clientes[] = $cotizacion->proveedor;
+
+                        $ordenesCompra[] = $foliooc;
+
+                        $listaCotizaciones = [];
+
+                        foreach ($cotizacion->detalleCotizaciones as $detalle) {
+                            if ($detalle->autorizado != false) {
+                                $ComercialMovimiento = [
+                                    "ciddocumento" => $ciddocuemento,
+                                    "cidproducto" => $detalle->producto_id,
+                                    "cunidades" => $detalle->cantidad,
+                                    "cprecio" => $detalle->precio
+                                ];
+
+                                $listaCotizaciones[] = $ComercialMovimiento;
+                            }
+                        }
+
+                        //armo la lista de lo que autorizacon por detalle y mando una lista
+                        //$response = Http::post($this->urlApi  .  $this->requisicion->sucursal->nomenclatura  . '/ComercialMovimiento', $listaCotizaciones);
+
+                        if (true/* $response->successful() */) {
+                            $usuariorequisicon = User::find($this->requisicion->empleado_id);
+
+                            $ordencompra = [
+                                'folio' => $ciddocuemento,
+                                'email' => $this->requisicion->seguimiento ? $usuariorequisicon->email : ""
+                            ];
+
+                            // $response = Http::post($this->urlApi  .  $this->requisicion->sucursal->nomenclatura  . '/ComercialMovimiento/EnviarCorreo', $ordencompra);
+                            //$response = Http::timeout(60)->post($this->urlApi  .  $this->requisicion->sucursal->nomenclatura  . '/ComercialMovimiento/EnviarCorreo', $ordencompra);
+
+                            if (true /* $response->successful() */) {
+                                $this->alert('success', 'Orden de Compra', [
+                                    'position' => 'center',
+                                    'timer' => '6000',
+                                    'toast' => true,
+                                    'text' => '¡La orden de compra con el folio ' . $foliooc . ' se ha creado exitosamente y ha sido enviada por correo al proveedor!',
+                                ]);
+                            } else {
+                                $this->alert('info', 'Orden de Compra', [
+                                    'position' => 'center',
+                                    'timer' => '6000',
+                                    'toast' => true,
+                                    'text' => '¡Error en el envío de la orden de compra! Por favor, envía manualmente la OC con el folio ' . $foliooc,
+                                ]);
+                            }
+                        }
+                    } else {
+                        $this->alert('info', 'Orden de Compra', [
+                            'position' => 'center',
+                            'timer' => '6000',
+                            'toast' => true,
+                            'text' => '¡En proceso de creacion de orden de compra ! ',
+                        ]);
+                    }
+                }
+            }
+
+
+            $requisicionupdate = Requisicion::find($this->requisicion->id);
+
+            // Verifica si se encontró una requisición válida
+            if ($requisicionupdate) {
+                // Concatena las órdenes de compra
+                /* $ordenesCompraConcatenadas = implode(',', $ordenesCompra);
+
+                $clientesconcatenados = implode(',', $clientes); */
+
+                // Actualiza el campo 'ordenCompra' de la requisición
+                $requisicionupdate->ordenCompra = '999999';//$ordenesCompraConcatenadas;
+                $requisicionupdate->proveedor = 'PRUEBA TEST PROVEEDOR';//$clientesconcatenados;
+                $requisicionupdate->estatus_id = 6;
+
+                // Guarda los cambios
+                $requisicionupdate->save();
+            }
+
+            $this->agregarComentarioFinal();
+        } catch (\Throwable $th) {
+
+            $requisicionupdate = Requisicion::find($this->requisicion->id);
+
+            // Verifica si se encontró una requisición válida
+            if ($requisicionupdate) {
+
+                $requisicionupdate->estatus_id = 11;
+
+
+                $requisicionupdate->save();
+            }
+            $this->agregarComentarioFinal();
+        }
+        return redirect()->route('requisicion.index');
+    }
+
     public function continuarAutorizar()
     {
         if ($this->totalPermitidoAutorizar > $this->obtenerTotalAutorizar()) {

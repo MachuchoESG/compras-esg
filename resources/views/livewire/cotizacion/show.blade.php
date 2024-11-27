@@ -512,8 +512,8 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="incompleta()">Guardar</x-button>
-            <x-button wire:click="$set('openIncompleta',false)">Cancelar</x-button>
+            <x-button wire:click="incompleta()" wire:loading.attr="disabled" >Guardar</x-button>
+            <x-button wire:click="$set('openIncompleta',false)" wire:loading.attr="disabled" >Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -534,8 +534,8 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="autorizarCotizacion()" id="btn-preautorizar" disabled>Autorizar</x-button>
-            <x-button wire:click="$set('openPreAutorizacion',false)">Cancelar</x-button>
+            <x-button wire:click="autorizarCotizacion()" id="btn-preautorizar" disabled wire:loading.attr="disabled" >Autorizar</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled" >Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -556,9 +556,11 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="liberarRequisicionCotUnica()" id="btn-autorizar-unica" disabled>FINALIZAR
+            <x-button wire:click="liberarRequisicionCotUnica()" wire:loading.attr="disabled" id="btn-autorizar-unica"
+                disabled>FINALIZAR
                 REQUISICIÓN</x-button>
-            <x-button wire:click="$set('openCotizacionUnicaComentario',false)">Cancelar</x-button>
+            <x-button wire:click="$set('openCotizacionUnicaComentario',false)"
+                wire:loading.attr="disabled">Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -571,8 +573,8 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="deleteCotizacion()" id="btn-remover-cotizacion">Remover</x-button>
-            <x-button wire:click="$set('openPreAutorizacion',false)">Cancelar</x-button>
+            <x-button wire:click="deleteCotizacion()" id="btn-remover-cotizacion" wire:loading.attr="disabled" >Remover</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled" >Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -584,7 +586,7 @@
             @if ($esCotizacionUnica)
                 <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
             @else
-                <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+                <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled" >Finalizar Requisición</x-button>
             @endif
 
         @endif
@@ -594,7 +596,7 @@
                 @if ($esCotizacionUnica)
                     <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
                 @else
-                    <x-button wire:click="liberarRequisicion()">Finalizar Requisición</x-button>
+                    <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled" >Finalizar Requisición</x-button>
                 @endif
 
             </div>
