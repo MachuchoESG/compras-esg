@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 px-3  w-100 d-flex align-items-center h-20">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 px-3  w-100 d-flex align-items-center h-20" style="position: sticky; top:0; z-index:20;">
     <!-- Primary Navigation Menu -->
     <!-- Logo -->
     <div id="cont-logo" class="w-1/4">

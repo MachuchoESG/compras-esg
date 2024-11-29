@@ -25,6 +25,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body class="font-sans antialiased bg-gray-100 w-100" style="">
@@ -35,7 +37,7 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-white shadow">
+            <header class="bg-white shadow" style="position: sticky; top: 0; z-index: 10;">
                 <div class="max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
