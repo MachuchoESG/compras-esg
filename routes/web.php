@@ -71,4 +71,5 @@ Route::middleware([
     Route::get('/graficos/all/status', [GraficosController::class, 'GraficoAllRequisicionesStatus']);
     Route::get('/graficos/all/proveedores', [GraficosController::class, 'GraficoAllRequisicionesProveedores']);
     Route::get('/graficos/all/unidades', [GraficosController::class, 'GraficoAllRequisicionesUnidades']);
+    Route::get('/graficos/all/unidades/gastos', [GraficosController::class, 'GraficoAllGastosPorUnidades']);
 });
