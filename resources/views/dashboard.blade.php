@@ -26,7 +26,7 @@
                 <div class="col-12">
                     <h3>Requisiciones por Estatus</h3>
                 </div>
-                <div id="generalTabla" class="data-status col-12 mb-sm-3 col-md-3 col-lg-3">
+                <div id="generalTabla" class="data-status col-12 mb-sm-3 col-md-3 col-lg-3 mb-3">
                     <ul class="list-group" id="listaestatus">
                     </ul>
                 </div>
@@ -35,7 +35,13 @@
                     <div>
                         <p class="m-0">Total de Requisiciones: <span id="totalrequi">Cargando...</span></p>
                     </div>
-                    <canvas id="myChart"></canvas>
+                    <div style="width: 100%; overflow-x: scroll;">
+                        <div style="width: 800px;">
+                            <canvas id="myChart"></canvas>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -52,7 +58,7 @@
                 <div class="col-12">
                     <h3>Requisiciones por Proveedores</h3>
                 </div>
-                <div id="" class="col-12 col-md-5" style="height: 70vh; overflow: auto;">
+                <div id="" class="col-12 col-md-4 mb-3" style="height: 50vh; overflow: auto;">
                     <table class="table">
                         <thead style="position:sticky; top: 0; left: 0;">
                             <tr>
@@ -65,8 +71,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="generalChartProveedores" class="col-12 col-md-7 d-flex justify-content-center"
-                    style="height: 70vh">
+                <div id="generalChartProveedores" class="col-12 col-md-8 d-flex justify-content-center"
+                    style="height: 60vh">
                     <canvas id="chartProveedores"></canvas>
                 </div>
             </div>
@@ -97,8 +103,11 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="generalChartUnidades" class="col-12 col-md-9">
-                    <canvas id="chartUnidades"></canvas>
+                <div id="generalChartUnidades" class="col-12 col-md-9" style="overflow-x:auto">
+                    <div style="width: 800px;">
+                        <canvas id="chartUnidades"></canvas>
+                    </div>
+
                 </div>
             </div>
             <div id="spin_loading_unidades" class="d-flex flex-column justify-content-center align-item-center mb-3">
@@ -132,8 +141,11 @@
                         <div class="col-12">
                             <h4 class="mb-0 text-center">TOP 10 Gastos por Unidad</h4>
                         </div>
-                        <div class="col-12">
-                            <canvas id="chartGastosUnidades"></canvas>
+                        <div class="col-12" style="overflow-x:auto">
+                            <div style="width: 800px;">
+                                <canvas id="chartGastosUnidades"></canvas>
+                            </div>
+
                         </div>
                     </div>
 
@@ -250,6 +262,7 @@
                 type: 'pie', //'doughnut',
                 data: data,
             });
+            
         }
 
         const renderGraficoAllUnidades = (dataUnidades = []) => {
@@ -260,7 +273,9 @@
                     datasets: [{
                         label: 'Total Requisiciones x Unidades',
                         data: dataUnidades, //[12, 19, 3, 5, 2, 3],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        maxBarThickness: 50, // Ancho máximo
+                        barPercentage: 0.8
                     }]
                 },
                 options: {
@@ -270,6 +285,14 @@
                     },
                     scales: {
                         y: {
+                            beginAtZero: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 1
+                            },
                             beginAtZero: true
                         }
                     }
@@ -302,12 +325,11 @@
                     }]
                 },
                 options: {
-                    /* parsing: {
-                        xAxisKey: 'unidad',
-                        yAxisKey: 'total'
-                    }, */
                     scales: {
                         y: {
+                            ticks: {
+                                stepSize: 1
+                            },
                             beginAtZero: true
                         }
                     }
@@ -405,37 +427,40 @@
             });
         }
 
-        const generarGraficos = async (fd, ld) => {
-
-            $('#spin_loading_estatus').removeClass('d-none').addClass('d-flex') //.addClass('d-none');
-            $('#spin_loading_proveedores').removeClass('d-none').addClass('d-flex')
-            $('#spin_loading_unidades').removeClass('d-none').addClass('d-flex')
-            $('#spin_loading_unidades_gastos').removeClass('d-none').addClass('d-flex')
-
-            $('#data-estatus').addClass('d-none')
-            $('#data-proveedores').addClass('d-none')
-            $('#data-unidades').addClass('d-none')
-            $('#data-unidades-gastos').addClass('d-none')
-
-            //$('#spin_loading_estatus').addClass('d-none');
-            await generarGraficosEstatus(fd, ld);
-            await generarGraficosProveedores(fd, ld);
-            await generarGraficosUnidades(fd, ld);
-            await generarGraficosUnidadesGastos(fd, ld);
-        }
-
         const renderDivChar = async () => {
             $('#generalChart').empty();
-            $('#generalChart').html(`<canvas id="myChart"></canvas>`)
+            $('#generalChart').html(`
+                <div>
+                    <p class="m-0">Total de Requisiciones: <span id="totalrequi">Cargando...</span></p>
+                </div>
+                <div style="width: 100%; overflow-x: scroll;">
+                    <div style="width: 800px;">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            `)
 
             $('#generalChartProveedores').empty();
             $('#generalChartProveedores').html(`<canvas id="chartProveedores"></canvas>`)
 
             $('#generalChartUnidades').empty();
-            $('#generalChartUnidades').html(`<canvas id="chartUnidades"></canvas>`)
+            $('#generalChartUnidades').html(`
+            <div style="width: 800px;">
+                <canvas id="chartUnidades"></canvas>
+            </div>`)
 
             $('#generalChartGastoUnidades').empty();
-            $('#generalChartGastoUnidades').html(`<canvas id="chartGastosUnidades"></canvas>`)
+            $('#generalChartGastoUnidades').html(`<div class="row">
+                <div class="col-12 mb-3 mt-3">
+                    <h4 class="mb-0 text-center">TOP 10 Gastos por Unidad</h4>
+                </div>
+                <div class="col-12" style="overflow-x:auto">
+                    <div style="width: 800px;">
+                        <canvas id="chartGastosUnidades"></canvas>
+                    </div>
+
+                </div>
+            </div>`)
         }
 
         const renderGraficoGeneral = async () => {
@@ -486,6 +511,25 @@
                 </tr>
                 `)
             });
+        }
+
+        const generarGraficos = async (fd, ld) => {
+
+            $('#spin_loading_estatus').removeClass('d-none').addClass('d-flex') //.addClass('d-none');
+            $('#spin_loading_proveedores').removeClass('d-none').addClass('d-flex')
+            $('#spin_loading_unidades').removeClass('d-none').addClass('d-flex')
+            $('#spin_loading_unidades_gastos').removeClass('d-none').addClass('d-flex')
+
+            $('#data-estatus').addClass('d-none')
+            $('#data-proveedores').addClass('d-none')
+            $('#data-unidades').addClass('d-none')
+            $('#data-unidades-gastos').addClass('d-none')
+
+            //$('#spin_loading_estatus').addClass('d-none');
+            await generarGraficosEstatus(fd, ld);
+            await generarGraficosProveedores(fd, ld);
+            await generarGraficosUnidades(fd, ld);
+            await generarGraficosUnidadesGastos(fd, ld);
         }
 
         document.addEventListener("DOMContentLoaded", async function() {
