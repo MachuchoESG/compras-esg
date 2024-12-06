@@ -50,6 +50,8 @@ Route::middleware([
     Route::resource('sucursal', sucursalController::class);
     Route::resource('proveedor', proveedorController::class);
     Route::resource('producto', ProductoController::class);
+    Route::get('/productos/asignar', [ProductoController::class, 'getProductosParaAsignar']);
+    Route::post('/productos/asignar/{id}', [ProductoController::class, 'asignarIdProducto']);
     Route::resource('requisicion', requisicionController::class);
     Route::get('/{nom}/producto/{id}/existencia', [requisicionController::class, 'getTotalExistenciaProducto']);
     Route::resource('departamento', DepartamentoController::class);

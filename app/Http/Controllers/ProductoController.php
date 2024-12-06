@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Requisicion;
+use App\Service\ProductoService;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
@@ -61,5 +63,20 @@ class ProductoController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getProductosParaAsignar(Request $request){
+        $requisicionId = $request->input('ri');
+        $requisicion = Requisicion::find($requisicionId);
+        $productos = ProductoService::ListaProductos($requisicion->sucursal->nomenclatura);
+
+        return response()->json($productos);
+    }
+
+    public function asignarIdProducto (Request $request){
+        $idProd = $request->id_producto;
+        $idDetalle = $request->id_detalle_cotizacion;
+
+        return response()->json([ 'id_producto' => $idProd , 'id_detalle' => $idDetalle ]);
     }
 }

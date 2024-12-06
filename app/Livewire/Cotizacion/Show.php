@@ -386,14 +386,14 @@ class Show extends Component
         //dd($cotizacion);
     }
 
-    public function updateProducto()
+    public function updateProducto($producto_id, $producto_name, $detalle_id)
     {
-        $detalleRequisicion = DetalleRequisicion::findOrFail($this->detalleid);
+        $detalleRequisicion = DetalleRequisicion::findOrFail($detalle_id);
 
         // Actualizar los campos de $producto
 
-        $detalleRequisicion->producto_id = $this->producto['id_Producto'];
-        $detalleRequisicion->producto = $this->producto['producto'];
+        $detalleRequisicion->producto_id = $producto_id;
+        $detalleRequisicion->producto = $producto_name;
 
         // Guardar los cambios
         $detalleRequisicion->save();
@@ -498,6 +498,12 @@ class Show extends Component
         }
 
         $this->productos = ProductoService::ListaProductos($requisicion->sucursal->nomenclatura);
+        usort($this->productos, function($a, $b) {
+            return strcmp($a['cnombreproducto'], $b['cnombreproducto']);
+        });
+        //dd($this->requisicion->detalleRequisiciones);
+
+        //dd($this->productos);
     }
 
 

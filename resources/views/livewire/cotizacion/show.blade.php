@@ -93,8 +93,9 @@
                                                     <x-dropdown-link id="editar-producto"
                                                         class="no-underline text-xs cursor-pointer">
                                                         <div>
-                                                            <button
-                                                                wire:click="AbrirModal('{{ $detalle->id }}')">Asignar
+                                                            <button data-bs-toggle="modal"
+                                                                data-bs-target="#ModalEditProducto"
+                                                                onclick="getListaProductosSucursal({{ $detalle->id }})">Asignar
                                                                 Producto</button>
                                                         </div>
                                                     </x-dropdown-link>
@@ -368,7 +369,7 @@
                     <div class="w-full mb-2">
                         <label for="select_proveedor">Proveedor</label>
                         <select wire:ignore class="w-full" name="cotizacion.proveedor_id" id="select_proveedor"
-                            wire:model.live="cotizacion.proveedor_id" style="width: 100%!important">
+                            wire:model="cotizacion.proveedor_id" style="width: 100%!important">
                             <option value="0">Selecciona un proveedor</option>
                         </select>
                     </div>
@@ -457,8 +458,8 @@
     </div>
 
 
-    <div wire:ignore.self class="modal fade" id="ModalEditProducto" aria-hidden="true"
-        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal fade" id="ModalEditProducto" aria-hidden="true" aria-labelledby="exampleModalToggleLabel"
+        tabindex="-1" wire:ignore>
         <div class="modal-dialog modal-dialog-centered modal-dialog-top">
             <div class="modal-content">
                 <div class="modal-header">
@@ -466,24 +467,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="w-full">
-                        <label for="">Productos</label>
-                        <select class="select2 w-full" name="producto.id_Producto" id="SelectProducto"
-                            wire:model.live="producto.id_Producto">
-                            <option value="">Selecciona un producto</option>
-                            @foreach ($productos as $producto)
-                                <option value="{{ $producto['cidproducto'] }}">{{ $producto['cnombreproducto'] }}
-                                </option>
-                            @endforeach
+                    <div>
+                        <label> Productos </label>
+                        <select class="w-full" id="producto_select" onchange="changeSelectProducto()"
+                            style="width: 100%important;">
+                            <option value="0" selected disabled>Seleccionar producto</option>
                         </select>
-                        <x-input-error for="producto.id_Producto" />
-
-
                     </div>
                 </div>
                 <div class="modal-footer">
 
-                    <x-button type="submit" class="ml-2" wire:click="updateProducto()">Guardar</x-button>
+                    <x-button class="ml-2" onclick="updateProducto()">Guardar</x-button>
                 </div>
             </div>
         </div>
@@ -512,8 +506,8 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="incompleta()" wire:loading.attr="disabled" >Guardar</x-button>
-            <x-button wire:click="$set('openIncompleta',false)" wire:loading.attr="disabled" >Cancelar</x-button>
+            <x-button wire:click="incompleta()" wire:loading.attr="disabled">Guardar</x-button>
+            <x-button wire:click="$set('openIncompleta',false)" wire:loading.attr="disabled">Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -534,8 +528,9 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="autorizarCotizacion()" id="btn-preautorizar" disabled wire:loading.attr="disabled" >Autorizar</x-button>
-            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled" >Cancelar</x-button>
+            <x-button wire:click="autorizarCotizacion()" id="btn-preautorizar" disabled
+                wire:loading.attr="disabled">Autorizar</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled">Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -573,8 +568,9 @@
 
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="deleteCotizacion()" id="btn-remover-cotizacion" wire:loading.attr="disabled" >Remover</x-button>
-            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled" >Cancelar</x-button>
+            <x-button wire:click="deleteCotizacion()" id="btn-remover-cotizacion"
+                wire:loading.attr="disabled">Remover</x-button>
+            <x-button wire:click="$set('openPreAutorizacion',false)" wire:loading.attr="disabled">Cancelar</x-button>
         </x-slot>
     </x-dialog-modal>
 
@@ -586,7 +582,8 @@
             @if ($esCotizacionUnica)
                 <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
             @else
-                <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled" >Finalizar Requisición</x-button>
+                <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled">Finalizar
+                    Requisición</x-button>
             @endif
 
         @endif
@@ -596,7 +593,8 @@
                 @if ($esCotizacionUnica)
                     <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
                 @else
-                    <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled" >Finalizar Requisición</x-button>
+                    <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled">Finalizar
+                        Requisición</x-button>
                 @endif
 
             </div>
@@ -630,13 +628,20 @@
         var comentCotUnica = ''
         var valueProveedorSelected = ''
         var proveedorSelected = {
-            'id': '',
-            'name': '',
+            id: '',
+            name: '',
+        }
+
+        var productoSelected = {
+            id: 0,
+            name: '',
+            detalle_id: 0,
         }
 
         var allProveedores = @json($proveedores)
 
         function InicializarSelect() {
+            console.log('lala');
 
             $('.select2').select2({
                 dropdownParent: $("#ModalEditProducto")
@@ -646,8 +651,63 @@
             });
 
 
+            $('#producto_select').select2({
+                dropdownParent: $("#ModalEditProducto")
+            })
         }
 
+        InicializarSelect()
+
+        function llenarSelectProductos(productos) {
+            const select = document.getElementById('producto_select');
+            select.innerHTML = '<option value="0" selected disabled>Seleccionar producto</option>';
+            productos.forEach(producto => {
+                const option = document.createElement('option');
+                option.value = producto.cidproducto; // Usamos el ID del producto como valor
+                option.textContent = producto.cnombreproducto; // Usamos el nombre del producto como texto
+                select.appendChild(option);
+            });
+        }
+
+        function getListaProductosSucursal(id) {
+            productoSelected.detalle_id = id
+
+            $.ajax({
+                url: window.location.origin + `/productos/asignar?ri={{ $requisicion->id }}`, // URL del endpoint
+                type: 'GET', // Método HTTP
+                dataType: 'json', // Tipo de datos esperados
+                success: function(response) {
+                    // Código a ejecutar si la solicitud es exitosa
+                    llenarSelectProductos(response);
+                    console.log(response);
+
+                },
+                error: function(xhr, status, error) {
+                    // Código a ejecutar si hay un error
+                    console.error('Error en la solicitud:', error);
+                }
+            });
+        }
+
+        function changeSelectProducto() {
+            console.log($('#producto_select'));
+
+            var selectInputVal = $('#producto_select').val();
+            var selectInputText = $('#producto_select').find('option:selected').text();
+
+            productoSelected.id = selectInputVal;
+            productoSelected.name = selectInputText;
+
+        }
+
+
+        function updateProducto() {
+            console.log('value selected');
+            console.log(productoSelected);
+
+            @this.call('updateProducto', productoSelected.id, productoSelected.name, productoSelected.detalle_id);
+
+        }
 
         function resetInputFile() {
             //$(`#selectProveedor option[value="${valueProveedorSelected}"]`).remove();
@@ -675,10 +735,11 @@
             location.reload()
         }
 
-
         function cerrarModalEditProducto() {
             var closeButton = $('#ModalEditProducto .btn-close'); // Busca el botón de cierre dentro del modal
             closeButton.click();
+            //InicializarSelect()
+            //window.location.reload()
         }
 
         function cerrarModalAddCotizacion() {
@@ -722,6 +783,11 @@
                 }
             });
         }
+
+        document.getElementById('producto_select').addEventListener('change', function(event) {
+            const selectedValue = event.target.value; // Obtiene el valor seleccionado
+            console.log("Producto seleccionado:", selectedValue);
+        });
 
         document.addEventListener('renderProveedores', event => {
             const proveedores = event.detail[0].proveedores; // Aquí obtienes la lista de productos
@@ -769,24 +835,63 @@
         });
 
         $('#select_proveedor').on('change', function(e) {
-            //console.log(e);
             var provId = e.target.value;
             var provText = e.target.options[e.target.selectedIndex].text;
 
+
             proveedorSelected.id = provId
             proveedorSelected.name = provText
+            @this.set('cotizacion.proveedor_id', proveedorSelected.id);
+            @this.set('cotizacion.proveedor', proveedorSelected.name);
 
-            @this.set('cotizacion.proveedor_id', provId);
-            @this.set('cotizacion.proveedor', provText);
+        })
+
+        $('#input_cotizacionunica').on('keyup', function(e) {
+            console.log('algo cambio');
+            
+            comentPreAutorizar = e.target.value
+            if (comentPreAutorizar === '') {
+                //console.log('Comentario obligarotiros');
+                $('#btn-autorizar-unica').prop('disabled', true);
+                alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn-autorizar-unica').prop('disabled', false);
+            }
+
+        })
+
+        $('#input_preautorizacion').on('keyup', function(e) {
+
+        comentPreAutorizar = e.target.value
+        if (comentPreAutorizar === '') {
+            //console.log('Comentario obligarotiros');
+            $('#btn-preautorizar').prop('disabled', true);
+        } else {
+            //console.log('coment valido');
+            $('#btn-preautorizar').prop('disabled', false);
+        }
+
         })
 
         renderOptionsSelectProveedores(allProveedores)
 
         $(document).ready(function() {
+            $('#producto_select').select2({
+                dropdownParent: $("#ModalEditProducto")
+            });
 
 
+            console.log(document.getElementById('producto_select'));
 
-            $('#input_preautorizacion').on('keyup', function(e) {
+            document.getElementById('producto_select').addEventListener('change', function(event) {
+                const selectedValue = event.target.value; // Obtiene el valor seleccionado
+                console.log("Producto seleccionado:", selectedValue);
+            });
+            /* $('#producto_select').select2({
+                dropdownParent: $("#ModalEditProducto")
+            }); */
+            /* $('#input_preautorizacion').on('keyup', function(e) {
 
                 comentPreAutorizar = e.target.value
                 if (comentPreAutorizar === '') {
@@ -800,7 +905,8 @@
             })
 
             $('#input_cotizacionunica').on('keyup', function(e) {
-
+                console.log('algo cambio');
+                
                 comentPreAutorizar = e.target.value
                 if (comentPreAutorizar === '') {
                     //console.log('Comentario obligarotiros');
@@ -811,7 +917,7 @@
                     $('#btn-autorizar-unica').prop('disabled', false);
                 }
 
-            })
+            }) */
 
 
             $('#selectProveedor').on('change', function(e) {
@@ -824,22 +930,37 @@
             });
 
             $(document).ready(function() {
+                document.getElementById('producto_select').addEventListener('change', function(event) {
+                    const selectedValue = event.target.value; // Obtiene el valor seleccionado
+                    console.log("Producto seleccionado:", selectedValue);
+                });
                 $('#SelectProducto').on('change', function() {
-
-
-
                     @this.set('producto.id_Producto', $(this).val());
                     @this.set('producto.producto', $(this).find('option:selected').text());
 
 
                 });
+                $('#input_cotizacionunica').on('keyup', function(e) {
+                    console.log('algo cambio');
+                    
+                    comentPreAutorizar = e.target.value
+                    if (comentPreAutorizar === '') {
+                        //console.log('Comentario obligarotiros');
+                        $('#btn-autorizar-unica').prop('disabled', true);
+                        alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+                    } else {
+                        //console.log('coment valido');
+                        $('#btn-autorizar-unica').prop('disabled', false);
+                    }
+
+                })
             });
 
-            $('#ModalEditProducto').on('shown.bs.modal', function() {
+            /* $('#ModalEditProducto').on('shown.bs.modal', function() {
                 $('.select2').select2({
                     dropdownParent: $("#ModalEditProducto")
                 });
-            });
+            }); */
 
             $('#ModalAddCotizacion').on('shown.bs.modal', function() {
                 $('.select2').select2({
@@ -852,9 +973,9 @@
                 $('#cotizacion_unica').prop('checked', false);
             });
 
-            Livewire.on('togglemodal', function() {
+            /* Livewire.on('togglemodal', function() {
                 $('#ModalEditProducto').modal('show');
-            });
+            }); */
 
 
 
