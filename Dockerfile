@@ -18,13 +18,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copia el contenido del proyecto Laravel
 COPY . /var/www/html
 
-RUN php artisan config:clear && php artisan config:cache
-
 # Asigna permisos
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-RUN php artisan config:clear && php artisan config:cachev && php artisan route:cache && php artisan view:cache
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
