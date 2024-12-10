@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd mysqli pdo pdo_mysql
+    && docker-php-ext-install gd mysqli pdo pdo_mysql \
+    && apt install dnf
+
 
 # Instala Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -22,5 +24,12 @@ RUN php artisan config:clear && php artisan config:cache
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+RUN php artisan config:clear && php artisan config:cachev && php artisan route:cache && php artisan view:cache
+
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
 # Define el directorio de trabajo
 WORKDIR /var/www/html
+
+ENTRYPOINT ["sh", "-c", "php artisan config:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php-fpm"]
+

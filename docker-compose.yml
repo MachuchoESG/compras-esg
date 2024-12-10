@@ -8,8 +8,8 @@ services:
       - .:/var/www/html
     working_dir: /var/www/html
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
+      - APP_ENV=production
+      - APP_DEBUG=false
       - APP_KEY=base64:random_generated_key
     ports:
       - "9000:9000" # Exponiendo el puerto de PHP-FPM
