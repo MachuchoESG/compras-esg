@@ -31,5 +31,3 @@ RUN chown -R www-data:www-data /var/www/html \
 # Ejecuta comandos de Artisan en modo producción
 RUN php artisan config:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache
 
-# Define el comando por defecto para PHP-FPM
-CMD ["php-fpm"]
