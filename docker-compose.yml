@@ -8,10 +8,10 @@ services:
       - .:/var/www/html
       - ./storage:/var/www/html/storage
     working_dir: /var/www/html
-    environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - APP_KEY=base64:your-app-key
+    #environment:
+    #  - APP_ENV=production
+    # - APP_DEBUG=false
+    #  - APP_KEY=base64:your-app-key
     ports:
       - "9000:9000" # PHP-FPM escucha en este puerto
 
