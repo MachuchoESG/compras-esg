@@ -5,6 +5,7 @@ use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\empresaController;
 use App\Http\Controllers\EstatusController;
 use App\Http\Controllers\GastosFijosController;
+use App\Http\Controllers\GraficosController;
 use App\Http\Controllers\MigrationsRun;
 use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\PermisosrequisicionController;
@@ -51,13 +52,15 @@ Route::middleware([
     Route::resource('sucursal', sucursalController::class);
     Route::resource('proveedor', proveedorController::class);
     Route::resource('producto', ProductoController::class);
+    Route::get('/productos/asignar', [ProductoController::class, 'getProductosParaAsignar']);
+    Route::post('/productos/asignar/{id}', [ProductoController::class, 'asignarIdProducto']);
     Route::resource('requisicion', requisicionController::class);
     Route::get('/{nom}/producto/{id}/existencia', [requisicionController::class, 'getTotalExistenciaProducto']);
     Route::resource('departamento', DepartamentoController::class);
     Route::resource('puesto', PuestoController::class);
     Route::resource('usuario', UsuarioController::class);
     Route::resource('estatus', EstatusController::class);
-    Route::resource('gastosfijos',GastosFijosController::class);
+    Route::resource('gastosfijos', GastosFijosController::class);
     Route::get('gf-empresas', [GastosFijosController::class, 'gastosFijosEmpresas']);
     Route::get('gf-opt-productos/{opt}', [GastosFijosController::class, 'gastosFijosOptProductos']);
     Route::resource('permisosrequisicion', PermisosrequisicionController::class);
@@ -69,4 +72,10 @@ Route::middleware([
     Route::get('/run-migrations', [App\Http\Controllers\MigrationsRun::class, 'runMigrations']);
     Route::get('/clear-view-cache', [App\Http\Controllers\MigrationsRun::class, 'clearViewCache']);
     Route::post('/notificaciones/all', [NotificacionesController::class, 'getAllNotificaciones']);
+
+    //GRAFICOS
+    Route::get('/graficos/all/status', [GraficosController::class, 'GraficoAllRequisicionesStatus']);
+    Route::get('/graficos/all/proveedores', [GraficosController::class, 'GraficoAllRequisicionesProveedores']);
+    Route::get('/graficos/all/unidades', [GraficosController::class, 'GraficoAllRequisicionesUnidades']);
+    Route::get('/graficos/all/unidades/gastos', [GraficosController::class, 'GraficoAllGastosPorUnidades']);
 });

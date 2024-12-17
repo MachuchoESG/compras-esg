@@ -3,8 +3,8 @@
         <div class="flex flex-col">
             <span class="text-sm text-gray-500"> Fecha Creacion
                 {{ \Carbon\Carbon::parse($requisicion->created_at)->locale('es')->isoFormat('LL') }}</span>
-            <p class="text-gray-500 text-md font-bold m-0">Folio: {{ $requisicion->folio }}</p>
-            <p class="text-gray-500 text-md font-bold">Estatus: {{ $requisicion->estatus->name }}</p>
+            <p class="text-gray-500 text-md font-bold mb-0">Folio: {{ $requisicion->folio }}</p>
+            <p class="text-gray-500 text-md font-bold mb-0">Estatus: {{ $requisicion->estatus->name }}</p>
         </div>
         @if ($requisicion->evidencia()->exists())
             <button wire:click.prevent="download({{ $requisicion->evidencia()->first()->id }})"

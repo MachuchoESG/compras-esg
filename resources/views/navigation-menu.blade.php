@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 px-3  w-100 d-flex align-items-center h-20">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 px-3  w-100 d-flex align-items-center h-20" style="position: sticky; top:0; z-index:20;">
     <!-- Primary Navigation Menu -->
     <!-- Logo -->
     <div id="cont-logo" class="w-1/4">
@@ -224,7 +224,8 @@
         </button>
     </div>
     {{-- SIDEBAR  --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel"
+        style="width: 70%!important">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasNavbarLabel">MENU</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>

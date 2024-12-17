@@ -364,6 +364,56 @@ class Show extends Component
                 'autorizado' => false,
                 'visto' => false
             ]);
+            $contieneDiesel = false;
+            $contieneProductosDifDiesel = false;
+
+            $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $this->requisicion->id)->get();
+            $allCotizaciones = [];
+            foreach ($cotizacionesRequisicion as $cr) {
+                $coti = DetalleCotizacion::select('id', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+                array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
+            }
+
+            $index = 0;
+            $allProcudots = [];
+            $indexProdAdded = [];
+
+            foreach ($allCotizaciones as $AC) {
+                foreach ($AC['cotizaciones'] as $producto) {
+                    array_push($allProcudots, $producto);
+                    if ($producto['autorizado'] == 1) {
+                        array_push($indexProdAdded, $index); // En caso de recargar pagina valida los index agregados previamente
+                    }
+                    $index++;
+                }
+                $index = 0;
+            }
+            //dd($allProcudots);
+            foreach ($allProcudots as $producto) {
+                if ($producto->producto_id === 4155) {
+                    $contieneDiesel = true;
+                } elseif ($producto->producto_id !== 4155) {
+                    $contieneProductosDifDiesel = true;
+                }
+            }
+
+            //dd($contieneDiesel, $contieneProductosDifDiesel);
+
+            if ($contieneDiesel && !$contieneProductosDifDiesel) {
+                $userAlta = User::find($this->requisicion->user_id);
+                $autorizacion = Autorizacionhistorial::create([
+                    'requisicion_id' => $this->requisicion->id,
+                    'user_id' => 5, // puesto quien llega
+                    'user_solicita' => $userAlta->puesto_id, // puesto quien pide
+                    'departamento_id' => $userAlta->departamento_id, // departamento de la requi
+                    'autorizado' => false,
+                    'visto' => false
+                ]);
+            }
+
+
+
+            //$this->;
 
 
             $this->alert('success', 'Requisicion', [
@@ -444,14 +494,14 @@ class Show extends Component
         //dd($cotizacion);
     }
 
-    public function updateProducto()
+    public function updateProducto($producto_id, $producto_name, $detalle_id)
     {
-        $detalleRequisicion = DetalleRequisicion::findOrFail($this->detalleid);
+        $detalleRequisicion = DetalleRequisicion::findOrFail($detalle_id);
 
         // Actualizar los campos de $producto
 
-        $detalleRequisicion->producto_id = $this->producto['id_Producto'];
-        $detalleRequisicion->producto = $this->producto['producto'];
+        $detalleRequisicion->producto_id = $producto_id;
+        $detalleRequisicion->producto = $producto_name;
 
         // Guardar los cambios
         $detalleRequisicion->save();
@@ -556,6 +606,12 @@ class Show extends Component
         }
 
         $this->productos = ProductoService::ListaProductos($requisicion->sucursal->nomenclatura);
+        usort($this->productos, function($a, $b) {
+            return strcmp($a['cnombreproducto'], $b['cnombreproducto']);
+        });
+        //dd($this->requisicion->detalleRequisiciones);
+
+        //dd($this->productos);
     }
 
 

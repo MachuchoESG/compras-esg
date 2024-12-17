@@ -56,7 +56,7 @@ class Index extends Component
     public function render()
     {
 
-        $departamentos = Departamento::where('name', 'like', '%' . $this->search . '%')->paginate(10);
+        $departamentos = Departamento::where('name', 'like', '%' . $this->search . '%')->get();
 
         return view('livewire.departamento.index', ['departamentos' => $departamentos]);
     }

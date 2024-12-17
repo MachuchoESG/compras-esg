@@ -3,6 +3,8 @@
 namespace App\Livewire\Forms\Requisicion;
 
 use App\Models\Autorizacionhistorial;
+use App\Models\Cotizacion;
+use App\Models\DetalleCotizacion;
 use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use App\Models\User;
@@ -62,7 +64,8 @@ class RequisicionCreateForm extends Form
     public $imageKey;
     public $f = false;
     public $openProductoSR = true;
-
+    public $contieneDiesel = false;
+    public $contieneProductosDifDiesel = false;
 
 
     public $listaProductos = [];
@@ -95,7 +98,19 @@ class RequisicionCreateForm extends Form
 
     public function save()
     {
+        //dd($this->listaProductos);
+        foreach ($this->listaProductos as $lp) {
+            if ($lp['producto_id'] == 4155 || $lp['producto_id'] == "4155") { // SI LA LISTA DE PRODUCTOS CONTIENE DIESEL PASA DIRECTO A COMPRAS
+                $this->contieneDiesel = true;
+            } else {
+                $this->contieneProductosDifDiesel = true;
+            }
+        }
 
+        //dd($this->contieneDiesel);
+
+
+        //return 0;
         $this->user = Auth::user();
 
         if ($this->sucursal_id == 1) { // id 1 es Monterrey sucursal Matriz
@@ -176,7 +191,7 @@ class RequisicionCreateForm extends Form
 
         if ($requisicionNueva) {
 
-            if (User::jefe()) {
+            if (User::jefe() || ($this->contieneDiesel === true && $this->contieneProductosDifDiesel === false)) {
                 $requisicionNueva->aprobado = true;
                 if ($requisicionNueva->cotizacion_especial === 1 || $requisicionNueva->cotizacion_especial === true) {
                     $requisicionNueva->estatus_id = 13;// COTIZACION ESPECIAL
