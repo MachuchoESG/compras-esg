@@ -110,10 +110,14 @@
                     @endforeach
                 </div>
 
+                {{-- <div>
+                    <p>total autorizar - {{ $this->obtenerTotalAutorizar() }}</p>
+                    <p>Permitido - {{ $totalPermitidoAutorizar }}</p>
+                    <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p>
+                </div> --}}
+
                 <div class="my-3 d-flex justify-between">
-                    {{-- <p>{{ $this->obtenerTotalAutorizar() }}</p>
-                    <p>{{ $totalPermitidoAutorizar }}</p>
-                    <p>{{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() ? 'true' : 'false' }}</p> --}}
+
                     @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar() || ($contieneDiesel && !$contieneProductoDifDiesel))
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
                     @else
@@ -184,7 +188,6 @@
             <x-button wire:click="$set('open', false)">Salir</x-button>
         </x-slot>
     </x-dialog-modal>
-
 
     <x-alpine-modal wire:model="comentarioOpen">
         <x-slot name="title">
