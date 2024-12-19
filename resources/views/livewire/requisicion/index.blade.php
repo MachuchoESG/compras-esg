@@ -1,4 +1,4 @@
-<div class="p-2 ">
+<div class="p-2">
     <div class="flex justify-between py-2 mb-2">
 
         <form method="get" class="relative w-1/2">
@@ -32,7 +32,7 @@
     </div>
 
 
-    <div class="w-full p-2 overflow-x-auto">
+    <div class="w-full p-2 overflow-x-auto" style="height: 50vh">
         <table class="w-full shadow-lg">
             <thead class="bg-gray-200">
                 <tr>

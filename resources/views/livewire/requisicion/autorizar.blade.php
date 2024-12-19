@@ -5,7 +5,7 @@
     <div>
         @if ($requisicion->cotizaciones->count() != 0)
             <form wire:submit.prevent="continuarAutorizar()">
-                <div class="w-full">
+                <div class="w-full p-2 overflow-x-auto" >
                     @foreach ($requisicion->cotizaciones as $cotizacion)
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 mt-4">
                             <thead class="text-md font-bold uppercase bg-gray-50">

@@ -55,7 +55,7 @@ class Index extends Component
     public function obtenerPuestos($departamentoId)
     {
         $this->departamento_id = $departamentoId;
-        if($departamentoId === '0'){
+        if ($departamentoId === '0') {
             $this->puesto_id = 0;
             $this->usuarios = User::where('name', 'like', '%' . $this->search . '%')->orderBy('created_at', 'desc')->get();
         } else {
@@ -66,11 +66,11 @@ class Index extends Component
                 $this->usuarios = User::where('departamento_id', $departamentoId)->orderBy('created_at', 'desc')->get();
             }
         }
-        
     }
 
     public function filtrarUsuariosPuesto($puestoId)
     {
+        $this->puesto_id = $puestoId;
         if ($this->search !== '') {
             $this->usuarios = User::where('departamento_id', $this->departamento_id)->where('puesto_id', $puestoId)->where('name', 'like', '%' . $this->search . '%')->get();
         } else {
@@ -89,9 +89,25 @@ class Index extends Component
 
     public function render()
     {
+        $this->search = $this->search ?? '';
+        //dd($this->search);
+        $query = User::query();
+        if (!empty($this->search)) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        if ($this->departamento_id != '0') {
+            $query->where('departamento_id', $this->departamento_id);
+        }
+
+        if ($this->puesto_id != '0') {
+            $query->where('puesto_id', $this->puesto_id);
+        }
         //$usuarios = User::where('name', 'like', '%' . $this->search . '%')->orderBy('created_at', 'desc')->get();
+        $usuarios = $query->orderBy('created_at', 'desc')->get();
+
         //dd($usuarios);
-        //$this->usuarios = $usuarios;
-        return view('livewire.usuario.index'/* , ['usuarios' => $usuarios] */);
+        $this->usuarios = $usuarios;
+        return view('livewire.usuario.index', ['usuarios' => $usuarios]);
     }
 }

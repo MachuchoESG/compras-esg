@@ -124,43 +124,49 @@
         <div class="mt-3 px-3 w-100">
             @foreach ($requisicion->cotizaciones as $cotizacion)
                 <div class="row bg-gray-200 px-1">
-                    <div class="col-4 d-flex justify-center align-items-center">
-                        <p class="m-0 text-center"> Proveedor: <span>{{ $cotizacion['proveedor'] }}</span> </p>
+                    <div class="col-8 col-md-4 d-flex justify-center align-items-center">
+                        <p class="m-0 text-center text-proveedor"> Proveedor:
+                            <span>{{ $cotizacion['proveedor'] }}</span> </p>
 
                     </div>
-                    <div class="col-4 d-flex justify-center align-items-center">
+                    <div class="col-2 col-md-4 d-flex justify-center align-items-center pt-1">
                         <button wire:click.prevent="download({{ $cotizacion->id }})"
                             class="btn btn-secondary btn-sm d-flex items-start">
                             <x-eva-download-outline class="h-5 w-5" />
-                            <span class="ms-2 fw-bold">Cotización</span>
+                            <span class="ms-2 fw-bold hide-text-btn">Cotización</span>
                         </button>
                     </div>
                     @if ($requisicion->estatus_id !== 6)
-                        <div class="col-4 d-flex justify-center p-3">
+                        <div class="col-2 col-md-4 d-flex justify-center align-items-center pt-1">
                             <i class="bi bi-trash-fill"></i>
                             <button wire:click="deleteCotizacion({{ $cotizacion->id }})" wire:loading.attr="disabled"
                                 class="btn btn-danger btn-sm d-flex">
                                 {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
                                 <x-eva-trash class="h-5 w-5" />
-                                <span class="ms-2 fw-bold">Eliminar Cotización</span>
+                                <span class="ms-2 fw-bold hide-text-btn">Eliminar Cotización</span>
                             </button>
                         </div>
                     @endif
 
-                    <div class="col-4">
-                        <p class="text-center">
-                            Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
-                        </p>
-                    </div>
-                    <div class="col-4">
-                        <p class="text-center">
-                            Dias Credito: {{ $cotizacion['dias_credito'] }}
-                        </p>
-                    </div>
-                    <div class="col-4">
-                        <p class="text-center">
-                            Forma Pago: {{ $cotizacion['formapago'] }}
-                        </p>
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-4">
+                                <p class="text-center">
+                                    Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p class="text-center">
+                                    Dias Credito: {{ $cotizacion['dias_credito'] }}
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p class="text-center">
+                                    Forma Pago: {{ $cotizacion['formapago'] }}
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -417,19 +423,19 @@
                         </table>
                     </div>
 
-                    <div class="row">
-                        <div class="col p-0">
+                    <div class="row px-1 mb-2">
+                        <div class="col-6 col-md-3 p-0">
                             <x-label for="cantidad">Tiempo de Entrega</x-label>
                             <input wire:model="cotizacion.dias_entrega" class="w-full h-10 border rounded-lg mb-2"
                                 type="number" id="cantidad" name="cantidad">
                             <x-input-error for="cotizacion.dias_entrega" />
                         </div>
-                        <div class="col p-0">
+                        <div class="col-6 col-md-3 p-0">
                             <x-label for="cantidad">Dias de Credito</x-label>
                             <input wire:model="cotizacion.dias_credito" class="w-full h-10 border rounded-lg mb-2"
                                 type="number" id="diascredito" name="diascredito">
                         </div>
-                        <div class="col p-0">
+                        <div class="col-6 col-md-6 p-0">
                             <x-label for="formaPago">Forma de Pago</x-label>
                             <select name="cotizacion.formapago" id="cotizacion.formapago"
                                 wire:model.live="cotizacion.formapago" class=" border-[#dee2e6] rounded-lg"
@@ -848,7 +854,7 @@
 
         $('#input_cotizacionunica').on('keyup', function(e) {
             console.log('algo cambio');
-            
+
             comentPreAutorizar = e.target.value
             if (comentPreAutorizar === '') {
                 //console.log('Comentario obligarotiros');
@@ -863,14 +869,14 @@
 
         $('#input_preautorizacion').on('keyup', function(e) {
 
-        comentPreAutorizar = e.target.value
-        if (comentPreAutorizar === '') {
-            //console.log('Comentario obligarotiros');
-            $('#btn-preautorizar').prop('disabled', true);
-        } else {
-            //console.log('coment valido');
-            $('#btn-preautorizar').prop('disabled', false);
-        }
+            comentPreAutorizar = e.target.value
+            if (comentPreAutorizar === '') {
+                //console.log('Comentario obligarotiros');
+                $('#btn-preautorizar').prop('disabled', true);
+            } else {
+                //console.log('coment valido');
+                $('#btn-preautorizar').prop('disabled', false);
+            }
 
         })
 
@@ -942,12 +948,14 @@
                 });
                 $('#input_cotizacionunica').on('keyup', function(e) {
                     console.log('algo cambio');
-                    
+
                     comentPreAutorizar = e.target.value
                     if (comentPreAutorizar === '') {
                         //console.log('Comentario obligarotiros');
                         $('#btn-autorizar-unica').prop('disabled', true);
-                        alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+                        alert(
+                            'Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.'
+                        )
                     } else {
                         //console.log('coment valido');
                         $('#btn-autorizar-unica').prop('disabled', false);
@@ -981,6 +989,19 @@
 
         });
     </script>
+
+    <style>
+        @media (max-width: 768px) {
+            .hide-text-btn {
+                display: none;
+            }
+
+            .text-proveedor {
+                text-align: start !important;
+                justify-content: right;
+            }
+        }
+    </style>
 
 
 </div>

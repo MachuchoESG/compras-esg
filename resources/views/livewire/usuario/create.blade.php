@@ -1,6 +1,6 @@
-<div class="p-2 pt-1">
+<div class="pt-1">
 
-    <div class="flex justify-end">
+    <div class="d-flex">
         <button
             class="hover:pointertext-white hover:bg-blue-400 font-bold text-sm bg-blue-500  inline-flex p-2  items-center rounded-lg text-gray-50"
             wire:click="$set('open', true)">

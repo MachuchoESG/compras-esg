@@ -1,7 +1,7 @@
 <div>
 
     <form wire:submit.prevent="save">
-        <div class="md:flex  md:space-x-2 mb-2">
+        <div class="md:flex md:space-x-2 mb-2">
             <div class="mb-2 w-full">
                 <x-label for="">Empresa</x-label>
                 <select wire:model.live="requisicion.empresa_id"
@@ -71,9 +71,6 @@
                 </select>
 
             </div>
-
-
-
         </div>
 
 
