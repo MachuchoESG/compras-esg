@@ -101,38 +101,36 @@ class Index extends Component
 
     public function filtrarFlujosDepartamento($departamentoId){
         $this->departamento_id = $departamentoId;
-        if ($departamentoId == '0' || $departamentoId == 0) {
-            $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->get();
-        } else {
-            $this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->where('Departamento_id', $departamentoId)->get();
+        $query = permisosrequisicion::query()->with('puestosolicitante', 'puestoautorizador', 'departamento');
+        if ($departamentoId != '0') {
+            $query->where('Departamento_id', $departamentoId);
         }
-        
+
+        $this->permisos = $query->get();
+        //$this->permisos =  permisosrequisicion::with('puestosolicitante', 'puestoautorizador', 'departamento')->where('Departamento_id', $departamentoId)->get();
     }
 
     public function filtrarPorBusqueda($busqueda){
-        if ($this->departamento_id !== '0') {
-            $busqueda = $this->search;
-            $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
-            ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {
-                $query->where('name', 'like', '%' . $busqueda . '%');
-            })
-            ->orWhereHas('puestoAutorizador', function ($query) use ($busqueda) {
-                $query->where('name', 'like', '%' . $busqueda . '%');
-            })
-            ->where('Departamento_id', $this->departamento_id)
-            ->get();
-        } else {
-            
-            $busqueda = $this->search;
-            $this->permisos = PermisosRequisicion::with(['puestoSolicitante', 'puestoAutorizador', 'departamento'])
-            ->whereHas('puestoSolicitante', function ($query) use ($busqueda) {
-                $query->where('name', 'like', '%' . $busqueda . '%');
-            })
-            ->orWhereHas('puestoAutorizador', function ($query) use ($busqueda) {
-                $query->where('name', 'like', '%' . $busqueda . '%');
-            })
-            ->get();
+        $query = permisosrequisicion::query();
+        $this->search = $busqueda;
+
+        if (!empty($this->search)) {
+            $query->where(function ($q) use ($busqueda) {
+                $q->whereHas('puestoSolicitante', function ($subQuery) use ($busqueda) {
+                    $subQuery->where('name', 'like', '%' . $busqueda . '%');
+                })
+                ->orWhereHas('puestoAutorizador', function ($subQuery) use ($busqueda) {
+                    $subQuery->where('name', 'like', '%' . $busqueda . '%');
+                });
+            });
         }
+
+        if ($this->departamento_id != '0') {
+            $query->where('Departamento_id', $this->departamento_id);
+        }
+
+        $this->permisos = $query->get();
+
     }
 
     public function updatedSearch($value)

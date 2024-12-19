@@ -5,13 +5,9 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-
-
-
-
+    <div class="pt-3 pt-md-5">
+        <div class="">
+            <div class="bg-white mx-2 px-2 overflow-hidden shadow-xl sm:rounded-lg">
                 @livewire('usuario.index')
             </div>
         </div>

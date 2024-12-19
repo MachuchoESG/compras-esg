@@ -1,5 +1,5 @@
 <div class="">
-    <div class="flex justify-end">
+    <div class="d-flex justify-content-end">
         <button class="hover:pointertext-white hover:bg-blue-400 font-bold text-sm bg-blue-500  inline-flex p-2  items-center rounded-lg text-gray-50" wire:click="$set('open', true)">
             <span class=" mx-2">Nuevo Flujo</span>
         </button>
