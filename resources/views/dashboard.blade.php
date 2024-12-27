@@ -58,7 +58,7 @@
                 <div class="col-12">
                     <h3>Requisiciones por Proveedores</h3>
                 </div>
-                <div id="" class="col-12 col-md-4 mb-3" style="height: 50vh; overflow: auto;">
+                <div id="" class="col-12 col-md-4 mb-3" style="height: 70vh; overflow: auto;">
                     <table class="table">
                         <thead style="position:sticky; top: 0; left: 0;">
                             <tr>
@@ -71,8 +71,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="generalChartProveedores" class="col-12 col-md-8 d-flex justify-content-center"
-                    style="height: 60vh">
+                <div id="generalChartProveedores" class="col-12 col-md-8 col-lg-6 d-flex justify-content-center"
+                    style="height: 100%">
                     <canvas id="chartProveedores"></canvas>
                 </div>
             </div>
