@@ -16,7 +16,8 @@ class DetalleCotizacion extends Model
         'producto',
         'cantidad',
         'precio',
-        'autorizado'
+        'autorizado',
+        'retencion'
 
     ];
 

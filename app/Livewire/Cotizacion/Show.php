@@ -413,7 +413,11 @@ class Show extends Component
     }
     public function save()
     {
+        //dd( $this->cotizacion->retenciones);
+
+        $this->cotizacion->requisicion_id = $this->requisicionId;
         //dd($this->cotizacion);
+        
         if ($this->esCotizacionUnica) { // valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
             $this->alert('error', 'No se puede dar de alta nueva cotizacion si se marco "Cotizacion Unica"');
             return view('livewire.cotizacion.show');
@@ -460,6 +464,45 @@ class Show extends Component
         $this->dispatch('nuevo_proveedores', ['proveedores' => $this->proveedores]);
     }
 
+    public function generarCalculoTotal($detalle)
+    {
+        //dd($cotizacio_id);
+        //$subtotal = $detalle->cantidad * $detalle->precio;
+        $subtotal = $detalle->cantidad * $detalle->precio;
+        $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
+        $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
+        return $subtotal + $iva - $retencion;
+    }
+
+    public function generarCalculoSubtotal($detalle)
+    {
+        //dd($detalle);
+        $subtotal = $detalle->cantidad * $detalle->precio;
+        return $subtotal;
+    }
+
+    public function generarCalculoIVA($detalle)
+    {
+        //$cotizacion = Cotizacion::find($id);
+        return ($detalle->cantidad * $detalle->precio) * 0.16;
+    }
+
+    public function generarCalculoRetencion($detalle)
+    {
+        //dd($detalle);
+        return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+    }
+
+    public function generarTotalCotizacion($detalles = []){
+        $total = 0;
+        foreach($detalles as $detalle){
+            $subtotal = 0;
+            $subtotal = $this->generarCalculoTotal($detalle);
+            $total = $total + $subtotal;
+        }
+        return $total;
+    }
+
     public function mount()
     {
 
@@ -498,7 +541,7 @@ class Show extends Component
         }
 
         $this->productos = ProductoService::ListaProductos($requisicion->sucursal->nomenclatura);
-        usort($this->productos, function($a, $b) {
+        usort($this->productos, function ($a, $b) {
             return strcmp($a['cnombreproducto'], $b['cnombreproducto']);
         });
         //dd($this->requisicion->detalleRequisiciones);

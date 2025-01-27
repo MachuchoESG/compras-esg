@@ -46,6 +46,16 @@ class Autorizar extends Component
     public $contieneDiesel = false;
     public $contieneProductoDifDiesel = false;
 
+    public $allDetallesSelected = [];
+    public $PreDataOrden = [];
+
+    public $requiCalculos;
+
+    public $subtotal = 0;
+    public $IVA = 0;
+    public $retencion = 0;
+    public $TotalCotizacion = 0;
+
     public function download($id)
     {
         $archivo = Cotizacion::findOrFail($id);
@@ -200,7 +210,6 @@ class Autorizar extends Component
         return $totalrequisicion;
     }
 
-
     public function updateCantidad($id, $cantidad)
     {
 
@@ -211,11 +220,17 @@ class Autorizar extends Component
             $detalle->save();
         }
     }
+
+    public function showDD(){
+        dd($this->indexProdAdded);
+    }
+
     public function toggleSelection($index, $id, $check)
     {
+        $errorExiste = false;
         $allproductos = [];
         $detalle = DetalleCotizacion::find($id);
-        //Validar que otras cotizaciones no tengan autorizadas el mismo producto
+
         $cotizacionDelDetalle = Cotizacion::where('id', '=', $detalle->cotizacion_id)->first();
         $requisicionID = $cotizacionDelDetalle->requisicion_id;
 
@@ -226,42 +241,45 @@ class Autorizar extends Component
             //array_push($allproductos, $coti);
             array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
         }
-        //dd($allproductos);
-        //dd($this->indexProdAdded);
+
+        //dd($allCotizaciones);
 
         if (!$this->requisicion->cotizacion_unica) {
             if ($check != false) {
-                foreach ($allCotizaciones as $AC) {
-                    if ($AC['cotizacion_id'] == $detalle->cotizacion_id) {
-                        if (!in_array($index, $this->indexProdAdded)) {
+                //foreach ($allCotizaciones as $AC) {
+                    //if ($AC['cotizacion_id'] == $detalle->cotizacion_id) {
+                if (!in_array($index, $this->indexProdAdded)) {
+                    array_push($this->indexProdAdded, $index);
+                    //return 0;
+                //  }
+                
+                } else {
+                    //foreach ($AC['cotizaciones'] as $cot) {
+                        if (in_array($index, $this->indexProdAdded)) {
+                            $this->alert('warning', 'Ya existe un producto autorizado  ' . $index + 1 . '. ' . $detalle->producto . ' con otro proveedor');
+                            $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
+                            $errorExiste = true;
+                            //return 0;
+                        } else {
                             array_push($this->indexProdAdded, $index);
-                            break;
+                            //break;
                         }
-                    } else {
-                        foreach ($AC['cotizaciones'] as $cot) {
-                            if (in_array($index, $this->indexProdAdded)) {
-                                //$this->alert('warning', json_encode($cot));
-                                $this->alert('warning', 'Ya existe un producto autorizado  ' . $index + 1 . '. ' . $detalle->producto . ' con otro proveedor');
-                                //$this->alert('warning', json_encode($this->indexProdAdded));
-                                $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
-                                return 0;
-                            } else {
-                                array_push($this->indexProdAdded, $index);
-                                break;
-                            }
-                        }
-                    }
+                    //}
                 }
+                //}
             } else {
                 $pos = array_search($index, $this->indexProdAdded);
                 if ($pos !== false) {
                     unset($this->indexProdAdded[$pos]);
+                    $this->indexProdAdded = array_values($this->indexProdAdded); // Reorganizar claves
                 }
-                //dd($this->indexProdAdded);
+                /* if ($pos !== false) {
+                    unset($this->indexProdAdded[$pos]);
+                } */
             }
         }
 
-        if ($detalle) {
+        if ($detalle && !$errorExiste) {
             $detalle->autorizado = $check;
             $detalle->save();
 
@@ -281,20 +299,31 @@ class Autorizar extends Component
 
                 $cotizacion->save();
             }
-            //dd($this->indexProdAdded);
-        }
 
-        $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
-        foreach ($cotizacionesRequisicion as $cr) {
-            $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
-            //array_push($allproductos, $coti);
+            $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicionID)->get();
+            foreach ($cotizacionesRequisicion as $cr) {
+                $coti = DetalleCotizacion::select('id', 'producto', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
+                //array_push($allproductos, $coti);
 
-            foreach ($coti as $producto) {
-                array_push($allproductos, $producto);
+                foreach ($coti as $producto) {
+                    array_push($allproductos, $producto);
+                }
             }
         }
 
-        //dd($allproductos);
+        
+        if (!$errorExiste) {
+            $this->allDetallesSelected = [];
+            foreach ($allproductos as $allp) {
+                if ($allp['autorizado'] === 1) {
+                    array_push($this->allDetallesSelected, $allp);
+                }
+            }
+        }
+
+        $this->PreDataOrden = $this->generarPrevOrdenCompra();
+        
+        //d($this->indexProdAdded);
         $this->contieneDiesel = false;
         $this->contieneProductoDifDiesel = false;
 
@@ -307,32 +336,7 @@ class Autorizar extends Component
                 }
             }
         }
-        /* foreach($allproductos as $producto){
-            if ($producto->autorizado == 1) {
-                if ($producto['producto_id'] == 4155) {
-                    $this->contieneDiesel = true;
-                }
-            }
-        }
 
-        foreach($allproductos as $producto){
-            if ($producto['autorizado'] == 1) {
-                if ($producto['producto_id'] != 4155) {
-                    $this->contieneProductoDifDiesel = true;
-                }
-            }
-        } */
-        // $check;
-        // $objeto = ['id' => $id];
-
-
-        // if (!in_array($objeto, $this->selectedItems, true)) {
-        //     $this->selectedItems[] = $objeto;
-        // } else {
-        //     $this->selectedItems = array_values(array_filter($this->selectedItems, function ($item) use ($id) {
-        //         return $item['id'] != $id;
-        //     }));
-        // }
     }
 
     public function noAutorizar()
@@ -598,6 +602,11 @@ class Autorizar extends Component
             $this->alert('error', 'Error al agregar el comentario');
             return redirect()->route('requisicion.index');
         }
+    }
+
+    public function renderTotalProveedor($cotizacion){
+        $html = '<p>ESTE ES UN TEXTO</p>';
+        return $html;
     }
 
     public function saveComentarioFinalAutorizar()
@@ -979,7 +988,6 @@ class Autorizar extends Component
         $this->historialCommpra = $response->json();
     }
 
-
     public function agregarComentarioFinal()
     {
 
@@ -1010,8 +1018,156 @@ class Autorizar extends Component
         return redirect()->route('requisicion.index');
     }
 
+    public function generarCalculoSubtotal($id){
+        //dd($cotizacio_id);
+        $cotizacion = Cotizacion::find($id);
+        //dd($cotizacion->detalleCotizaciones);
+        $subtotal = $cotizacion->detalleCotizaciones->sum(function ($detalle) {
+            
+            return $detalle->cantidad * $detalle->precio;
+        });
+        return $subtotal;
+    }
+
+    public function generarCalculoIVA($id){
+        $cotizacion = Cotizacion::find($id);
+        return $cotizacion->detalleCotizaciones->sum(function ($detalle) {
+            return $detalle->cantidad * $detalle->precio;
+        }) * 0.16;
+    }
+
+    public function generarCalculoRetencion($id){
+        $cotizacion = Cotizacion::find($id);
+        return $cotizacion->detalleCotizaciones->sum(function ($detalle) {
+            return (($detalle->cantidad * $detalle->precio)*0.16) * ($detalle->retencion/100);
+        });
+    }
+
+    // calculo datos de tabla
+    public function generarCalculoTotalDetalle($detalle)
+    {
+        //dd($cotizacio_id);
+        //$subtotal = $detalle->cantidad * $detalle->precio;
+        $subtotal = $detalle->cantidad * $detalle->precio;
+        $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
+        $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
+        return $subtotal + $iva - $retencion;
+    }
+
+    public function generarCalculoSubtotalDetalle($detalle)
+    {
+        //dd($detalle);
+        $subtotal = $detalle->cantidad * $detalle->precio;
+        return $subtotal;
+    }
+
+    public function generarCalculoIVADetalle($detalle)
+    {
+        //$cotizacion = Cotizacion::find($id);
+        return ($detalle->cantidad * $detalle->precio) * 0.16;
+    }
+
+    public function generarCalculoRetencionDetalle($detalle)
+    {
+        //dd($detalle);
+        return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+    }
+    // FIN CALCULOS TABLA
+    //GENERAR TABLA ORDEN COMPRA PREV
+
+    public function generarPrevOrdenCompra(){
+        $arrIDCotis = [];
+        foreach($this->allDetallesSelected as $ads){
+            array_push($arrIDCotis, $ads['cotizacion_id']);
+        }
+
+        $dataPreOrder = [];
+
+        $cotizaciones = Cotizacion::with('detalleCotizaciones')->whereIn('id', $arrIDCotis)->get();
+        foreach($cotizaciones as $coti){
+            $prov = $coti['proveedor'];
+            $productos = $coti->detalleCotizaciones;
+            $formaPago = $coti['formapago'];
+            $moneda = $coti['moneda'];
+            $productosAutorizados = [];
+
+            foreach($productos as $prod){
+                if ($prod['autorizado'] === 1) {
+                    array_push($productosAutorizados, [ 'producto' => $prod['producto'], 'cantidad' => $prod['cantidad'], 'precio'=> $prod['precio'], 'retencion'=>$prod['retencion']]);
+                }
+            }
+
+            array_push($dataPreOrder, [ 'proveedor'=> $prov, 'formapago' =>$formaPago, 'moneda'=> $moneda, 'productos'=> $productosAutorizados ]);
+        }
+
+        return $dataPreOrder;
+        //dd($dataPreOrder);
+    }
+
+    public function calcularSubtotalPreOrdenProveedor($proveedor){
+        $subtotal = 0;
+        foreach($proveedor['productos'] as $producto){
+            $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
+        }
+
+        return number_format($subtotal, 2, '.', ',');
+    }
+
+    public function calcularIVAPreOrdenProveedor($proveedor){
+        $totalIva = 0;
+        foreach($proveedor['productos'] as $producto){
+            $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+        }
+
+        return number_format($totalIva, 2, '.', ',');
+    }
+
+    public function calcularTotalPreOrdenProveedor($proveedor){
+        $total = 0;
+        $totalIva = 0;
+        $retencion = 0;
+        foreach($proveedor['productos'] as $producto){
+            $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+            $total = $total + ($producto['cantidad'] * $producto['precio']);
+            $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+        }
+
+        return number_format($totalIva + $total - $retencion, 2, '.', ',');
+    }
+
+    public function calcularTotalPagarPreOrdenProveedor($proveedores){
+        $totalPagar = 0;
+        $totalIva = 0;
+        $subtotal = 0;
+        $retencion = 0;
+        foreach($proveedores as $proveedor){
+            foreach($proveedor['productos'] as $producto){
+                $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+                $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
+                $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+            }
+            $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
+            $totalIva = 0;
+            $subtotal = 0;
+        }
+
+        return number_format($totalPagar, 2, '.', ',');
+    }
+
+    public function calcularRetencionPreOrdenProveedor($proveedor){
+        $subtotal = 0;
+        foreach($proveedor['productos'] as $producto){
+            $subtotal = $subtotal + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+        }
+
+        return number_format($subtotal, 2, '.', ',');
+    }
+
     public function mount($requisicion)
     {
+        $this->allDetallesSelected = [];
+        $this->requiCalculos = $requisicion;
+        
         $user = auth()->user();
         $userSolictante = User::find($requisicion->user_id);
         $permiso = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto->id)
@@ -1024,27 +1180,21 @@ class Autorizar extends Component
             $coti = DetalleCotizacion::select('id', 'cotizacion_id', 'producto_id', 'autorizado')->where('cotizacion_id', '=', $cr->id)->get();
             array_push($allCotizaciones, ["cotizacion_id" => $cr->id, "cotizaciones" => $coti]);
         }
-
+        //dd($cotizacionesRequisicion);
         $index = 0;
         $allProcudots = [];
         foreach ($allCotizaciones as $AC) {
             foreach ($AC['cotizaciones'] as $producto) {
                 array_push($allProcudots, $producto);
                 if ($producto['autorizado'] == 1) {
+                    array_push($this->allDetallesSelected, $producto);
                     array_push($this->indexProdAdded, $index); // En caso de recargar pagina valida los index agregados previamente
-                    /* if ($producto['producto_id'] === '4155') {
-                        $this->contieneDiesel = true;
-                    } else {
-                        $this->contieneProductoDifDiesel = true;
-                    }  */
                 }
                 $index++;
             }
             $index = 0;
         }
-        //dd($this->indexProdAdded);
-        // Requisicion::with('detalleRequisiciones', 'cotizaciones.detalleCotizaciones')->find($requisicion->id);
-        //d($allProcudots);
+
         foreach ($allProcudots as $producto) {
             if ($producto->autorizado == 1) {
                 if ($producto->producto_id == 4155) {
@@ -1054,29 +1204,17 @@ class Autorizar extends Component
                 }
             }
         }
-        /* foreach ($allProcudots as $producto) {
-            if ($producto->autorizado == 1) {
-                if ($producto->producto_id == 4155) {
-                    $this->contieneDiesel = true;
-                }
-            }
-        }
-
-        foreach ($allProcudots as $producto) {
-            if ($producto->autorizado == 1) {
-                if ($producto->producto_id != 4155) {
-                    $this->contieneProductoDifDiesel = true;
-                }
-            }
-        } */
 
         $this->urlApi = ApiUrl::urlApi();
         $this->requisicion = $requisicion;
+
+        $this->PreDataOrden = $this->generarPrevOrdenCompra();
 
         $this->visto();
     }
     public function render()
     {
+        $this->PreDataOrden = $this->generarPrevOrdenCompra();
         return view('livewire.requisicion.autorizar');
     }
 }
