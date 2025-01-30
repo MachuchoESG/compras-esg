@@ -164,8 +164,11 @@
                                 </p>
                             </div>
                             <div class="col-3">
-                                <p class="text-center">
+                                <p class="text-center m-0">
                                     Moneda: {{ $cotizacion['moneda'] === '' ? 'MXN' : $cotizacion['moneda'] }}
+                                </p>
+                                <p class="text-center m-0">
+                                    Valor Peso: {{ number_format($valorPeso, 2, '.', ',') }}
                                 </p>
                             </div>
                         </div>
@@ -174,7 +177,7 @@
 
                 </div>
                 <div style="table-responsive">
-                    <table class="w-full text-sm text-gray-500 mb-3" style="min-width: 1000px">
+                    <table class="w-full text-sm text-gray-500 mb-3 table">
                         <thead class=" bg-gray-50">
                             <tr class="text-center">
                                 <th scope="col" class="md:px-6 md:py-3">
@@ -208,7 +211,7 @@
                             @foreach ($cotizacion->detalleCotizaciones as $detalle)
                                 <tr class="bg-white border-b">
                                     <td class="md:px-6 md:py-3 col-2 col-md-3">
-                                        {{ $detalle['producto'] }} + {{$loop->index}}
+                                        {{ $detalle['producto'] }} + {{ $loop->index }}
                                     </td>
                                     <td class="md:px-6 md:py-3 text-center">
                                         {{ $detalle['cantidad'] }}
@@ -241,14 +244,17 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @if(count($cotizacion->detalleCotizaciones) === $loop->index +1)
-                                <tr class=" bg-black text-white">
-                                    <td colspan="6" class="fw-bold md:px-6 md:py-3">TOTAL COTIZACION</td>
-                                    <td class="fw-bold md:px-6 md:py-3 text-center">${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}</td>
-                                </tr>
+                                @if (count($cotizacion->detalleCotizaciones) === $loop->index + 1)
+                                    <tr class="">
+                                        <td colspan="6" class="fw-bold md:px-6 md:py-3">TOTAL COTIZACION
+                                        </td>
+                                        <td class="fw-bold md:px-6 md:py-3 text-center">
+                                            ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                        </td>
+                                    </tr>
                                 @endif
                             @endforeach
-                            
+
 
                         </tbody>
                     </table>

@@ -129,12 +129,10 @@ class CotizacionShowForm extends Form
     public function guardarCotizacion()
     {
 
+        
         //dd($this->requisicion->detalleRequisiciones);
 
         $this->validate();
-
-
-
 
         if ($this->requisicion && $this->requisicion->exists) {
 
@@ -163,6 +161,8 @@ class CotizacionShowForm extends Form
                 'comentarios',
                 'moneda'
             ));
+
+
 
             // Crear los detalles de la cotización
             $detalleConPrecios = $this->requisicion->detalleRequisiciones->map(function ($detalle) use ($cotizacion) {

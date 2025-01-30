@@ -8,11 +8,13 @@ use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
 use App\Models\DetalleRequisicion;
+use App\Models\Divisa;
 use App\Models\Requisicion;
 use App\Models\User;
 use App\Service\ApiUrl;
 use App\Service\ProductoService;
 use App\Service\ProveedorService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +58,7 @@ class Show extends Component
 
     public $detalleid;
     public $detalle;
+    public $valorPeso = 0;
 
 
 
@@ -383,7 +386,7 @@ class Show extends Component
     {
         //dd($id);
         $cotizacion = Cotizacion::find($id);
-        //dd($cotizacion);
+        // dd($cotizacion);
     }
 
     public function updateProducto($producto_id, $producto_name, $detalle_id)
@@ -411,13 +414,56 @@ class Show extends Component
 
         return view('livewire.cotizacion.show');
     }
+
     public function save()
     {
         //dd( $this->cotizacion->retenciones);
 
         $this->cotizacion->requisicion_id = $this->requisicionId;
         //dd($this->cotizacion);
-        
+
+        if ($this->cotizacion->moneda === 'USD') {
+            $cambioDivisaActual = Divisa::select('*')->where('moneda', 'USD')->where('created_at', Carbon::now())->orderBy('created_at', 'desc')->first();
+            if ($cambioDivisaActual) {
+                if ($cambioDivisaActual && Carbon::parse($cambioDivisaActual->created_at)->isSameDay(Carbon::now())) {
+                    $this->valorPeso = $cambioDivisaActual->valor;
+                } else {
+                    $apiKey = env('BANXICO_API_KEY');
+                    $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
+                    try {
+                        $response = Http::withHeaders([
+                            'Bmx-Token' => $apiKey,
+                        ])->get($url);
+
+                        if ($response->successful()) {
+                            $dataAPI = $response->json();
+                            $dataContent = $dataAPI['bmx']['series'][0]['datos'];
+
+                            $fechaFIX = $dataContent[0]['fecha'];
+                            $valueFIX = $dataContent[0]['dato'];
+                            $monedaFIX = 'USD';
+                            $divisaADD = Divisa::create([
+                                'moneda' => $monedaFIX,
+                                'fecha_fix' => $fechaFIX,
+                                'valor' => $valueFIX,
+                            ]);
+                            $this->valorPeso = $divisaADD->valor;
+                        } else {
+                            return [
+                                'error' => 'No se pudo obtener la información de Banxico.',
+                                'status' => $response->status(),
+                            ];
+                        }
+                    } catch (\Exception $e) {
+                        return [
+                            'error' => 'Hubo un problema al conectarse con la API.',
+                            'message' => $e->getMessage(),
+                        ];
+                    }
+                }
+            }
+        }
+
         if ($this->esCotizacionUnica) { // valida en caso de que se abra el modal de agregar cotizacion si es Cotizacion Unica
             $this->alert('error', 'No se puede dar de alta nueva cotizacion si se marco "Cotizacion Unica"');
             return view('livewire.cotizacion.show');
@@ -470,7 +516,12 @@ class Show extends Component
         //$subtotal = $detalle->cantidad * $detalle->precio;
         $subtotal = $detalle->cantidad * $detalle->precio;
         $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
-        $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
+        if ($detalle['retencion'] && $detalle['retencion'] !== null && $detalle['retencion'] > 0) {
+            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion'] / 100);
+        } else {
+            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16);
+        }
+
         return $subtotal + $iva - $retencion;
     }
 
@@ -490,12 +541,14 @@ class Show extends Component
     public function generarCalculoRetencion($detalle)
     {
         //dd($detalle);
-        return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+        return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion'] / 100);
     }
 
-    public function generarTotalCotizacion($detalles = []){
+    public function generarTotalCotizacion($detalles = [])
+    {
+        //dd($detalles); 
         $total = 0;
-        foreach($detalles as $detalle){
+        foreach ($detalles as $detalle) {
             $subtotal = 0;
             $subtotal = $this->generarCalculoTotal($detalle);
             $total = $total + $subtotal;
@@ -506,7 +559,9 @@ class Show extends Component
     public function mount()
     {
 
-
+        $divisaPeso = Divisa::select('*')->where('moneda', 'USD')->orderBy('created_at', 'desc')->first();
+        //dd($divisaPeso);
+        $this->valorPeso = $divisaPeso->valor;
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
 
 
