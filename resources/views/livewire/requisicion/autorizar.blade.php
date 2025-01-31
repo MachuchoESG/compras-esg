@@ -92,7 +92,7 @@
                                                     id="{{ $detalle['id'] }}">
                                             </td>
                                             <td class="px-6 py-4">
-                                                {{ $loop->index + 1 }}. {{ $detalle['producto'] }}
+                                                {{ $loop->index + 1 }}. {{ $detalle['producto'] . '- ' . $detalle['producto_id'] }}
                                             </td>
                                             <td class="px-6 py-4">
                                                 ${{ $detalle['precio'] }}
@@ -117,13 +117,38 @@
                 </div> --}}
 
                 <div class="my-3 d-flex justify-between">
+                    @php
+                        $puedeAutorizar = $totalPermitidoAutorizar > $this->obtenerTotalAutorizar();
+                        $esSoloDiesel = $contieneDiesel && !$contieneProductoDifDiesel;
+                    @endphp
+                    {{-- @if($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
+                        <p>autorizado monto - {{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() }}</p>
+                        <div>
+                            <p>monto: {{$this->obtenerTotalAutorizar()}}</p>
+                            <p>maximo: {{$totalPermitidoAutorizar}}</p>
+                        </div>
+                    @endif
+                    
+                    @if($esSoloDiesel)
+                        <p>contiene diesel</p>
+                    @endif
 
-                    @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar() || ($contieneDiesel && !$contieneProductoDifDiesel))
+                    @if($contieneProductoDifDiesel)
+                        <p>contienededif diesel</p>
+                    @endif --}}
+
+                    @if ($puedeAutorizar || $esSoloDiesel)
+                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
+                    @else
+                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente Nivel</x-button>
+                    @endif
+
+                    {{-- @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar() || ($contieneDiesel && !$contieneProductoDifDiesel))
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
                     @else
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente
                             Nivel</x-button>
-                    @endif
+                    @endif --}}
 
                     <x-danger-button wire:click.prevent="noAutorizar">No autorizar</x-danger-button>
                     <x-button wire:click.prevent="volverCotizar">Volver a cotizar</x-button>
