@@ -209,7 +209,7 @@ class Autorizar extends Component
             });
         }
 
-        return $totalrequisicion;
+        return $totalrequisicion + ($totalrequisicion*0.16);
     }
 
     public function updateCantidad($id, $cantidad)
@@ -333,7 +333,8 @@ class Autorizar extends Component
             if ($producto->autorizado == 1) {
                 if ($producto->producto_id == 4155) {
                     $this->contieneDiesel = true;
-                } elseif ($producto->producto_id != 4155) {
+                }
+                if ($producto->producto_id != 4155) {
                     $this->contieneProductoDifDiesel = true;
                 }
             }
@@ -1312,12 +1313,14 @@ class Autorizar extends Component
             }
             $index = 0;
         }
-
         foreach ($allProcudots as $producto) {
             if ($producto->autorizado == 1) {
                 if ($producto->producto_id == 4155) {
+                    //dd('tiene diesel');
                     $this->contieneDiesel = true;
-                } elseif ($producto->producto_id != 4155) {
+                }
+                if ($producto->producto_id != 4155) {
+                    //dd('no contiene tiene diesel');
                     $this->contieneProductoDifDiesel = true;
                 }
             }
