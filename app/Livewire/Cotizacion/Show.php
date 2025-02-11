@@ -415,19 +415,63 @@ class Show extends Component
         return view('livewire.cotizacion.show');
     }
 
+    public function validarDivisa()
+    {
+        $apiKey = env('BANXICO_API_KEY');
+        $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
+        try {
+            $response = Http::withHeaders([
+                'Bmx-Token' => $apiKey,
+            ])->get($url);
+
+            if ($response->successful()) {
+                $dataAPI = $response->json();
+                $dataContent = $dataAPI['bmx']['series'][0]['datos'];
+
+                $fechaFIX = $dataContent[0]['fecha'];
+                $valueFIX = $dataContent[0]['dato'];
+                $monedaFIX = 'USD';
+                $divisaADD = Divisa::create([
+                    'moneda' => $monedaFIX,
+                    'fecha_fix' => $fechaFIX,
+                    'valor' => $valueFIX,
+                ]);
+                $this->valorPeso = $divisaADD->valor;
+                return ['error' => '', 'status' => $divisaADD];
+            } else {
+                return [
+                    'error' => 'No se pudo obtener la información de Banxico.',
+                    'status' => $response->status(),
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Hubo un problema al conectarse con la API.',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
     public function save()
     {
-        //dd( $this->cotizacion->retenciones);
+        /* $cambioDivisaActual = Divisa::select('*')->where('moneda', 'USD')->where('created_at', Carbon::now())->orderBy('created_at', 'desc')->first();
+        dd( $cambioDivisaActual); */
 
         $this->cotizacion->requisicion_id = $this->requisicionId;
         //dd($this->cotizacion);
 
         if ($this->cotizacion->moneda === 'USD') {
-            $cambioDivisaActual = Divisa::select('*')->where('moneda', 'USD')->where('created_at', Carbon::now())->orderBy('created_at', 'desc')->first();
+            $cambioDivisaActual = Divisa::whereDate('created_at', Carbon::today())
+            ->where('moneda', 'USD')
+            ->orderBy('created_at', 'desc')
+            ->first();
+            //dd($cambioDivisaActual);
             if ($cambioDivisaActual) {
-                if ($cambioDivisaActual && Carbon::parse($cambioDivisaActual->created_at)->isSameDay(Carbon::now())) {
+                if (Carbon::parse($cambioDivisaActual->created_at)->isSameDay(Carbon::now())) {
+                    //dd('hay dato actual');
                     $this->valorPeso = $cambioDivisaActual->valor;
                 } else {
+                    //dd('no hay dato');
                     $apiKey = env('BANXICO_API_KEY');
                     $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
                     try {
@@ -460,6 +504,39 @@ class Show extends Component
                             'message' => $e->getMessage(),
                         ];
                     }
+                }
+            } else {
+                $apiKey = env('BANXICO_API_KEY');
+                $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
+                try {
+                    $response = Http::withHeaders([
+                        'Bmx-Token' => $apiKey,
+                    ])->get($url);
+
+                    if ($response->successful()) {
+                        $dataAPI = $response->json();
+                        $dataContent = $dataAPI['bmx']['series'][0]['datos'];
+
+                        $fechaFIX = $dataContent[0]['fecha'];
+                        $valueFIX = $dataContent[0]['dato'];
+                        $monedaFIX = 'USD';
+                        $divisaADD = Divisa::create([
+                            'moneda' => $monedaFIX,
+                            'fecha_fix' => $fechaFIX,
+                            'valor' => $valueFIX,
+                        ]);
+                        $this->valorPeso = $divisaADD->valor;
+                    } else {
+                        return [
+                            'error' => 'No se pudo obtener la información de Banxico.',
+                            'status' => $response->status(),
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    return [
+                        'error' => 'Hubo un problema al conectarse con la API.',
+                        'message' => $e->getMessage(),
+                    ];
                 }
             }
         }
@@ -512,14 +589,13 @@ class Show extends Component
 
     public function generarCalculoTotal($detalle)
     {
-        //dd($cotizacio_id);
-        //$subtotal = $detalle->cantidad * $detalle->precio;
+
         $subtotal = $detalle->cantidad * $detalle->precio;
         $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
         if ($detalle['retencion'] && $detalle['retencion'] !== null && $detalle['retencion'] > 0) {
-            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion'] / 100);
+            $retencion = $iva * ($detalle['retencion'] / 100);
         } else {
-            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16);
+            $retencion = 0;
         }
 
         return $subtotal + $iva - $retencion;
@@ -556,12 +632,69 @@ class Show extends Component
         return $total;
     }
 
+    public function generarTotalCotizacionDivisa($detalles = [])
+    {
+        //dd($detalles); 
+        $total = 0;
+        foreach ($detalles as $detalle) {
+            $subtotal = 0;
+            $subtotal = $this->generarCalculoTotalDivisas($detalle);
+            $total = $total + $subtotal;
+        }
+        return $total;
+    }
+
+    public function generarCalculoRetencionDivisa($detalle)
+    {
+        //dd($detalle);
+        return ((($detalle['cantidad'] * ($detalle['precio'] * $this->valorPeso))) * 0.16) * ($detalle['retencion'] / 100);
+    }
+
+    public function generarCalculoIVADivisa($detalle)
+    {
+        return ($detalle->cantidad * ($detalle->precio * $this->valorPeso)) * 0.16;
+    }
+
+    public function generarCalculoSubtotalDivisa($detalle)
+    {
+        //dd($detalle);
+        $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
+        return $subtotal;
+    }
+
+    public function generarCalculoTotalDivisas($detalle)
+    {
+        $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
+        $iva = $subtotal * 0.16;
+        if ($detalle['retencion'] && $detalle['retencion'] !== null && $detalle['retencion'] > 0) {
+            $retencion = $iva * ($detalle['retencion'] / 100);
+        } else {
+            $retencion = 0;
+        }
+
+        return $subtotal + $iva - $retencion;
+    }
+
     public function mount()
     {
 
-        $divisaPeso = Divisa::select('*')->where('moneda', 'USD')->orderBy('created_at', 'desc')->first();
+        $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
+        ->where('moneda', 'USD')
+        ->orderBy('created_at', 'desc')
+        ->first();
         //dd($divisaPeso);
-        $this->valorPeso = $divisaPeso->valor;
+        if ($divisaPeso) {
+            $this->valorPeso = $divisaPeso->valor;
+        } else {
+            //dd('no hay moneda');
+            $respValorDivisa = $this->validarDivisa();
+            if ($respValorDivisa['error'] != '') {
+                $this->valorPeso = $respValorDivisa['status']['valor'];
+            } else {
+                dd($respValorDivisa['error']);
+            }
+        }
+
         $this->requisicion = $requisicion = Requisicion::with('cotizaciones')->find($this->requisicionId);
 
 

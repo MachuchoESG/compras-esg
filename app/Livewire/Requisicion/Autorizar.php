@@ -7,6 +7,7 @@ use App\Models\Autorizacionhistorial;
 use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
+use App\Models\Divisa;
 use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use App\Models\User;
@@ -55,6 +56,7 @@ class Autorizar extends Component
     public $IVA = 0;
     public $retencion = 0;
     public $TotalCotizacion = 0;
+    public $valorPeso = 0;
 
     public function download($id)
     {
@@ -1044,33 +1046,54 @@ class Autorizar extends Component
     }
 
     // calculo datos de tabla
-    public function generarCalculoTotalDetalle($detalle)
+    public function generarCalculoTotalDetalle($detalle, $moneda = 'MXN')
     {
-        //dd($cotizacio_id);
-        //$subtotal = $detalle->cantidad * $detalle->precio;
-        $subtotal = $detalle->cantidad * $detalle->precio;
-        $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
-        $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
-        return $subtotal + $iva - $retencion;
+        if ($moneda == 'MXN') {
+            $subtotal = $detalle->cantidad * $detalle->precio;
+            $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
+            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
+            return $subtotal + $iva - $retencion;
+        } else {
+            $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
+            $iva = ($detalle->cantidad * ($detalle->precio * $this->valorPeso)) * 0.16;
+            $retencion = ((($detalle['cantidad'] * ($detalle->precio * $this->valorPeso))) * .16) * ($detalle['retencion']/100);
+            return $subtotal + $iva - $retencion;
+        }
     }
+        
 
-    public function generarCalculoSubtotalDetalle($detalle)
+    public function generarCalculoSubtotalDetalle($detalle, $moneda = 'MXN')
     {
         //dd($detalle);
-        $subtotal = $detalle->cantidad * $detalle->precio;
+        if ($moneda == 'MXN') {
+            $subtotal = $detalle->cantidad * $detalle->precio;
+        } else {
+            $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
+        }
+        
         return $subtotal;
     }
 
-    public function generarCalculoIVADetalle($detalle)
+    public function generarCalculoIVADetalle($detalle, $moneda = 'MXN')
     {
         //$cotizacion = Cotizacion::find($id);
-        return ($detalle->cantidad * $detalle->precio) * 0.16;
+        if ($moneda == 'MXN'){
+            return ($detalle->cantidad * $detalle->precio) * 0.16;
+        } else {
+            return ($detalle->cantidad * ($detalle->precio * $this->valorPeso)) * 0.16;
+        }
+        
     }
 
-    public function generarCalculoRetencionDetalle($detalle)
+    public function generarCalculoRetencionDetalle($detalle,  $moneda = 'MXN')
     {
         //dd($detalle);
-        return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+        if ($moneda) {
+            return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+        } else {
+            return ((($detalle['cantidad'] * ($detalle['precio'] * $this->valorPeso))) * 0.16) * ($detalle['retencion']/100);
+        }
+        
     }
     // FIN CALCULOS TABLA
     //GENERAR TABLA ORDEN COMPRA PREV
@@ -1106,17 +1129,31 @@ class Autorizar extends Component
 
     public function calcularSubtotalPreOrdenProveedor($proveedor){
         $subtotal = 0;
-        foreach($proveedor['productos'] as $producto){
-            $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
+        //dd($proveedor);
+        if ($proveedor['moneda'] == 'MXN') {
+            foreach($proveedor['productos'] as $producto){
+                $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
+            }
+        } else {
+            foreach($proveedor['productos'] as $producto){
+                $subtotal = $subtotal + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
+            }
         }
+        
 
         return number_format($subtotal, 2, '.', ',');
     }
 
     public function calcularIVAPreOrdenProveedor($proveedor){
         $totalIva = 0;
-        foreach($proveedor['productos'] as $producto){
-            $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+        if ($proveedor['moneda'] == 'MXN'){
+            foreach($proveedor['productos'] as $producto){
+                $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+            }
+        } else {
+            foreach($proveedor['productos'] as $producto){
+                $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
+            }
         }
 
         return number_format($totalIva, 2, '.', ',');
@@ -1126,29 +1163,54 @@ class Autorizar extends Component
         $total = 0;
         $totalIva = 0;
         $retencion = 0;
-        foreach($proveedor['productos'] as $producto){
-            $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
-            $total = $total + ($producto['cantidad'] * $producto['precio']);
-            $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+        if ($proveedor['moneda'] == 'MXN') {
+            foreach($proveedor['productos'] as $producto){
+                $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+                $total = $total + ($producto['cantidad'] * $producto['precio']);
+                $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+            }
+        } else {
+            foreach($proveedor['productos'] as $producto){
+                $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
+                $total = $total + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
+                $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso))* 0.16) * $producto['retencion']/100);
+            }
         }
+        
 
         return number_format($totalIva + $total - $retencion, 2, '.', ',');
     }
 
     public function calcularTotalPagarPreOrdenProveedor($proveedores){
+        //dd($proveedores);
         $totalPagar = 0;
         $totalIva = 0;
         $subtotal = 0;
         $retencion = 0;
         foreach($proveedores as $proveedor){
-            foreach($proveedor['productos'] as $producto){
-                $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
-                $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
-                $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+            if ($proveedor['moneda'] == 'MXN') {
+                foreach($proveedor['productos'] as $producto){
+                    $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
+                    $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
+                    $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+                }
+               /*  $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
+                $totalIva = 0;
+                $subtotal = 0; */
+            } else {
+                foreach($proveedor['productos'] as $producto){
+                    $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
+                    $subtotal = $subtotal + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
+                    $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso))* 0.16) * $producto['retencion']/100);
+                }
+                /* $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
+                $totalIva = 0;
+                $subtotal = 0; */
             }
             $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
             $totalIva = 0;
             $subtotal = 0;
+            
         }
 
         return number_format($totalPagar, 2, '.', ',');
@@ -1163,10 +1225,66 @@ class Autorizar extends Component
         return number_format($subtotal, 2, '.', ',');
     }
 
+    public function validarDivisa()
+    {
+        $apiKey = env('BANXICO_API_KEY');
+        $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
+        try {
+            $response = Http::withHeaders([
+                'Bmx-Token' => $apiKey,
+            ])->get($url);
+
+            if ($response->successful()) {
+                $dataAPI = $response->json();
+                $dataContent = $dataAPI['bmx']['series'][0]['datos'];
+
+                $fechaFIX = $dataContent[0]['fecha'];
+                $valueFIX = $dataContent[0]['dato'];
+                $monedaFIX = 'USD';
+                $divisaADD = Divisa::create([
+                    'moneda' => $monedaFIX,
+                    'fecha_fix' => $fechaFIX,
+                    'valor' => $valueFIX,
+                ]);
+                $this->valorPeso = $divisaADD->valor;
+                return ['error' => '', 'status' => $divisaADD];
+            } else {
+                return [
+                    'error' => 'No se pudo obtener la información de Banxico.',
+                    'status' => $response->status(),
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Hubo un problema al conectarse con la API.',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
     public function mount($requisicion)
     {
         $this->allDetallesSelected = [];
         $this->requiCalculos = $requisicion;
+
+        //DIVISA 
+        $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
+        ->where('moneda', 'USD')
+        ->orderBy('created_at', 'desc')
+        ->first();
+        //dd($divisaPeso);
+        if ($divisaPeso) {
+            $this->valorPeso = $divisaPeso->valor; 
+        } else {
+            //dd('no hay moneda');
+            $respValorDivisa = $this->validarDivisa();
+            if ($respValorDivisa['error'] != '') {
+                dd($respValorDivisa);
+            } else {
+                
+                $this->valorPeso = $respValorDivisa['status']['valor'];
+            }
+        }
         
         $user = auth()->user();
         $userSolictante = User::find($requisicion->user_id);

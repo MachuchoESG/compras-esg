@@ -3,7 +3,7 @@
     <livewire:requisicion.component.informacion-requisicion :requisicion="$requisicion" />
 
     <div>
-        <div class="card p-3 table-responsive">
+        <div class="card p-3 table-responsive mb-3">
             {{-- <button wire:click="showDD">ver indexes</button> --}}
             <h4>Orden de Compra a Generar</h4>
             <table class="w-full text-sm text-gray-500 mb-3" style="min-width: 800px">
@@ -19,24 +19,28 @@
                 <tbody class="table-group-divider">
                     {{-- {{ $this->generarPrevOrdenCompra() }} --}}
                     @foreach ($this->PreDataOrden as $pre)
-                    <tr>
-                        <td >{{ $pre['proveedor'] }}</td>
-                        <td class="text-end"> ${{ $this->calcularSubtotalPreOrdenProveedor($pre) }} </td>
-                        <td class="text-end"> ${{ $this->calcularIVAPreOrdenProveedor($pre) }}</td>
-                        <td class="text-end"> ${{ $this->calcularRetencionPreOrdenProveedor($pre) }}</td>
-                        <td class="text-end"> ${{ $this->calcularTotalPreOrdenProveedor($pre) }}</td>
-                    </tr>    
+                        <tr>
+                            <td>{{ $pre['proveedor'] }}</td>
+                            <td class="text-end"> ${{ $this->calcularSubtotalPreOrdenProveedor($pre) }} </td>
+                            <td class="text-end"> ${{ $this->calcularIVAPreOrdenProveedor($pre) }}</td>
+                            <td class="text-end"> ${{ $this->calcularRetencionPreOrdenProveedor($pre) }}</td>
+                            <td class="text-end"> ${{ $this->calcularTotalPreOrdenProveedor($pre) }}</td>
+                        </tr>
                     @endforeach
                     <tr>
-                        <td colspan="12"><p></p></td>
+                        <td colspan="12">
+                            <p></p>
+                        </td>
                         {{-- <td class="text-end fw-bold">Maximo Autorizar: ${{ number_format($totalPermitidoAutorizar, 2, '.', ',') }}</td> --}}
                     </tr>
                     <tr class="bg-black text-white">
                         {{-- <td colspan="" class="text-start fw-bold"></td> --}}
                         <td colspan="12" class="text-end fw-bold">
-                            <p class="m-0">Total Pagar: ${{ $this->calcularTotalPagarPreOrdenProveedor($this->PreDataOrden) }}</p>
-                            <p class="m-0">Maximo Autorizar: ${{ number_format($totalPermitidoAutorizar, 2, '.', ',') }}</p>
-                        
+                            <p class="m-0">Total Pagar:
+                                ${{ $this->calcularTotalPagarPreOrdenProveedor($this->PreDataOrden) }}</p>
+                            <p class="m-0">Maximo Autorizar:
+                                ${{ number_format($totalPermitidoAutorizar, 2, '.', ',') }}</p>
+
                         </td>
                     </tr>
                 </tbody>
@@ -49,25 +53,31 @@
         </div>
         @if ($requisicion->cotizaciones->count() != 0)
             <form wire:submit.prevent="continuarAutorizar()">
-                <div class="w-full p-2">
+                <div class="w-full card p-2">
                     @foreach ($requisicion->cotizaciones as $cotizacion)
-                        <div class="row bg-gray-50">
-                            <div class="col-3 text-center p-3">
-                                <p>
+                        <div class="row bg-black text-white mx-0 rounded-3">
+                            <div class="col-3 text-center my-2">
+                                <p class="m-0">
                                     Proveedor: {{ $cotizacion['proveedor'] }}
                                 </p>
                             </div>
-                            <div class="col-3 text-center p-3">
-                                <p>
+                            <div class="col-3 text-center my-2">
+                                <p class="m-0">
                                     Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
                                 </p>
                             </div>
-                            <div class="col-3 text-center p-3">
+                            <div class="col-2 text-center my-2">
                                 Tipo Moneda: {{ $cotizacion['moneda'] }}
                             </div>
+                            <div class="col-3 text-center my-2">
+                                @if($cotizacion['moneda'] == 'USD')
+                                    Valor Divisa: {{ number_format($this->valorPeso, 2, '.', ',') }}
+                                @endif
+                            </div>
                             <div
-                                class="col-3 p-3 d-flex justify-content-end algin-items-sm-start algin-items-md-center  pe-5 pt-2">
-                                <button wire:click.prevent="download({{ $cotizacion->id }})" class="btn" style="height: 50%">
+                                class="col-1 d-flex justify-content-end algin-items-sm-start algin-items-center">
+                                <button wire:click.prevent="download({{ $cotizacion->id }})" class="btn text-white"
+                                    style="height: 50%">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
                                         <path
@@ -77,7 +87,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            <div class="col text-center">
+                            {{-- <div class="col text-center">
                                 <p>Subtotal:
                                     ${{ number_format($this->generarCalculoSubtotal($cotizacion->id), 2, '.', ',') }}
                                 </p>
@@ -104,18 +114,18 @@
                                         ',',
                                     ) }}
                                 </p>
-                            </div>
-                            <div class="col text-center">
+                            </div> --}}
+                            {{-- <div class="col text-center">
                                 <p class="">
                                     Maximo a Autorizar =
                                     ${{ number_format($totalPermitidoAutorizar, 2, '.', ',') }}
                                 </p>
-                            </div>
+                            </div> --}}
 
                         </div>
                         <div class="table-responsive">
                             <table class="w-full text-sm text-gray-500 mb-3" style="min-width: 800px">
-                                <thead class="text-md font-bold uppercase bg-gray-50">
+                                <thead class="text-md font-bold uppercase">
                                     <tr class="text-center">
                                         <th scope="col" class="px-6 py-3">
                                         </th>
@@ -128,6 +138,11 @@
                                         <th scope="col" class="px-6 py-3">
                                             Precio Unidad
                                         </th>
+                                        @if($cotizacion["moneda"] === 'USD') 
+                                        <th scope="col" class="px-6 py-3">
+                                            Precio Divisa
+                                        </th>
+                                        @endif
                                         <th scope="col" class="px-6 py-3">
                                             SubTotal
                                         </th>
@@ -166,25 +181,50 @@
                                                         wire:change="updateCantidad( {{ $detalle['id'] }} , $event.target.value)"
                                                         type="number" value="{{ $detalle['cantidad'] }}"
                                                         class="form-control-sm" id="{{ $detalle['id'] }}">
-                                                </td>
+                                                </td> 
                                                 <td class="px-6 py-2">
                                                     {{ $loop->index + 1 }}. {{ $detalle['producto'] }}
                                                 </td>
                                                 <td class="px-6 py-2 text-center">
-                                                    ${{ number_format($detalle['precio'], 2, '.', ',') }}
+                                                    ${{ number_format($detalle['precio'], 2, '.', ',') }} 
                                                 </td>
+                                                @if($cotizacion->moneda == 'USD') 
                                                 <td class="px-6 py-2 text-center">
+                                                    ${{ number_format(($detalle['precio'] * $this->valorPeso), 2, '.', ',') }}
+                                                </td>
+                                                @endif
+                                                <td class="px-6 py-2 text-center">
+                                                    @if($cotizacion->moneda == 'USD')
+                                                    ${{ number_format($this->generarCalculoSubtotalDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
+                                                    @else
                                                     ${{ number_format($this->generarCalculoSubtotalDetalle($detalle), 2, '.', ',') }}
+                                                    @endif
+                                                    
                                                 </td>
                                                 <td class="text-center">
+                                                    @if($cotizacion->moneda == 'USD')
+                                                    ${{ number_format($this->generarCalculoIVADetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
+                                                    @else
                                                     ${{ number_format($this->generarCalculoIVADetalle($detalle), 2, '.', ',') }}
+                                                    @endif
+                                                    
                                                 </td>
                                                 <td class="text-center">
+                                                    @if($cotizacion->moneda == 'USD')
+                                                    ${{ number_format($this->generarCalculoRetencionDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
+                                                    @else
                                                     ${{ number_format($this->generarCalculoRetencionDetalle($detalle), 2, '.', ',') }}
+                                                    @endif
+                                                    
                                                 </td>
 
                                                 <td class="px-6 py-2 text-center">
+                                                    @if($cotizacion->moneda == 'USD')
+                                                    ${{ number_format($this->generarCalculoTotalDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
+                                                    @else
                                                     ${{ number_format($this->generarCalculoTotalDetalle($detalle), 2, '.', ',') }}
+                                                    @endif
+                                                    
                                                 </td>
                                                 <td class="px-6 py-2 text-center">
                                                     <a href="#"

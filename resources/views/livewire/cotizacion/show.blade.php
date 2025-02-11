@@ -100,8 +100,6 @@
                                                         </div>
                                                     </x-dropdown-link>
 
-
-
                                                 </div>
                                             </x-slot>
                                         </x-dropdown>
@@ -176,8 +174,8 @@
                     </div>
 
                 </div>
-                <div style="table-responsive">
-                    <table class="w-full text-sm text-gray-500 mb-3 table">
+                <div style="table-responsive" style="">
+                    <table class="table text-sm text-gray-500 mb-3" style="overflow-x: auto">
                         <thead class=" bg-gray-50">
                             <tr class="text-center">
                                 <th scope="col" class="md:px-6 md:py-3">
@@ -189,14 +187,19 @@
                                 <th scope="col" class="md:px-6 md:py-3">
                                     Precio Unidad
                                 </th>
+                                @if ($cotizacion['moneda'] === 'USD')
+                                    <th scope="col" class="md:px-6 md:py-3">
+                                        Precio MXN
+                                    </th>
+                                @endif
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Subtotal
+                                </th>
                                 <th scope="col" class="md:px-6 md:py-3">
                                     IVA
                                 </th>
                                 <th scope="col" class="md:px-6 md:py-3">
                                     Retención
-                                </th>
-                                <th scope="col" class="md:px-6 md:py-3">
-                                    Subotal
                                 </th>
                                 <th scope="col" class="md:px-6 md:py-3">
                                     Total
@@ -211,7 +214,7 @@
                             @foreach ($cotizacion->detalleCotizaciones as $detalle)
                                 <tr class="bg-white border-b">
                                     <td class="md:px-6 md:py-3 col-2 col-md-3">
-                                        {{ $detalle['producto'] }} + {{ $loop->index }}
+                                        {{ $detalle['producto'] }}
                                     </td>
                                     <td class="md:px-6 md:py-3 text-center">
                                         {{ $detalle['cantidad'] }}
@@ -219,17 +222,43 @@
                                     <td class="md:px-6 md:py-3 text-center">
                                         ${{ number_format($detalle['precio'], 2, '.', ',') }}
                                     </td>
-                                    <td class="text-center">
-                                        ${{ number_format($this->generarCalculoIVA($detalle), 2, '.', ',') }}
-                                    </td>
-                                    <td class="text-center">
-                                        ${{ number_format($this->generarCalculoRetencion($detalle), 2, '.', ',') }}
-                                    </td>
+                                    @if ($cotizacion['moneda'] === 'USD')
+                                        <td class="md:px-6 md:py-3 text-center">
+                                            ${{ number_format($detalle['precio'] * $this->valorPeso, 2, '.', ',') }}
+                                        </td>
+                                    @endif
                                     <td class="md:px-6 md:py-3 text-center">
-                                        ${{ number_format($this->generarCalculoSubtotal($detalle), 2, '.', ',') }}
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoSubtotalDivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoSubtotal($detalle), 2, '.', ',') }}
+                                        @endif
+
                                     </td>
+                                    <td class="text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoIVADivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoIVA($detalle), 2, '.', ',') }}
+                                        @endif
+
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoRetencionDivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoRetencion($detalle), 2, '.', ',') }}
+                                        @endif
+
+                                    </td>
+                                    
                                     <td class="md:px-6 md:py-3 text-center">
-                                        ${{ number_format($this->generarCalculoTotal($detalle), 2, '.', ',') }}
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoTotalDivisas($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoTotal($detalle), 2, '.', ',') }}
+                                        @endif
+
                                     </td>
                                     <td>
                                         <div class="flex justify-around items-center">
@@ -246,10 +275,24 @@
                                 </tr>
                                 @if (count($cotizacion->detalleCotizaciones) === $loop->index + 1)
                                     <tr class="">
-                                        <td colspan="6" class="fw-bold md:px-6 md:py-3">TOTAL COTIZACION
-                                        </td>
-                                        <td class="fw-bold md:px-6 md:py-3 text-center">
-                                            ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            <td colspan="7" class="fw-bold md:px-6 md:py-3"
+                                                style="background-color: black; color: white;">TOTAL COTIZACION
+                                            </td>
+                                        @else
+                                            <td colspan="6" class="fw-bold md:px-6 md:py-3"
+                                                style="background-color: black; color: white;">TOTAL COTIZACION
+                                            </td>
+                                        @endif
+
+                                        <td class="fw-bold md:px-6 md:py-3 text-center"
+                                            style="background-color: black; color: white;">
+                                            @if ($cotizacion['moneda'] === 'USD')
+                                                ${{ number_format($this->generarTotalCotizacionDivisa($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                            @else
+                                                ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                            @endif
+
                                         </td>
                                     </tr>
                                 @endif
