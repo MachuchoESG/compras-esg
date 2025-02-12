@@ -456,7 +456,7 @@ class Show extends Component
     {
         /* $cambioDivisaActual = Divisa::select('*')->where('moneda', 'USD')->where('created_at', Carbon::now())->orderBy('created_at', 'desc')->first();
         dd( $cambioDivisaActual); */
-
+        //dd($this->requisicion->detalleRequisiciones);
         $this->cotizacion->requisicion_id = $this->requisicionId;
         //dd($this->cotizacion);
 
@@ -677,12 +677,25 @@ class Show extends Component
 
     public function mount()
     {
-
-        $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
-        ->where('moneda', 'USD')
-        ->orderBy('created_at', 'desc')
-        ->first();
+        $horaActual = Carbon::now();
+        
+        //dd($divisaPeso,$divisaPesoActual);
+        if ($horaActual->lt(Carbon::today()->addSeconds(43200))) { // Antes de las 12:00:00
+            $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
+                ->where('moneda', 'USD')
+                ->orderBy('created_at', 'desc')
+                ->first();
+        } else { // Después o igual a las 12:00:00
+            $divisaPeso = Divisa::whereBetween('created_at', [
+                    Carbon::today()->addSeconds(43200), // Hoy a las 12:00:00
+                    Carbon::today()->endOfDay()         // Hoy a las 23:59:59
+                ])
+                ->where('moneda', 'USD')
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
         //dd($divisaPeso);
+        
         if ($divisaPeso) {
             $this->valorPeso = $divisaPeso->valor;
         } else {
@@ -691,7 +704,7 @@ class Show extends Component
             if ($respValorDivisa['error'] != '') {
                 $this->valorPeso = $respValorDivisa['status']['valor'];
             } else {
-                dd($respValorDivisa['error']);
+                dd($respValorDivisa);
             }
         }
 

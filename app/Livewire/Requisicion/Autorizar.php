@@ -201,15 +201,21 @@ class Autorizar extends Component
 
         $totalrequisicion = 0;
         foreach ($cotizaciones as $cotizacion) {
-            $totalrequisicion += $cotizacion->detalleCotizaciones->sum(function ($detalle) {
+            //dd($cotizacion);
+            $moneda = $cotizacion->moneda;
+            $totalrequisicion += $cotizacion->detalleCotizaciones->sum(function ($detalle) use ($moneda) {
                 if ($detalle->autorizado) {
-                    return $detalle->cantidad * $detalle->precio;
+                    if ($moneda == 'MXN') {
+                        return $detalle->cantidad * $detalle->precio;
+                    } else {
+                        return $detalle->cantidad * ($detalle->precio * $this->valorPeso);
+                    }
                 }
                 return 0;
             });
         }
 
-        return $totalrequisicion + ($totalrequisicion*0.16);
+        return $totalrequisicion + ($totalrequisicion * 0.16);
     }
 
     public function updateCantidad($id, $cantidad)
@@ -223,7 +229,8 @@ class Autorizar extends Component
         }
     }
 
-    public function showDD(){
+    public function showDD()
+    {
         dd($this->indexProdAdded);
     }
 
@@ -249,23 +256,23 @@ class Autorizar extends Component
         if (!$this->requisicion->cotizacion_unica) {
             if ($check != false) {
                 //foreach ($allCotizaciones as $AC) {
-                    //if ($AC['cotizacion_id'] == $detalle->cotizacion_id) {
+                //if ($AC['cotizacion_id'] == $detalle->cotizacion_id) {
                 if (!in_array($index, $this->indexProdAdded)) {
                     array_push($this->indexProdAdded, $index);
                     //return 0;
-                //  }
-                
+                    //  }
+
                 } else {
                     //foreach ($AC['cotizaciones'] as $cot) {
-                        if (in_array($index, $this->indexProdAdded)) {
-                            $this->alert('warning', 'Ya existe un producto autorizado  ' . $index + 1 . '. ' . $detalle->producto . ' con otro proveedor');
-                            $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
-                            $errorExiste = true;
-                            //return 0;
-                        } else {
-                            array_push($this->indexProdAdded, $index);
-                            //break;
-                        }
+                    if (in_array($index, $this->indexProdAdded)) {
+                        $this->alert('warning', 'Ya existe un producto autorizado  ' . $index + 1 . '. ' . $detalle->producto . ' con otro proveedor');
+                        $this->dispatch('ProductoYaAutoriado', ['id' => $id]);
+                        $errorExiste = true;
+                        //return 0;
+                    } else {
+                        array_push($this->indexProdAdded, $index);
+                        //break;
+                    }
                     //}
                 }
                 //}
@@ -313,7 +320,7 @@ class Autorizar extends Component
             }
         }
 
-        
+
         if (!$errorExiste) {
             $this->allDetallesSelected = [];
             foreach ($allproductos as $allp) {
@@ -324,7 +331,7 @@ class Autorizar extends Component
         }
 
         $this->PreDataOrden = $this->generarPrevOrdenCompra();
-        
+
         //d($this->indexProdAdded);
         $this->contieneDiesel = false;
         $this->contieneProductoDifDiesel = false;
@@ -339,7 +346,6 @@ class Autorizar extends Component
                 }
             }
         }
-
     }
 
     public function noAutorizar()
@@ -607,7 +613,8 @@ class Autorizar extends Component
         }
     }
 
-    public function renderTotalProveedor($cotizacion){
+    public function renderTotalProveedor($cotizacion)
+    {
         $html = '<p>ESTE ES UN TEXTO</p>';
         return $html;
     }
@@ -820,8 +827,8 @@ class Autorizar extends Component
 
                     if (true/* $response->successful() */) {
                         //$documento = $response->json();
-                        $ciddocuemento = '777TEST';//$documento['ciddocumento'];
-                        $foliooc = '000000';//$documento['cfolio'];
+                        $ciddocuemento = '777TEST'; //$documento['ciddocumento'];
+                        $foliooc = '000000'; //$documento['cfolio'];
 
 
 
@@ -896,8 +903,8 @@ class Autorizar extends Component
                 $clientesconcatenados = implode(',', $clientes); */
 
                 // Actualiza el campo 'ordenCompra' de la requisición
-                $requisicionupdate->ordenCompra = '999999';//$ordenesCompraConcatenadas;
-                $requisicionupdate->proveedor = 'PRUEBA TEST PROVEEDOR';//$clientesconcatenados;
+                $requisicionupdate->ordenCompra = '999999'; //$ordenesCompraConcatenadas;
+                $requisicionupdate->proveedor = 'PRUEBA TEST PROVEEDOR'; //$clientesconcatenados;
                 $requisicionupdate->estatus_id = 6;
 
                 // Guarda los cambios
@@ -932,24 +939,31 @@ class Autorizar extends Component
             $permiso = permisosrequisicion::where('PuestoSolicitante_id', $user->puesto->id)
                 ->where('departamento_id', $userSolictante->departamento_id)
                 ->first();
-            //dd($permiso);
 
-            //$userLogin = auth()->user();
-            $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
-            //dd($userAutorizador);
-            //dd($user);
-            //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
-            if ($userAutorizador == null) {
-                $this->alert('info', 'Requisición', [
+            if ($permiso) {
+                //$userLogin = auth()->user();
+                $userAutorizador = User::where('puesto_id', '=', $permiso->PuestoAutorizador_id)->first(); //permisosrequisicion::getPuestoSuperiorUsuarioAutenticado($userLogin->departamento_id);
+                //dd($userAutorizador);
+                //dd($user);
+                //si es null mandar mensaje de que no se tiene un flujo de autorizacion 
+                if ($userAutorizador == null) {
+                    $this->alert('info', 'Requisición', [
+                        'position' => 'center',
+                        'timer' => '6000',
+                        'toast' => true,
+                        'text' => '¡No se encontro el autorizador del siguiente nivel , aun no cuentas con uno  ',
+                    ]);
+                    return;
+                }
+                $this->jefe = $userAutorizador->name;
+                $this->comentarioOpen = true;
+            } else {
+                $this->alert('warning', 'ALERTA', [
                     'position' => 'center',
-                    'timer' => '6000',
-                    'toast' => true,
-                    'text' => '¡No se encontro el autorizador del siguiente nivel , aun no cuentas con uno  ',
+                    'toast' => true, 
+                    'text' => 'No se encontró Autorizador para el siguiente nivel. Revisar flujo de autorización.'
                 ]);
-                return;
             }
-            $this->jefe = $userAutorizador->name;
-            $this->comentarioOpen = true;
         }
     }
 
@@ -1007,10 +1021,12 @@ class Autorizar extends Component
             'onDenied' => 'confirmed'
         ]);
     }
+
     protected $listeners = [
         'confirmed',
         'cancelled'
     ];
+
     public function confirmed()
     {
         $this->comentarioFinal = true;
@@ -1021,28 +1037,31 @@ class Autorizar extends Component
         return redirect()->route('requisicion.index');
     }
 
-    public function generarCalculoSubtotal($id){
+    public function generarCalculoSubtotal($id)
+    {
         //dd($cotizacio_id);
         $cotizacion = Cotizacion::find($id);
         //dd($cotizacion->detalleCotizaciones);
         $subtotal = $cotizacion->detalleCotizaciones->sum(function ($detalle) {
-            
+
             return $detalle->cantidad * $detalle->precio;
         });
         return $subtotal;
     }
 
-    public function generarCalculoIVA($id){
+    public function generarCalculoIVA($id)
+    {
         $cotizacion = Cotizacion::find($id);
         return $cotizacion->detalleCotizaciones->sum(function ($detalle) {
             return $detalle->cantidad * $detalle->precio;
         }) * 0.16;
     }
 
-    public function generarCalculoRetencion($id){
+    public function generarCalculoRetencion($id)
+    {
         $cotizacion = Cotizacion::find($id);
         return $cotizacion->detalleCotizaciones->sum(function ($detalle) {
-            return (($detalle->cantidad * $detalle->precio)*0.16) * ($detalle->retencion/100);
+            return (($detalle->cantidad * $detalle->precio) * 0.16) * ($detalle->retencion / 100);
         });
     }
 
@@ -1052,16 +1071,16 @@ class Autorizar extends Component
         if ($moneda == 'MXN') {
             $subtotal = $detalle->cantidad * $detalle->precio;
             $iva = ($detalle->cantidad * $detalle->precio) * 0.16;
-            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion']/100);
+            $retencion = ((($detalle['cantidad'] * $detalle['precio'])) * .16) * ($detalle['retencion'] / 100);
             return $subtotal + $iva - $retencion;
         } else {
             $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
             $iva = ($detalle->cantidad * ($detalle->precio * $this->valorPeso)) * 0.16;
-            $retencion = ((($detalle['cantidad'] * ($detalle->precio * $this->valorPeso))) * .16) * ($detalle['retencion']/100);
+            $retencion = ((($detalle['cantidad'] * ($detalle->precio * $this->valorPeso))) * .16) * ($detalle['retencion'] / 100);
             return $subtotal + $iva - $retencion;
         }
     }
-        
+
 
     public function generarCalculoSubtotalDetalle($detalle, $moneda = 'MXN')
     {
@@ -1071,88 +1090,89 @@ class Autorizar extends Component
         } else {
             $subtotal = $detalle->cantidad * ($detalle->precio * $this->valorPeso);
         }
-        
+
         return $subtotal;
     }
 
     public function generarCalculoIVADetalle($detalle, $moneda = 'MXN')
     {
         //$cotizacion = Cotizacion::find($id);
-        if ($moneda == 'MXN'){
+        if ($moneda == 'MXN') {
             return ($detalle->cantidad * $detalle->precio) * 0.16;
         } else {
             return ($detalle->cantidad * ($detalle->precio * $this->valorPeso)) * 0.16;
         }
-        
     }
 
     public function generarCalculoRetencionDetalle($detalle,  $moneda = 'MXN')
     {
         //dd($detalle);
         if ($moneda) {
-            return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion']/100);
+            return ((($detalle['cantidad'] * $detalle['precio'])) * 0.16) * ($detalle['retencion'] / 100);
         } else {
-            return ((($detalle['cantidad'] * ($detalle['precio'] * $this->valorPeso))) * 0.16) * ($detalle['retencion']/100);
+            return ((($detalle['cantidad'] * ($detalle['precio'] * $this->valorPeso))) * 0.16) * ($detalle['retencion'] / 100);
         }
-        
     }
     // FIN CALCULOS TABLA
     //GENERAR TABLA ORDEN COMPRA PREV
 
-    public function generarPrevOrdenCompra(){
+    public function generarPrevOrdenCompra()
+    {
         $arrIDCotis = [];
-        foreach($this->allDetallesSelected as $ads){
+        foreach ($this->allDetallesSelected as $ads) {
             array_push($arrIDCotis, $ads['cotizacion_id']);
         }
 
         $dataPreOrder = [];
 
         $cotizaciones = Cotizacion::with('detalleCotizaciones')->whereIn('id', $arrIDCotis)->get();
-        foreach($cotizaciones as $coti){
+        foreach ($cotizaciones as $coti) {
             $prov = $coti['proveedor'];
             $productos = $coti->detalleCotizaciones;
             $formaPago = $coti['formapago'];
             $moneda = $coti['moneda'];
             $productosAutorizados = [];
 
-            foreach($productos as $prod){
+            foreach ($productos as $prod) {
                 if ($prod['autorizado'] === 1) {
-                    array_push($productosAutorizados, [ 'producto' => $prod['producto'], 'cantidad' => $prod['cantidad'], 'precio'=> $prod['precio'], 'retencion'=>$prod['retencion']]);
+                    array_push($productosAutorizados, ['producto' => $prod['producto'], 'cantidad' => $prod['cantidad'], 'precio' => $prod['precio'], 'retencion' => $prod['retencion']]);
                 }
             }
 
-            array_push($dataPreOrder, [ 'proveedor'=> $prov, 'formapago' =>$formaPago, 'moneda'=> $moneda, 'productos'=> $productosAutorizados ]);
+            array_push($dataPreOrder, ['proveedor' => $prov, 'formapago' => $formaPago, 'moneda' => $moneda, 'productos' => $productosAutorizados]);
         }
 
         return $dataPreOrder;
         //dd($dataPreOrder);
     }
 
-    public function calcularSubtotalPreOrdenProveedor($proveedor){
+    public function calcularSubtotalPreOrdenProveedor($proveedor)
+    {
         $subtotal = 0;
         //dd($proveedor);
         if ($proveedor['moneda'] == 'MXN') {
-            foreach($proveedor['productos'] as $producto){
+            foreach ($proveedor['productos'] as $producto) {
                 $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
             }
         } else {
-            foreach($proveedor['productos'] as $producto){
+            foreach ($proveedor['productos'] as $producto) {
                 $subtotal = $subtotal + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
             }
         }
-        
+
 
         return number_format($subtotal, 2, '.', ',');
     }
 
-    public function calcularIVAPreOrdenProveedor($proveedor){
+    public function calcularIVAPreOrdenProveedor($proveedor)
+    {
         $totalIva = 0;
-        if ($proveedor['moneda'] == 'MXN'){
-            foreach($proveedor['productos'] as $producto){
+        if ($proveedor['moneda'] == 'MXN') {
+            foreach ($proveedor['productos'] as $producto) {
                 $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
             }
         } else {
-            foreach($proveedor['productos'] as $producto){
+            foreach ($proveedor['productos'] as $producto) {
                 $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
             }
         }
@@ -1160,49 +1180,51 @@ class Autorizar extends Component
         return number_format($totalIva, 2, '.', ',');
     }
 
-    public function calcularTotalPreOrdenProveedor($proveedor){
+    public function calcularTotalPreOrdenProveedor($proveedor)
+    {
         $total = 0;
         $totalIva = 0;
         $retencion = 0;
         if ($proveedor['moneda'] == 'MXN') {
-            foreach($proveedor['productos'] as $producto){
+            foreach ($proveedor['productos'] as $producto) {
                 $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
                 $total = $total + ($producto['cantidad'] * $producto['precio']);
-                $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+                $retencion = $retencion + ((($producto['cantidad'] * $producto['precio']) * 0.16) * $producto['retencion'] / 100);
             }
         } else {
-            foreach($proveedor['productos'] as $producto){
+            foreach ($proveedor['productos'] as $producto) {
                 $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
                 $total = $total + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
-                $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso))* 0.16) * $producto['retencion']/100);
+                $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16) * $producto['retencion'] / 100);
             }
         }
-        
+
 
         return number_format($totalIva + $total - $retencion, 2, '.', ',');
     }
 
-    public function calcularTotalPagarPreOrdenProveedor($proveedores){
+    public function calcularTotalPagarPreOrdenProveedor($proveedores)
+    {
         //dd($proveedores);
         $totalPagar = 0;
         $totalIva = 0;
         $subtotal = 0;
         $retencion = 0;
-        foreach($proveedores as $proveedor){
+        foreach ($proveedores as $proveedor) {
             if ($proveedor['moneda'] == 'MXN') {
-                foreach($proveedor['productos'] as $producto){
+                foreach ($proveedor['productos'] as $producto) {
                     $totalIva = $totalIva + (($producto['cantidad'] * $producto['precio']) * 0.16);
                     $subtotal = $subtotal + ($producto['cantidad'] * $producto['precio']);
-                    $retencion = $retencion + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+                    $retencion = $retencion + ((($producto['cantidad'] * $producto['precio']) * 0.16) * $producto['retencion'] / 100);
                 }
-               /*  $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
+                /*  $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
                 $totalIva = 0;
                 $subtotal = 0; */
             } else {
-                foreach($proveedor['productos'] as $producto){
+                foreach ($proveedor['productos'] as $producto) {
                     $totalIva = $totalIva + (($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16);
                     $subtotal = $subtotal + ($producto['cantidad'] * ($producto['precio'] * $this->valorPeso));
-                    $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso))* 0.16) * $producto['retencion']/100);
+                    $retencion = $retencion + ((($producto['cantidad'] * ($producto['precio'] * $this->valorPeso)) * 0.16) * $producto['retencion'] / 100);
                 }
                 /* $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
                 $totalIva = 0;
@@ -1211,16 +1233,16 @@ class Autorizar extends Component
             $totalPagar = ($totalPagar + $totalIva + $subtotal) - $retencion;
             $totalIva = 0;
             $subtotal = 0;
-            
         }
 
         return number_format($totalPagar, 2, '.', ',');
     }
 
-    public function calcularRetencionPreOrdenProveedor($proveedor){
+    public function calcularRetencionPreOrdenProveedor($proveedor)
+    {
         $subtotal = 0;
-        foreach($proveedor['productos'] as $producto){
-            $subtotal = $subtotal + ((($producto['cantidad'] * $producto['precio'])* 0.16) * $producto['retencion']/100);
+        foreach ($proveedor['productos'] as $producto) {
+            $subtotal = $subtotal + ((($producto['cantidad'] * $producto['precio']) * 0.16) * $producto['retencion'] / 100);
         }
 
         return number_format($subtotal, 2, '.', ',');
@@ -1269,30 +1291,45 @@ class Autorizar extends Component
         $this->requiCalculos = $requisicion;
 
         //DIVISA 
-        $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
-        ->where('moneda', 'USD')
-        ->orderBy('created_at', 'desc')
-        ->first();
+        $horaActual = Carbon::now();
+        
+        //dd($divisaPeso,$divisaPesoActual);
+        if ($horaActual->lt(Carbon::today()->addSeconds(43200))) { // Antes de las 12:00:00
+            $divisaPeso = Divisa::whereDate('created_at', Carbon::today())
+                ->where('moneda', 'USD')
+                ->orderBy('created_at', 'desc')
+                ->first();
+        } else { // Después o igual a las 12:00:00
+            $divisaPeso = Divisa::whereBetween('created_at', [
+                    Carbon::today()->addSeconds(43200), // Hoy a las 12:00:00
+                    Carbon::today()->endOfDay()         // Hoy a las 23:59:59
+                ])
+                ->where('moneda', 'USD')
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
         //dd($divisaPeso);
         if ($divisaPeso) {
-            $this->valorPeso = $divisaPeso->valor; 
+            $this->valorPeso = $divisaPeso->valor;
         } else {
             //dd('no hay moneda');
             $respValorDivisa = $this->validarDivisa();
             if ($respValorDivisa['error'] != '') {
                 dd($respValorDivisa);
             } else {
-                
+
                 $this->valorPeso = $respValorDivisa['status']['valor'];
             }
         }
-        
+
         $user = auth()->user();
         $userSolictante = User::find($requisicion->user_id);
         $permiso = permisosrequisicion::where('PuestoAutorizador_id', $user->puesto->id)
             ->where('departamento_id', $userSolictante->departamento_id)
             ->first();
+        //dd($permiso);
         $this->totalPermitidoAutorizar = $permiso->monto;
+
         $cotizacionesRequisicion = Cotizacion::select('id')->where('requisicion_id', '=', $requisicion->id)->get();
         $allCotizaciones = [];
         foreach ($cotizacionesRequisicion as $cr) {

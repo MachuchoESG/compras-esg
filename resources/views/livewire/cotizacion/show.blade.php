@@ -165,9 +165,12 @@
                                 <p class="text-center m-0">
                                     Moneda: {{ $cotizacion['moneda'] === '' ? 'MXN' : $cotizacion['moneda'] }}
                                 </p>
+                                @if($cotizacion['moneda'] === 'USD')
                                 <p class="text-center m-0">
                                     Valor Peso: {{ number_format($valorPeso, 2, '.', ',') }}
                                 </p>
+                                @endif
+                                
                             </div>
                         </div>
 
