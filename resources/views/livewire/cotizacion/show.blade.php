@@ -188,7 +188,7 @@
                                     Cantidad
                                 </th>
                                 <th scope="col" class="md:px-6 md:py-3">
-                                    Precio Unidad
+                                    Precio Unidad @if($cotizacion['moneda'] === 'USD') <span>(USD)</span> @endif
                                 </th>
                                 @if ($cotizacion['moneda'] === 'USD')
                                     <th scope="col" class="md:px-6 md:py-3">

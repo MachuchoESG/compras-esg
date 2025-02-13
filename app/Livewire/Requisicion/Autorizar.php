@@ -1314,11 +1314,10 @@ class Autorizar extends Component
         } else {
             //dd('no hay moneda');
             $respValorDivisa = $this->validarDivisa();
-            if ($respValorDivisa['error'] != '') {
-                dd($respValorDivisa);
-            } else {
-
+            try {
                 $this->valorPeso = $respValorDivisa['status']['valor'];
+            } catch (\Throwable $th) {
+                $this->alert('error', 'Error al actualizar valor de divisa');
             }
         }
 
