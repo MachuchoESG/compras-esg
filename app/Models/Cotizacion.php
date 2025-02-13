@@ -19,7 +19,8 @@ class Cotizacion extends Model
         'dias_credito',
         'formapago',
         'comentarios',
-        'estatus'
+        'estatus',
+        'moneda'
     ];
 
     public function detalleCotizaciones()

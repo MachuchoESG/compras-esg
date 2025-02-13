@@ -94,11 +94,22 @@
         </x-slot>
 
         <x-slot name='footer'>
-            <x-button class="bg-blue-500 hover:pointer text-white font-bold" type="submit">Guardar</x-button>
+            <div class="row">
+                <div class="col-12 col-sm-4 col-md-4 d-flex justify-content-center">
+                    <x-button class="bg-blue-500 hover:pointer text-white font-bold" type="submit">Guardar</x-button>
+                </div>
+                
             </form>
-
-            <x-button class="bg-blue-500 hover:pointer text-white font-bold" wire:click="$set('open', false)">Cancelar</x-button>
-            <x-button class="bg-blue-500 hover:pointer text-white font-bold" wire:click="$set('openConsecutivo', true)">Buscar Consecutivo</x-button>
+                <div class="col-12 col-sm-4 col-md-4 d-flex justify-content-center">
+                    <x-button class="bg-blue-500 hover:pointer text-white font-bold" wire:click="$set('open', false)">Cancelar</x-button>
+                </div>
+                <div class="col-12 col-sm-4 col-md-4 d-flex justify-content-center">
+                    <x-button class="bg-blue-500 hover:pointer text-white font-bold" wire:click="$set('openConsecutivo', true)">Buscar Consecutivo</x-button>
+                </div>
+            </div>
+           
+            
+            
         </x-slot>
 
     </x-dialog-modal>

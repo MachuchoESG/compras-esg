@@ -100,8 +100,6 @@
                                                         </div>
                                                     </x-dropdown-link>
 
-
-
                                                 </div>
                                             </x-slot>
                                         </x-dropdown>
@@ -124,106 +122,189 @@
         <div class="mt-3 px-3 w-100">
             @foreach ($requisicion->cotizaciones as $cotizacion)
                 <div class="row bg-gray-200 px-1">
-                    <div class="col-8 col-md-4 d-flex justify-center align-items-center">
-                        <p class="m-0 text-center text-proveedor"> Proveedor:
-                            <span>{{ $cotizacion['proveedor'] }}</span> </p>
+                    <div class="col-8 col-md-6 d-flex justify-start align-items-center">
+                        <p class="m-0 text-start text-proveedor"> Proveedor:
+                            <span>{{ $cotizacion['proveedor'] }}</span>
+                        </p>
 
                     </div>
-                    <div class="col-2 col-md-4 d-flex justify-center align-items-center pt-1">
+                    <div class="col-4 col-md-6 d-flex justify-end align-items-center pt-1">
                         <button wire:click.prevent="download({{ $cotizacion->id }})"
-                            class="btn btn-secondary btn-sm d-flex items-start">
+                            class="btn btn-secondary btn-sm d-flex items-start mx-1">
                             <x-eva-download-outline class="h-5 w-5" />
                             <span class="ms-2 fw-bold hide-text-btn">Cotización</span>
                         </button>
-                    </div>
-                    @if ($requisicion->estatus_id !== 6)
-                        <div class="col-2 col-md-4 d-flex justify-center align-items-center pt-1">
-                            <i class="bi bi-trash-fill"></i>
+                        @if ($requisicion->estatus_id !== 6)
                             <button wire:click="deleteCotizacion({{ $cotizacion->id }})" wire:loading.attr="disabled"
-                                class="btn btn-danger btn-sm d-flex">
+                                class="btn btn-danger btn-sm d-flex mx-1">
                                 {{-- <i class="bi bi-file-earmark-arrow-down-fill"></i> --}}
                                 <x-eva-trash class="h-5 w-5" />
-                                <span class="ms-2 fw-bold hide-text-btn">Eliminar Cotización</span>
+                                <span class="ms-2 fw-bold hide-text-btn">Eliminar</span>
                             </button>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
 
-                    <div class="col-12">
+                    <div class="col-12 mt-2">
                         <div class="row">
-                            <div class="col-4">
+                            <div class="col-3">
                                 <p class="text-center">
                                     Tiempo Entrega: {{ $cotizacion['dias_entrega'] }}
                                 </p>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <p class="text-center">
                                     Dias Credito: {{ $cotizacion['dias_credito'] }}
                                 </p>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <p class="text-center">
                                     Forma Pago: {{ $cotizacion['formapago'] }}
                                 </p>
+                            </div>
+                            <div class="col-3">
+                                <p class="text-center m-0">
+                                    Moneda: {{ $cotizacion['moneda'] === '' ? 'MXN' : $cotizacion['moneda'] }}
+                                </p>
+                                @if($cotizacion['moneda'] === 'USD')
+                                <p class="text-center m-0">
+                                    Valor Peso: {{ number_format($valorPeso, 2, '.', ',') }}
+                                </p>
+                                @endif
+                                
                             </div>
                         </div>
 
                     </div>
 
                 </div>
-                <table class="w-full text-sm text-gray-500 mb-3">
-                    <thead class=" bg-gray-50">
-                        <tr class="text-center">
+                <div style="table-responsive" style="">
+                    <table class="table text-sm text-gray-500 mb-3" style="overflow-x: auto">
+                        <thead class=" bg-gray-50">
+                            <tr class="text-center">
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Producto
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Cantidad
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Precio Unidad @if($cotizacion['moneda'] === 'USD') <span>(USD)</span> @endif
+                                </th>
+                                @if ($cotizacion['moneda'] === 'USD')
+                                    <th scope="col" class="md:px-6 md:py-3">
+                                        Precio MXN
+                                    </th>
+                                @endif
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Subtotal
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    IVA
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Retención
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Total
+                                </th>
+                                <th scope="col" class="md:px-6 md:py-3">
+                                    Accion
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                            <th scope="col" class="md:px-6 md:py-3">
-                                Cantidad
-                            </th>
-                            <th scope="col" class="md:px-6 md:py-3">
-                                Producto
-                            </th>
-                            <th scope="col" class="md:px-6 md:py-3">
-                                Precio Cotizado
-                            </th>
-                            <th scope="col" class="md:px-6 md:py-3">
-                                Total
-                            </th>
-                            <th scope="col" class="md:px-6 md:py-3">
-                                Accion
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        @foreach ($cotizacion->detalleCotizaciones as $detalle)
-                            <tr class="bg-white text-center border-b">
-                                <td class="md:px-6 md:py-3">
-                                    {{ $detalle['cantidad'] }}
-                                </td>
-                                <td class="md:px-6 md:py-3">
-                                    {{ $detalle['producto'] }}
-                                </td>
-                                <td class="md:px-6 md:py-3">
-                                    ${{ $detalle['precio'] }}
-                                </td>
-                                <td class="md:px-6 md:py-3">
-                                    ${{ $detalle['precio'] * $detalle['cantidad'] }}
-                                </td>
-                                <td>
-                                    <div class="flex justify-around items-center">
-                                        @if ($requisicion->estatus_id !== 6)
-                                            <button wire:click="editarDetalle({{ $detalle['id'] }})"
-                                                class="text-blue-500">
-                                                <x-far-edit class="w-6 h-6" />
-                                            </button>
+                            @foreach ($cotizacion->detalleCotizaciones as $detalle)
+                                <tr class="bg-white border-b">
+                                    <td class="md:px-6 md:py-3 col-2 col-md-3">
+                                        {{ $detalle['producto'] }}
+                                    </td>
+                                    <td class="md:px-6 md:py-3 text-center">
+                                        {{ $detalle['cantidad'] }}
+                                    </td>
+                                    <td class="md:px-6 md:py-3 text-center">
+                                        ${{ number_format($detalle['precio'], 2, '.', ',') }}
+                                    </td>
+                                    @if ($cotizacion['moneda'] === 'USD')
+                                        <td class="md:px-6 md:py-3 text-center">
+                                            ${{ number_format($detalle['precio'] * $this->valorPeso, 2, '.', ',') }}
+                                        </td>
+                                    @endif
+                                    <td class="md:px-6 md:py-3 text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoSubtotalDivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoSubtotal($detalle), 2, '.', ',') }}
                                         @endif
 
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoIVADivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoIVA($detalle), 2, '.', ',') }}
+                                        @endif
 
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoRetencionDivisa($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoRetencion($detalle), 2, '.', ',') }}
+                                        @endif
 
-                    </tbody>
-                </table>
+                                    </td>
+                                    
+                                    <td class="md:px-6 md:py-3 text-center">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoTotalDivisas($detalle), 2, '.', ',') }}
+                                        @else
+                                            ${{ number_format($this->generarCalculoTotal($detalle), 2, '.', ',') }}
+                                        @endif
+
+                                    </td>
+                                    <td>
+                                        <div class="flex justify-around items-center">
+                                            @if ($requisicion->estatus_id !== 6)
+                                                <button wire:click="editarDetalle({{ $detalle['id'] }})"
+                                                    class="text-blue-500">
+                                                    <x-far-edit class="w-6 h-6" />
+                                                </button>
+                                            @endif
+
+
+                                        </div>
+                                    </td>
+                                </tr>
+                                @if (count($cotizacion->detalleCotizaciones) === $loop->index + 1)
+                                    <tr class="">
+                                        @if ($cotizacion['moneda'] === 'USD')
+                                            <td colspan="7" class="fw-bold md:px-6 md:py-3"
+                                                style="background-color: black; color: white;">TOTAL COTIZACION
+                                            </td>
+                                        @else
+                                            <td colspan="6" class="fw-bold md:px-6 md:py-3"
+                                                style="background-color: black; color: white;">TOTAL COTIZACION
+                                            </td>
+                                        @endif
+
+                                        <td class="fw-bold md:px-6 md:py-3 text-center"
+                                            style="background-color: black; color: white;">
+                                            @if ($cotizacion['moneda'] === 'USD')
+                                                ${{ number_format($this->generarTotalCotizacionDivisa($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                            @else
+                                                ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                            @endif
+
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+
+
+                        </tbody>
+                    </table>
+                </div>
             @endforeach
         </div>
     @else
@@ -356,6 +437,10 @@
                 <x-label>Precio</x-label>
                 <x-input wire:model="cotizacion.detalleEditar.precio" type="number" class="w-full" />
             </div>
+            <div class="w-full">
+                <x-label>Retencion % (0-100) </x-label>
+                <x-input wire:model="cotizacion.detalleEditar.retencion" type="number" class="w-full" />
+            </div>
         </x-slot>
         <x-slot name="footer">
             <x-button wire:click="update()">Actualizar</x-button>
@@ -401,8 +486,9 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th scope="col">Cantidad</th>
+                                    <th scope="col" style="font-size: 0.9rem">Cantidad</th>
                                     <th scope="col">Producto</th>
+                                    <th scope="col">Retencion</th>
                                     <th scope="col">Precio</th>
 
                                 </tr>
@@ -412,10 +498,15 @@
                                     <tr>
 
                                         <td class="col-2" style="font-size: 0.9rem;">{{ $detalle->cantidad }}</td>
-                                        <td style="font-size: 0.9rem;">{{ $detalle->producto }}</td>
+                                        <td style="font-size: 0.8rem;">{{ $detalle->producto }}</td>
+                                        <td class="col-2" style="font-size: 0.9rem;">
+                                            <input wire:model="cotizacion.retenciones.{{ $detalle->id }}"
+                                                value="1" placeholder="0-100" type="number" min=0 max=100
+                                                class="form-control form-control-sm col-3">
+                                        </td>
                                         <td class="col-3" style="font-size: 0.9rem;">
                                             <input wire:model="cotizacion.precios.{{ $detalle->id }}" value="1"
-                                                type="number" class="form-control col-3">
+                                                type="number" class="form-control form-control-sm col-3">
                                         </td>
                                     </tr>
                                 @endforeach
@@ -424,33 +515,51 @@
                     </div>
 
                     <div class="row px-1 mb-2">
-                        <div class="col-6 col-md-3 p-0">
+                        <div class="col-6 col-md-4">
                             <x-label for="cantidad">Tiempo de Entrega</x-label>
-                            <input wire:model="cotizacion.dias_entrega" class="w-full h-10 border rounded-lg mb-2"
-                                type="number" id="cantidad" name="cantidad">
+                            <input wire:model="cotizacion.dias_entrega"
+                                class="form-control form-control-sm h-9 border rounded-lg mb-2" type="number"
+                                id="cantidad" name="cantidad">
                             <x-input-error for="cotizacion.dias_entrega" />
                         </div>
-                        <div class="col-6 col-md-3 p-0">
+                        <div class="col-6 col-md-4">
                             <x-label for="cantidad">Dias de Credito</x-label>
-                            <input wire:model="cotizacion.dias_credito" class="w-full h-10 border rounded-lg mb-2"
-                                type="number" id="diascredito" name="diascredito">
+                            <input wire:model="cotizacion.dias_credito"
+                                class="form-control form-control-sm h-9 border rounded-lg mb-2" type="number"
+                                id="diascredito" name="diascredito">
                         </div>
-                        <div class="col-6 col-md-6 p-0">
+                        {{--  <div class="col-6 col-md-4">
+                            <x-label for="cantidad">% Retencion (0-100)</x-label>
+                            <input wire:model="cotizacion.retencion"
+                                class="form-control form-control-sm h-10 border rounded-lg mb-2" type="number"
+                                id="retencion" name="retencion">
+                        </div> --}}
+                        <div class="col-6 col-md-4">
                             <x-label for="formaPago">Forma de Pago</x-label>
                             <select name="cotizacion.formapago" id="cotizacion.formapago"
-                                wire:model.live="cotizacion.formapago" class=" border-[#dee2e6] rounded-lg"
-                                id="formaPago">
-                                <option value="">Selecciona una opción</option>
+                                wire:model.live="cotizacion.formapago"
+                                class="form-control form-control-sm border-[#dee2e6] rounded-lg" id="formaPago">
+                                <option value="">Metodo</option>
                                 <option value="Contado">Contado</option>
                                 <option value="Credito">Credito</option>
                             </select>
                         </div>
+                        <div class="col-6 col-md-4">
+                            <x-label for="formaPago">Moneda</x-label>
+                            <select name="cotizacion.moneda" id="cotizacion.moneda"
+                                wire:model.live="cotizacion.moneda"
+                                class="form-control form-control-sm border-[#dee2e6] rounded-lg" id="formaPago">
+                                <option value="MXN">MXN$</option>
+                                <option value="USD">$USD</option>
+                            </select>
+                        </div>
+
                     </div>
 
                     <div>
                         <x-label for="observaciones">Comentarios</x-label>
-                        <textarea wire:model="cotizacion.comentarios" class="w-full border rounded-lg p-2" placeholder="Comentarios..."
-                            id="observaciones" name="cotizacion.comentarios" rows="2"></textarea>
+                        <textarea wire:model="cotizacion.comentarios" class="form-control form-control-sm border w-100 rounded-lg p-2"
+                            placeholder="Comentarios..." id="observaciones" name="cotizacion.comentarios" rows="2"></textarea>
 
                     </div>
                 </div>
@@ -894,36 +1003,6 @@
                 const selectedValue = event.target.value; // Obtiene el valor seleccionado
                 console.log("Producto seleccionado:", selectedValue);
             });
-            /* $('#producto_select').select2({
-                dropdownParent: $("#ModalEditProducto")
-            }); */
-            /* $('#input_preautorizacion').on('keyup', function(e) {
-
-                comentPreAutorizar = e.target.value
-                if (comentPreAutorizar === '') {
-                    //console.log('Comentario obligarotiros');
-                    $('#btn-preautorizar').prop('disabled', true);
-                } else {
-                    //console.log('coment valido');
-                    $('#btn-preautorizar').prop('disabled', false);
-                }
-
-            })
-
-            $('#input_cotizacionunica').on('keyup', function(e) {
-                console.log('algo cambio');
-                
-                comentPreAutorizar = e.target.value
-                if (comentPreAutorizar === '') {
-                    //console.log('Comentario obligarotiros');
-                    $('#btn-autorizar-unica').prop('disabled', true);
-                    alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
-                } else {
-                    //console.log('coment valido');
-                    $('#btn-autorizar-unica').prop('disabled', false);
-                }
-
-            }) */
 
 
             $('#selectProveedor').on('change', function(e) {

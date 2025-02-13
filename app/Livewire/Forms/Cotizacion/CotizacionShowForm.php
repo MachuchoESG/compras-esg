@@ -38,19 +38,10 @@ class CotizacionShowForm extends Form
     public $requisicion_id;
     public $dias_entrega = 1;
     public $dias_credito = 1;
+    public $moneda = 'MXN';
+    public $retencion = 0;
     public $formapago;
     public $comentarios = "";
-    // public $cotizacion = [
-    //     'url' => '',
-    //     'proveedor_id' => '',
-    //     'proveedor' => '',
-    //     'requisicion_id' => '',
-    //     'dias_entrega' => 1,
-    //     'dias_credito' => 1,
-    //     'formapago' => '',
-    //     'comentarios' => '',
-    // ];
-
     public $detalleEditar = [
         'id' => "",
         'producto' => "",
@@ -62,6 +53,7 @@ class CotizacionShowForm extends Form
     public $openEditarDetalle = false;
     public $openEditProducto = false;
     public $precios = []; //
+    public $retenciones = []; //
     public $image;
     public $requisicion;
 
@@ -85,6 +77,7 @@ class CotizacionShowForm extends Form
         $this->detalleEditar['producto'] = $detalle->producto;
         $this->detalleEditar['cantidad'] = $detalle->cantidad;
         $this->detalleEditar['precio'] = $detalle->precio;
+        $this->detalleEditar['retencion'] = $detalle->retencion;
 
         $this->openEditarDetalle = true;
     }
@@ -136,12 +129,10 @@ class CotizacionShowForm extends Form
     public function guardarCotizacion()
     {
 
-
+        
+        //dd($this->requisicion->detalleRequisiciones);
 
         $this->validate();
-
-
-
 
         if ($this->requisicion && $this->requisicion->exists) {
 
@@ -168,7 +159,10 @@ class CotizacionShowForm extends Form
                 'dias_credito',
                 'formapago',
                 'comentarios',
+                'moneda'
             ));
+
+
 
             // Crear los detalles de la cotización
             $detalleConPrecios = $this->requisicion->detalleRequisiciones->map(function ($detalle) use ($cotizacion) {
@@ -178,6 +172,7 @@ class CotizacionShowForm extends Form
                     "producto" => $detalle->producto,
                     "cantidad" => $detalle->cantidad,
                     "precio" => isset($this->precios[$detalle->id]) ? $this->precios[$detalle->id] : 0,
+                    "retencion" => isset($this->retenciones[$detalle->id]) ? $this->retenciones[$detalle->id] : 0,
                 ];
             });
 
@@ -187,12 +182,6 @@ class CotizacionShowForm extends Form
             }
         }
 
-        //Ahora la libera el boton de liberar requisicion
-        // $requisicion = Requisicion::find($this->requisicion->id);
-        // if ($requisicion) {
-        //     $requisicion->estatus_id = 2;
-        //     $requisicion->save();
-        // }
 
         $this->reset(
             'url',

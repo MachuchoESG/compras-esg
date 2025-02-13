@@ -19,6 +19,7 @@ class DetalleRequisicion extends Model
         'cantidad',
         'producto',
         'observaciones',
+        'retencion'
 
     ];
 }

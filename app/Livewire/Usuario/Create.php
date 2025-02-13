@@ -8,7 +8,7 @@ use App\Models\Departamento;
 use App\Models\Empresa;
 use App\Models\Puesto;
 use App\Models\User;
-
+use Error;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -95,8 +95,12 @@ class Create extends Component
         }
 
         $this->open = false;
-        $this->sendMailNewUser($data['name'], $data['email'], $data['password']);
-
+        try{
+            $this->sendMailNewUser($this->usuario['name'], $this->usuario['email'], $this->usuario['password']);
+        } catch (Error $error){
+            $this->alert('error', "Error al enviar correo de autenticación.");
+        }
+        
         return redirect()->route('usuario.index');
     }
 
