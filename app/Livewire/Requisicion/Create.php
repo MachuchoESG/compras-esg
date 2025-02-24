@@ -96,6 +96,11 @@ class Create extends Component
         }
     }
 
+    public function getSucursalObject()
+    {
+        return $this->sucursal;
+    }
+
     protected function obtenerProductos($sucursalId)
     {
         $this->sucursal = Sucursal::find($sucursalId);
@@ -103,6 +108,12 @@ class Create extends Component
             $this->cargandoproductos = true;
 
             $productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
+            $nomenclatura = $this->sucursal->nomenclatura;
+
+            foreach($productos as &$producto){
+                $producto['nomenclatura'] = $nomenclatura;
+            }
+            unset($producto);
 
             usort($productos, function ($a, $b) {
                 return strcmp($a['cnombreproducto'], $b['cnombreproducto']);

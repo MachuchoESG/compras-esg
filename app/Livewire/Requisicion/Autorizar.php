@@ -636,6 +636,7 @@ class Autorizar extends Component
 
 
         try {
+            //throw new \Exception('Este es un error de prueba');
             $cotizaciones = Cotizacion::where('requisicion_id', $this->requisicion->id)->get();
 
             $alMenosUnaCotizacionActiva = false;
@@ -764,15 +765,20 @@ class Autorizar extends Component
 
             $this->agregarComentarioFinal();
         } catch (\Throwable $th) {
+            // Obtener la fecha actual en formato YYYY-MM-DD
+            $fecha = now()->format('Y-m-d');
+            $logFile = storage_path("logs/error_generarorden_{$fecha}.log"); // Ruta del log
 
+            // Registrar el error en el archivo log
+            \Log::build([
+                'driver' => 'single',
+                'path' => $logFile,
+            ])->error($th->getMessage(), ['trace' => $th->getTraceAsString()]);
             $requisicionupdate = Requisicion::find($this->requisicion->id);
 
             // Verifica si se encontró una requisición válida
             if ($requisicionupdate) {
-
                 $requisicionupdate->estatus_id = 11;
-
-
                 $requisicionupdate->save();
             }
             $this->agregarComentarioFinal();

@@ -5,7 +5,7 @@
     <div>
         <div class="card p-3 table-responsive mb-3">
             {{-- <button wire:click="showDD">ver indexes</button> --}}
-            <h4>Orden de Compra a Generar</h4>
+            <h4>Orden de Compra (MXN)</h4>
             <table class="w-full text-sm text-gray-500 mb-3" style="min-width: 800px">
                 <thead>
                     <tr>
@@ -70,12 +70,11 @@
                                 Tipo Moneda: {{ $cotizacion['moneda'] }}
                             </div>
                             <div class="col-3 text-center my-2">
-                                @if($cotizacion['moneda'] == 'USD')
+                                @if ($cotizacion['moneda'] == 'USD')
                                     Valor Divisa: {{ number_format($this->valorPeso, 2, '.', ',') }}
                                 @endif
                             </div>
-                            <div
-                                class="col-1 d-flex justify-content-end algin-items-sm-start algin-items-center">
+                            <div class="col-1 d-flex justify-content-end algin-items-sm-start algin-items-center">
                                 <button wire:click.prevent="download({{ $cotizacion->id }})" class="btn text-white"
                                     style="height: 50%">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -136,13 +135,13 @@
                                             Producto
                                         </th>
                                         <th scope="col" class="px-6 py-3">
-                                            Precio Unidad
+                                            Precio Unitario
                                         </th>
-                                        @if($cotizacion["moneda"] === 'USD') 
+                                        {{-- @if ($cotizacion['moneda'] === 'USD') 
                                         <th scope="col" class="px-6 py-3">
                                             Precio Divisa
                                         </th>
-                                        @endif
+                                        @endif --}}
                                         <th scope="col" class="px-6 py-3">
                                             SubTotal
                                         </th>
@@ -181,50 +180,50 @@
                                                         wire:change="updateCantidad( {{ $detalle['id'] }} , $event.target.value)"
                                                         type="number" value="{{ $detalle['cantidad'] }}"
                                                         class="form-control-sm" id="{{ $detalle['id'] }}">
-                                                </td> 
+                                                </td>
                                                 <td class="px-6 py-2">
                                                     {{ $loop->index + 1 }}. {{ $detalle['producto'] }}
                                                 </td>
                                                 <td class="px-6 py-2 text-center">
-                                                    ${{ number_format($detalle['precio'], 2, '.', ',') }} 
+                                                    ${{ number_format($detalle['precio'], 2, '.', ',') }}
                                                 </td>
-                                                @if($cotizacion->moneda == 'USD') 
+                                                {{-- @if ($cotizacion->moneda == 'USD') 
                                                 <td class="px-6 py-2 text-center">
                                                     ${{ number_format(($detalle['precio'] * $this->valorPeso), 2, '.', ',') }}
                                                 </td>
-                                                @endif
+                                                @endif --}}
                                                 <td class="px-6 py-2 text-center">
-                                                    @if($cotizacion->moneda == 'USD')
-                                                    ${{ number_format($this->generarCalculoSubtotalDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
-                                                    @else
+                                                    {{-- @if ($cotizacion->moneda == 'USD')
+                                                    ${{ number_format($this->generarCalculoSubtotalDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }} --}}
+                                                    {{-- @else --}}
                                                     ${{ number_format($this->generarCalculoSubtotalDetalle($detalle), 2, '.', ',') }}
-                                                    @endif
-                                                    
+                                                    {{-- @endif --}}
+
                                                 </td>
                                                 <td class="text-center">
-                                                    @if($cotizacion->moneda == 'USD')
+                                                    {{-- @if ($cotizacion->moneda == 'USD')
                                                     ${{ number_format($this->generarCalculoIVADetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
-                                                    @else
+                                                    @else --}}
                                                     ${{ number_format($this->generarCalculoIVADetalle($detalle), 2, '.', ',') }}
-                                                    @endif
-                                                    
+                                                    {{-- @endif --}}
+
                                                 </td>
                                                 <td class="text-center">
-                                                    @if($cotizacion->moneda == 'USD')
+                                                    {{-- @if ($cotizacion->moneda == 'USD')
                                                     ${{ number_format($this->generarCalculoRetencionDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
-                                                    @else
+                                                    @else --}}
                                                     ${{ number_format($this->generarCalculoRetencionDetalle($detalle), 2, '.', ',') }}
-                                                    @endif
-                                                    
+                                                    {{-- @endif --}}
+
                                                 </td>
 
                                                 <td class="px-6 py-2 text-center">
-                                                    @if($cotizacion->moneda == 'USD')
+                                                    {{--  @if ($cotizacion->moneda == 'USD')
                                                     ${{ number_format($this->generarCalculoTotalDetalle($detalle, $cotizacion->moneda), 2, '.', ',') }}
-                                                    @else
+                                                    @else --}}
                                                     ${{ number_format($this->generarCalculoTotalDetalle($detalle), 2, '.', ',') }}
-                                                    @endif
-                                                    
+                                                    {{-- @endif --}}
+
                                                 </td>
                                                 <td class="px-6 py-2 text-center">
                                                     <a href="#"
@@ -252,7 +251,7 @@
                         $puedeAutorizar = $totalPermitidoAutorizar > $this->obtenerTotalAutorizar();
                         $esSoloDiesel = $contieneDiesel && !$contieneProductoDifDiesel;
                     @endphp
-                    {{-- @if($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
+                    {{-- @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar())
                         <p>autorizado monto - {{ $totalPermitidoAutorizar > $this->obtenerTotalAutorizar() }}</p>
                         <div>
                             <p>monto: {{$this->obtenerTotalAutorizar()}}</p>
@@ -260,18 +259,19 @@
                         </div>
                     @endif
                     
-                    @if($esSoloDiesel)
+                    @if ($esSoloDiesel)
                         <p>contiene diesel</p>
                     @endif
 
-                    @if($contieneProductoDifDiesel)
+                    @if ($contieneProductoDifDiesel)
                         <p>contienededif diesel</p>
                     @endif --}}
 
                     @if ($puedeAutorizar || $esSoloDiesel)
                         <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar</x-button>
                     @else
-                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente Nivel</x-button>
+                        <x-button id="btnAutorizar" type="submit" wire:loading.attr="disabled">Autorizar Siguiente
+                            Nivel</x-button>
                     @endif
 
                     {{-- @if ($totalPermitidoAutorizar > $this->obtenerTotalAutorizar() || ($contieneDiesel && !$contieneProductoDifDiesel))
@@ -356,16 +356,16 @@
             <div class="w-full">
                 <x-label>Comentario</x-label>
                 <textarea wire:model="comentario" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
-                    rows="4"></textarea>
+                    rows="4" id="input_comentario_solicitud_autorizar"></textarea>
                 <x-input-error for="comentario" />
+                <p style="font-size: .8rem">Caracteres <span id="contador_solicitud_autorizacion">0</span>/255</p>
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="saveComentario()">Guardar</x-button>
+            <x-button wire:click="saveComentario()" id="btn_comentario_solicitud_autorizar">Guardar</x-button>
             <x-button wire:click="$set('comentarioOpen', false)">Cancelar</x-button>
         </x-slot>
     </x-alpine-modal>
-
 
     <x-alpine-modal wire:model="openCancelacion">
         <x-slot name="title">
@@ -376,12 +376,13 @@
             <div class="w-full">
                 <x-label>Comentario</x-label>
                 <textarea wire:model="comentario" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
-                    rows="4"></textarea>
+                    rows="4" id="input_comentario_cancelacion"></textarea>
                 <x-input-error for="comentario" />
+                <p style="font-size: .8rem">Caracteres <span id="contador_cancelacion">0</span>/255</p>
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="saveComentarioCancelado()">Guardar</x-button>
+            <x-button wire:click="saveComentarioCancelado()" id="btn_comentario_cancelacion">Guardar</x-button>
             <x-button wire:click="$set('openCancelacion', false)">Cancelar</x-button>
         </x-slot>
     </x-alpine-modal>
@@ -395,12 +396,13 @@
             <div class="w-full">
                 <x-label>Comentario</x-label>
                 <textarea wire:model="comentariofinal" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
-                    rows="4"></textarea>
+                    rows="4" id="input_comentario_autorizacion"></textarea>
                 <x-input-error for="comentariofinal" />
+                <p style="font-size: .8rem">Caracteres <span id="contador_autorizacion">0</span>/255</p>
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="saveComentarioFinal()">Guardar</x-button>
+            <x-button wire:click="saveComentarioFinal()" id="btn_comentario_autorizacion">Guardar</x-button>
 
         </x-slot>
     </x-alpine-modal>
@@ -415,33 +417,94 @@
                 <p class="fw-bold">El comentario final antes de autorizar no es obligatorio.</p>
                 <x-label>Comentario</x-label>
                 <textarea wire:model="comentariofinalautorizar" class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..."
-                    rows="1"></textarea>
+                    id="input_comentario_final_autorizar" rows="3"></textarea>
                 <x-input-error for="comentariofinalautorizar" />
+                <p style="font-size: .8rem">Caracteres <span id="contador_final_autorizar">0</span>/255</p>
             </div>
         </x-slot>
         <x-slot name="footer">
             <x-button class="btn btn-secondary btn-sm me-3"
                 wire:click="$set('comentarioFinalAutorizar', false)">Cancelar</x-button>
-            <x-button wire:click="saveComentarioFinalAutorizar()" wire:loading.attr="disabled">Autorizar</x-button>
+            <x-button id="btn_comentario_final_autorizar" wire:click="saveComentarioFinalAutorizar()"
+                wire:loading.attr="disabled">Autorizar</x-button>
         </x-slot>
     </x-alpine-modal>
 
 
-
     <script>
         window.addEventListener('ProductoYaAutoriado', event => {
-            //console.log($(`checkbox-table-search-${event.detail[0].id}`));
             var id = event.detail[0].id
-
             $(`#checkbox-table-search-${id}`).prop('checked', false);
         });
+
+        $('#input_comentario_solicitud_autorizar').on('input', function(e) {
+            let comentSoliCancelacion = e.target.value;
+            $('#contador_solicitud_autorizacion').text(comentSoliCancelacion.length);
+            if (comentSoliCancelacion === '' || comentSoliCancelacion.length > 255) {
+                //console.log('Comentario obligarotiros');
+                $('#btn_comentario_solicitud_autorizar').prop('disabled', true);
+                $('#btn_comentario_solicitud_autorizar').hide();
+                //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn_comentario_solicitud_autorizar').prop('disabled', false);
+                $('#btn_comentario_solicitud_autorizar').show();
+            }
+
+        })
+
+        $('#input_comentario_cancelacion').on('input', function(e) {
+            let comentCancelacion = e.target.value;
+            $('#contador_cancelacion').text(comentCancelacion.length);
+            if (comentCancelacion === '' || comentCancelacion.length > 255) {
+                //console.log('Comentario obligarotiros');
+                $('#btn_comentario_cancelacion').prop('disabled', true);
+                $('#btn_comentario_cancelacion').hide();
+                //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn_comentario_cancelacion').prop('disabled', false);
+                $('#btn_comentario_cancelacion').show();
+            }
+
+        })
+
+        $('#input_comentario_final_autorizar').on('input', function(e) {
+            let comentAutorizacion = e.target.value;
+            $('#contador_autorizacion').text(comentAutorizacion.length);
+            if (comentAutorizacion === '' || comentAutorizacion.length > 255) {
+                //console.log('Comentario obligarotiros');
+                $('#btn_comentario_autorizacion').prop('disabled', true);
+                $('#btn_comentario_autorizacion').hide();
+                //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn_comentario_autorizacion').prop('disabled', false);
+                $('#btn_comentario_autorizacion').show();
+            }
+
+        })
+
+        $('#input_comentario_autorizacion').on('input', function(e) {
+            let comentFinal = e.target.value;
+            $('#contador_final_autorizar').text(comentFinal.length);
+            if (comentFinal === '' || comentFinal.length > 255) {
+                //console.log('Comentario obligarotiros');
+                $('#btn_comentario_final_autorizar').prop('disabled', true);
+                $('#btn_comentario_final_autorizar').hide();
+                //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn_comentario_final_autorizar').prop('disabled', false);
+                $('#btn_comentario_final_autorizar').show();
+            }
+
+        })
+
         $(document).ready(function() {
             // Existing jQuery code
             let detallesPorActualizar = [];
             $(document).on('ObtenerCantidad', function(event) {
-
-
-                console.log("click");
 
                 const detalles = event.detail.lista;
 

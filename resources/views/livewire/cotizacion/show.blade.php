@@ -165,12 +165,12 @@
                                 <p class="text-center m-0">
                                     Moneda: {{ $cotizacion['moneda'] === '' ? 'MXN' : $cotizacion['moneda'] }}
                                 </p>
-                                @if($cotizacion['moneda'] === 'USD')
-                                <p class="text-center m-0">
-                                    Valor Peso: {{ number_format($valorPeso, 2, '.', ',') }}
-                                </p>
+                                @if ($cotizacion['moneda'] === 'USD')
+                                    <p class="text-center m-0">
+                                        Valor Peso: {{ number_format($valorPeso, 2, '.', ',') }}
+                                    </p>
                                 @endif
-                                
+
                             </div>
                         </div>
 
@@ -188,13 +188,15 @@
                                     Cantidad
                                 </th>
                                 <th scope="col" class="md:px-6 md:py-3">
-                                    Precio Unidad @if($cotizacion['moneda'] === 'USD') <span>(USD)</span> @endif
+                                    Precio Unitario @if ($cotizacion['moneda'] === 'USD')
+                                        <span>(USD)</span>
+                                    @endif
                                 </th>
-                                @if ($cotizacion['moneda'] === 'USD')
+                                {{-- @if ($cotizacion['moneda'] === 'USD')
                                     <th scope="col" class="md:px-6 md:py-3">
                                         Precio MXN
                                     </th>
-                                @endif
+                                @endif --}}
                                 <th scope="col" class="md:px-6 md:py-3">
                                     Subtotal
                                 </th>
@@ -225,43 +227,43 @@
                                     <td class="md:px-6 md:py-3 text-center">
                                         ${{ number_format($detalle['precio'], 2, '.', ',') }}
                                     </td>
-                                    @if ($cotizacion['moneda'] === 'USD')
+                                    {{-- @if ($cotizacion['moneda'] === 'USD')
                                         <td class="md:px-6 md:py-3 text-center">
                                             ${{ number_format($detalle['precio'] * $this->valorPeso, 2, '.', ',') }}
                                         </td>
-                                    @endif
+                                    @endif --}}
                                     <td class="md:px-6 md:py-3 text-center">
-                                        @if ($cotizacion['moneda'] === 'USD')
+                                        {{-- @if ($cotizacion['moneda'] === 'USD')
                                             ${{ number_format($this->generarCalculoSubtotalDivisa($detalle), 2, '.', ',') }}
-                                        @else
-                                            ${{ number_format($this->generarCalculoSubtotal($detalle), 2, '.', ',') }}
-                                        @endif
+                                        @else --}}
+                                        ${{ number_format($this->generarCalculoSubtotal($detalle), 2, '.', ',') }}
+                                        {{-- @endif --}}
 
                                     </td>
                                     <td class="text-center">
-                                        @if ($cotizacion['moneda'] === 'USD')
+                                        {{-- @if ($cotizacion['moneda'] === 'USD')
                                             ${{ number_format($this->generarCalculoIVADivisa($detalle), 2, '.', ',') }}
-                                        @else
-                                            ${{ number_format($this->generarCalculoIVA($detalle), 2, '.', ',') }}
-                                        @endif
+                                        @else --}}
+                                        ${{ number_format($this->generarCalculoIVA($detalle), 2, '.', ',') }}
+                                        {{-- @endif --}}
 
                                     </td>
                                     <td class="text-center">
-                                        @if ($cotizacion['moneda'] === 'USD')
+                                        {{--  @if ($cotizacion['moneda'] === 'USD')
                                             ${{ number_format($this->generarCalculoRetencionDivisa($detalle), 2, '.', ',') }}
-                                        @else
-                                            ${{ number_format($this->generarCalculoRetencion($detalle), 2, '.', ',') }}
-                                        @endif
+                                        @else --}}
+                                        ${{ number_format($this->generarCalculoRetencion($detalle), 2, '.', ',') }}
+                                        {{-- @endif --}}
 
                                     </td>
-                                    
-                                    <td class="md:px-6 md:py-3 text-center">
-                                        @if ($cotizacion['moneda'] === 'USD')
-                                            ${{ number_format($this->generarCalculoTotalDivisas($detalle), 2, '.', ',') }}
-                                        @else
-                                            ${{ number_format($this->generarCalculoTotal($detalle), 2, '.', ',') }}
-                                        @endif
 
+                                    <td class="md:px-6 md:py-3 text-center">
+                                        {{-- @if ($cotizacion['moneda'] === 'USD')
+                                            ${{ number_format($this->generarCalculoTotalDivisas($detalle), 2, '.', ',') }}
+                                        @else --}}
+                                        ${{ number_format($this->generarCalculoTotal($detalle), 2, '.', ',') }}
+                                        {{-- @endif
+ --}}
                                     </td>
                                     <td>
                                         <div class="flex justify-around items-center">
@@ -278,23 +280,23 @@
                                 </tr>
                                 @if (count($cotizacion->detalleCotizaciones) === $loop->index + 1)
                                     <tr class="">
-                                        @if ($cotizacion['moneda'] === 'USD')
+                                        {{--  @if ($cotizacion['moneda'] === 'USD')
                                             <td colspan="7" class="fw-bold md:px-6 md:py-3"
                                                 style="background-color: black; color: white;">TOTAL COTIZACION
                                             </td>
-                                        @else
-                                            <td colspan="6" class="fw-bold md:px-6 md:py-3"
-                                                style="background-color: black; color: white;">TOTAL COTIZACION
-                                            </td>
-                                        @endif
+                                        @else --}}
+                                        <td colspan="6" class="fw-bold md:px-6 md:py-3"
+                                            style="background-color: black; color: white;">TOTAL COTIZACION
+                                        </td>
+                                        {{-- @endif --}}
 
                                         <td class="fw-bold md:px-6 md:py-3 text-center"
                                             style="background-color: black; color: white;">
-                                            @if ($cotizacion['moneda'] === 'USD')
+                                            {{--  @if ($cotizacion['moneda'] === 'USD')
                                                 ${{ number_format($this->generarTotalCotizacionDivisa($cotizacion->detalleCotizaciones), 2, '.', ',') }}
-                                            @else
-                                                ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
-                                            @endif
+                                            @else --}}
+                                            ${{ number_format($this->generarTotalCotizacion($cotizacion->detalleCotizaciones), 2, '.', ',') }}
+                                            {{-- @endif --}}
 
                                         </td>
                                     </tr>
@@ -461,7 +463,7 @@
                         <label for="select_proveedor">Proveedor</label>
                         <select wire:ignore class="w-full" name="cotizacion.proveedor_id" id="select_proveedor"
                             wire:model="cotizacion.proveedor_id" style="width: 100%!important">
-                            <option value="0">Selecciona un proveedor</option>
+                            <option value="select">Selecciona un proveedor</option>
                         </select>
                     </div>
                     <div class="w-full file-input-container" x-data="{ uploading: false, progress: 0, fileUploaded: false }"
@@ -557,15 +559,17 @@
                     </div>
 
                     <div>
-                        <x-label for="observaciones">Comentarios</x-label>
+                        <x-label for="observaciones">Comentarios <span
+                                id="contador_observaciones_cotizacion">0</span>/255</x-label>
                         <textarea wire:model="cotizacion.comentarios" class="form-control form-control-sm border w-100 rounded-lg p-2"
                             placeholder="Comentarios..." id="observaciones" name="cotizacion.comentarios" rows="2"></textarea>
 
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" wire:click="save"
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        onclick="{resetDataAgregarCotizacion()}">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="save" id="btn_agregar_cotizacion"
                         wire:loading.attr="disabled">Agregar</button>
                 </div>
             </div>
@@ -603,8 +607,6 @@
         @livewire('producto.create')
     </div>
 
-
-
     <x-dialog-modal wire:model="openIncompleta">
         <x-slot name="title">
             Requisicion Incompleta
@@ -626,7 +628,6 @@
         </x-slot>
     </x-dialog-modal>
 
-
     <x-dialog-modal wire:model="openPreAutorizacion">
         <x-slot name="title">
             Autorización
@@ -639,6 +640,7 @@
                 <textarea wire:model="comentario_preautorizacion" id="input_preautorizacion"
                     class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..." rows="4"></textarea>
                 <x-input-error for="comentario" />
+                Caracteres <span id="contador_caracteres">0</span>/255
             </div>
 
         </x-slot>
@@ -667,8 +669,7 @@
         </x-slot>
         <x-slot name="footer">
             <x-button wire:click="liberarRequisicionCotUnica()" wire:loading.attr="disabled" id="btn-autorizar-unica"
-                disabled>FINALIZAR
-                REQUISICIÓN</x-button>
+                disabled>FINALIZAR REQUISICIÓN</x-button>
             <x-button wire:click="$set('openCotizacionUnicaComentario',false)"
                 wire:loading.attr="disabled">Cancelar</x-button>
         </x-slot>
@@ -702,6 +703,18 @@
             @endif
 
         @endif
+
+        {{-- @if ($requisicion->estatus_id == 2)
+
+            @if ($esCotizacionUnica)
+                <x-button wire:click="$set('openCotizacionUnicaComentario',true)">Finalizar Requisición</x-button>
+            @else
+                <x-button wire:click="liberarRequisicion()" wire:loading.attr="disabled">Finalizar
+                    Requisición</x-button>
+            @endif
+
+        @endif --}}
+
         @can('Incompleta', $requisicion)
             <div class="flex justify-between mt-4">
                 <x-button wire:click="$set('openIncompleta',true)">Incompleta</x-button>
@@ -739,6 +752,7 @@
 
 
     <script>
+        var contadorCaracteresComentario = 0;
         var comentPreAutorizar = ''
         var comentCotUnica = ''
         var valueProveedorSelected = ''
@@ -754,6 +768,12 @@
         }
 
         var allProveedores = @json($proveedores)
+
+        function resetDataAgregarCotizacion() {
+            $('#contador_observaciones_cotizacion').text('0');
+            $('#select_proveedor').val('select').trigger('change');
+            $('#observaciones').val('');
+        }
 
         function InicializarSelect() {
             console.log('lala');
@@ -870,7 +890,7 @@
         }
 
         function renderOptionsSelectProveedores(proveedores) {
-            $("#select_proveedor").empty().append('<option value="0">Seleccione un Proveedor</option>');
+            $("#select_proveedor").empty().append('<option value="select">Seleccione un Proveedor</option>');
             $.each(proveedores, function(i, item) {
                 $('#select_proveedor').append($('<option>', {
                     value: item.cidclienteproveedor,
@@ -961,6 +981,22 @@
 
         })
 
+        $('#observaciones').on('keyup', function(e) {
+            let comentarioCoti = e.target.value;
+            $('#contador_observaciones_cotizacion').text(comentarioCoti.length);
+            if (comentarioCoti === '' || comentarioCoti.length > 255) {
+                //console.log('Comentario obligarotiros');
+                $('#btn_agregar_cotizacion').prop('disabled', true);
+                $('#btn_agregar_cotizacion').hide();
+                //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+            } else {
+                //console.log('coment valido');
+                $('#btn_agregar_cotizacion').prop('disabled', false);
+                $('#btn_agregar_cotizacion').show();
+            }
+
+        })
+
         $('#input_cotizacionunica').on('keyup', function(e) {
             console.log('algo cambio');
 
@@ -976,10 +1012,27 @@
 
         })
 
-        $('#input_preautorizacion').on('keyup', function(e) {
+
+        $('#input_preautorizacion').on('input', function(e) {
+            let comentario_preauto = e.target.value
+
+            $('#contador_caracteres').text(comentario_preauto.length);
+
+            if (comentario_preauto === '' || comentario_preauto.length > 255) {
+                console.log('Comentario obligarotiros');
+                $('#btn-preautorizar').prop('disabled', true);
+                $('#btn-preautorizar').hide();
+            } else {
+                $('#btn-preautorizar').prop('disabled', false);
+                $('#btn-preautorizar').show();
+            }
+
+        });
+
+        /* $('#input_preautorizacion').on('keyup', function(e) {
 
             comentPreAutorizar = e.target.value
-            if (comentPreAutorizar === '') {
+            if (comentPreAutorizar === '' && comentPreAutorizar.length < 255) {
                 //console.log('Comentario obligarotiros');
                 $('#btn-preautorizar').prop('disabled', true);
             } else {
@@ -987,7 +1040,7 @@
                 $('#btn-preautorizar').prop('disabled', false);
             }
 
-        })
+        }) */
 
         renderOptionsSelectProveedores(allProveedores)
 
@@ -995,9 +1048,6 @@
             $('#producto_select').select2({
                 dropdownParent: $("#ModalEditProducto")
             });
-
-
-            console.log(document.getElementById('producto_select'));
 
             document.getElementById('producto_select').addEventListener('change', function(event) {
                 const selectedValue = event.target.value; // Obtiene el valor seleccionado
@@ -1015,6 +1065,8 @@
             });
 
             $(document).ready(function() {
+
+
                 document.getElementById('producto_select').addEventListener('change', function(event) {
                     const selectedValue = event.target.value; // Obtiene el valor seleccionado
                     console.log("Producto seleccionado:", selectedValue);

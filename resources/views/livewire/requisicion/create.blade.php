@@ -73,24 +73,13 @@
             </div>
         </div>
 
-
-
-
         <div class="flex items-center">
-            {{-- <button type="button" @if (!$productoscargados) disabled @endif class="btn btn-primary"
-                id="addProduct" data-bs-toggle="modal" data-bs-target="#myModal">
-                Agregar Producto
-            </button> --}}
-
             <button @if (!$productoscargados) disabled @endif wire:loading.attr="disabled" type="button"
                 class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddProd">
                 Agregar Producto
             </button>
 
         </div>
-
-
-
 
         <div class="mt-4 mb-4 bg-white  rounded-lg shadow-md">
             @if (!empty($requisicion->listaProductos))
@@ -131,10 +120,6 @@
             <x-input-error for="requisicion.observaciones" />
             <x-input-error for="requisicion.listaProductos" />
         </div>
-
-
-
-
 
 
         <div class="flex items-center space-x-4 mb-4">
@@ -185,81 +170,6 @@
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">Crear</button>
 
     </form>
-
-
-    {{-- <div wire:ignore.self class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Detalle Productos</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                    <div x-data="{ showProductos: $wire.entangle('requisicion.openProductoSR') }">
-                        <div x-show="showProductos">
-                            <x-label for="">Producto</x-label>
-
-                            <select wire:ignore wire:model.live="requisicion.producto.producto_id"
-                                class="select2 w-full" id="productoSelect" required>
-                                <option value="" selected disabled>Seleccionar producto</option>
-                                @foreach ($productos as $producto)
-                                    <option value="{{ $producto['cidproducto'] }}">
-                                        {{ $producto['cnombreproducto'] }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error for="requisicion.producto.producto_id" />
-                        </div>
-
-                        <div x-show="!showProductos">
-                            <x-label for="">Producto no registrado en contpaqi Comercial</x-label>
-                            <x-input id="inputValueNewProduct" class="w-full"></x-input>
-                        </div>
-
-                        <x-checkbox id="productoNoRegistrado" wire:model="requisicion.productosinregistro"
-                            x-on:click="showProductos = !showProductos" /> Ninguno
-                    </div>
-
-
-                    <div>
-                        <x-label for="cantidad">Cantidad</x-label>
-                        <input wire:model="requisicion.producto.cantidad" class="w-full h-10 border rounded-lg mb-2"
-                            type="number" id="cantidad" name="cantidad" required>
-                        <x-input-error for="requisicion.producto.cantidad" />
-                    </div>
-
-                    <div>
-                        <x-label for="observaciones">Observaciones</x-label>
-                        <textarea wire:model="requisicion.producto.observaciones" class="w-full border rounded-lg p-2 mb-2"
-                            placeholder="Observaciones..." id="observaciones" name="observaciones" rows="4" required></textarea>
-                        <x-input-error for="requisicion.producto.observaciones" />
-
-                    </div>
-
-
-
-                    <div>
-
-                        <x-label for="existencias">Total de existencias</x-label>
-                        <input disabled wire:model.live="existencias" class="w-full h-10 border rounded-lg mb-2"
-                            type="number" id="existencias" name="existencias">
-
-                    </div>
-
-
-                </div>
-                <div class="modal-footer">
-                    <x-button onclick="sendAddProduct()" class="ml-2 bg-blue-500 hover:bg-blue-700">Guardar</x-button>
-                </div>
-
-            </div>
-        </div>
-
-
-
-    </div> --}}
 
     <div class="modal fade" id="modalAddProd" tabindex="-1" aria-labelledby="modalAddProd" aria-hidden="true">
         <div class="modal-dialog">
@@ -323,7 +233,7 @@
         $('#producto_select').select2({
             dropdownParent: $("#modalAddProd")
         });
-        
+
         var valDetalleProductosEx = {
             'producto_id': '',
             'producto': '',
@@ -358,7 +268,7 @@
             showProductos = true
             $('#container-select2').show()
             $('#container-input-nproduct').hide()
-            
+
             var closeButton = document.querySelector('.btn-close');
             closeButton.click();
             valDetalleProductosIn.producto_id = ''
@@ -383,7 +293,8 @@
             $.each(productos, function(i, item) {
                 $('#producto_select').append($('<option>', {
                     value: item.cidproducto,
-                    text: item.cnombreproducto
+                    text: item.cnombreproducto,
+                    'data-nomenclatura': item.nomenclatura
                 }))
             });
         }
@@ -391,14 +302,9 @@
 
         document.addEventListener('renderProductos', event => {
             const productos = event.detail[0].productos; // Aquí obtienes la lista de productos
-            /* console.log(event);
-            console.log(productos); */
+
             renderOptionsSelect2(productos);
 
-            // Si deseas procesar los productos en el DOM o realizar alguna acción
-            /* productos.forEach(producto => {
-                console.log(`Producto: ${producto.cnombreproducto} - id: ${producto.cidproducto}`);
-            }); */
         });
 
         document.addEventListener('cerrar-modal', event => {
@@ -406,18 +312,27 @@
         });
 
         $('#producto_select').on('change', function(e) {
-            /* console.log('cambio en select');
-            console.log(e.target.options[e.target.selectedIndex].text); */
+            console.log('cambio');
+            let selectedOption = $(this).find('option:selected');
+            let nomenclatura = selectedOption.data('nomenclatura');
+
+            console.log('Nomenclatura seleccionada:', nomenclatura);
+
+            $.get(`${window.location.origin}/${nomenclatura}/producto/${e.target.value}/existencia`, function(data,status){
+                console.log(data);
+                try {
+                    $('#existencias').val(isNaN(data) ? 0 : data)
+                } catch (error) {
+                    $('#existencias').val(0)
+                }
+                
+            })
+
             var productoId = e.target.value;
             var productoText = e.target.options[e.target.selectedIndex].text;
 
             valDetalleProductosEx.producto_id = productoId
             valDetalleProductosEx.producto = productoText
-            /* @this.set('requisicion.producto.producto_id', $(this).val());
-            @this.set('requisicion.producto.producto', $(this).find('option:selected').text()); */
-            //@this.call('valueSelectProductChange', {producto_id: productoId, producto: productoText});
-            /*  @this.set('requisicion.producto.producto_id', $(this).val());
-             @this.set('requisicion.producto.producto', $(this).find('option:selected').text()); */
 
 
         });
@@ -463,19 +378,13 @@
             });
 
             $('#producto_select').on('change', function(e) {
-                /* console.log('cambio en select');
-                console.log(e.target.options[e.target.selectedIndex].text); */
+
                 var productoId = e.target.value;
                 var productoText = e.target.options[e.target.selectedIndex].text;
 
                 valDetalleProductosEx.producto_id = productoId
                 valDetalleProductosEx.producto = productoText
-                /* @this.set('requisicion.producto.producto_id', $(this).val());
-                @this.set('requisicion.producto.producto', $(this).find('option:selected').text()); */
-                //@this.call('valueSelectProductChange', {producto_id: productoId, producto: productoText});
-                /*  @this.set('requisicion.producto.producto_id', $(this).val());
-                 @this.set('requisicion.producto.producto', $(this).find('option:selected').text()); */
-
+              
 
             });
 
@@ -493,7 +402,6 @@
 
 
             $('#productoNoRegistrado').change(function(e) {
-                /* console.log(e.target); */
                 if ($('#productoNoRegistrado').is(':checked')) {
                     /* console.log('Producto a agregar no existe'); */
                     valDetalleProductosIn.producto = ''
@@ -503,20 +411,7 @@
                     console.log('producto si existe');
 
                 }
-                //console.log('producto no registrado');
 
-                /* valDetalleProductos.producto_id = ''
-                valDetalleProductos.producto = ''
-                $('#inputValueNewProduct').val('')
-                $('#productoSelect').val('') */
-
-                // Verifica si el checkbox está seleccionado
-                /*if ($(this).is(':checked')) {
-                    valDetalleProductos.producto_id = ''
-                    valDetalleProductos.producto = ''
-                     @this.set('requisicion.producto.producto', "");
-                    @this.set('requisicion.producto.producto_id', 0); 
-                }*/
             });
 
 
