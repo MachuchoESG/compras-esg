@@ -8,6 +8,7 @@ use App\Models\Comentarios;
 use App\Models\Cotizacion;
 use App\Models\DetalleCotizacion;
 use App\Models\DetalleRequisicion;
+use App\Models\permisosrequisicion;
 use App\Models\Requisicion;
 use App\Models\User;
 use App\Service\ApiUrl;
@@ -298,6 +299,20 @@ class Show extends Component
                     'user_id' => 5, // puesto quien llega
                     'user_solicita' => $userAlta->puesto_id, // puesto quien pide
                     'departamento_id' => $userAlta->departamento_id, // departamento de la requi
+                    'autorizado' => false,
+                    'visto' => false
+                ]);
+            }else{
+                $userRequi = User::find($this->requisicion->user_id);
+                $permiso = permisosrequisicion::where('PuestoSolicitante_id', '=', $userRequi->puesto_id)
+                    ->where('departamento_id', $userRequi->departamento_id)
+                    ->first();
+    
+                Autorizacionhistorial::create([
+                    'requisicion_id' => $this->requisicion->id,
+                    'user_id' => $permiso->PuestoAutorizador_id,
+                    'user_solicita' => $permiso->PuestoSolicitante_id,
+                    'departamento_id' => $userRequi->departamento_id,
                     'autorizado' => false,
                     'visto' => false
                 ]);
