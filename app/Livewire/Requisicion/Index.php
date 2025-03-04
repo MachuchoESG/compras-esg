@@ -80,20 +80,20 @@ class Index extends Component
 
 
             if ($primerRegistro) {
-                $usuario = User::where('puesto_id', $primerRegistro->user_id)->first(); // O puedes usar ->get() si esperas múltiples resultados
+                $usuario = User::where('puesto_id', $primerRegistro->user_id)->where('id', '!=' , 10)->first(); // O puedes usar ->get() si esperas múltiples resultados
                 return 'Pendiente de aprobar por ' . $usuario->name;
             }
         }
         if ($requisicion->estatus_id == 2) {
             if ($primerRegistro) {
-                $usuario = User::where('puesto_id', $primerRegistro->user_id)->first(); // O puedes usar ->get() si esperas múltiples resultados
+                $usuario = User::where('puesto_id', $primerRegistro->user_id)->where('id', '!=' , 10)->first(); // O puedes usar ->get() si esperas múltiples resultados
                 return 'Pendiente de autorizar por ' . $usuario->name;
             }
         }
 
         if ($requisicion->estatus_id == 3) {
             if ($primerRegistro) {
-                $usuario = User::where('puesto_id', $primerRegistro->user_id)->first(); // O puedes usar ->get() si esperas múltiples resultados
+                $usuario = User::where('puesto_id', $primerRegistro->user_id)->where('id', '!=' , 10)->first(); // O puedes usar ->get() si esperas múltiples resultados
                 return 'Pendiente de autorizar por ' . $usuario->name;
             }
         }
