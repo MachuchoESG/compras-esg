@@ -13,7 +13,7 @@ class UnidadService
     {
         self::$urlApi = ApiUrl::urlApi();
 
-        $response = Http::get(self::$urlApi . $sucursal . '/Unidad');
+        $response = Http::timeout(60)->get(self::$urlApi . $sucursal . '/Unidad');
         if ($response->successful()) {
             return $response->json();
         }

@@ -14,7 +14,7 @@ class ProveedorService
     {
         self::$urlApi = ApiUrl::urlApi();
 
-        $response = Http::get(self::$urlApi . $sucursal . '/ComercialProveedor');
+        $response = Http::timeout(60)->get(self::$urlApi . $sucursal . '/ComercialProveedor');
         if ($response->successful()) {
             return $response->json();
         }

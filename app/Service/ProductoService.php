@@ -14,7 +14,7 @@ class ProductoService
     {
         self::$urlApi = ApiUrl::urlApi();
 
-        $response = Http::get(self::$urlApi . $sucursal . '/ComercialProductos');
+        $response = Http::timeout(60)->get(self::$urlApi . $sucursal . '/ComercialProductos');
         if ($response->successful()) {
             return $response->json();
         }
@@ -25,7 +25,7 @@ class ProductoService
     {
         self::$urlApi = ApiUrl::urlApi();
 
-        $response = Http::get(self::$urlApi . $sucursal . '/ComercialExistencia/' . $Producto_id);
+        $response = Http::timeout(60)->get(self::$urlApi . $sucursal . '/ComercialExistencia/' . $Producto_id);
         if ($response->successful()) {
             return $response->json();
         }

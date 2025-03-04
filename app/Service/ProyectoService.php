@@ -14,7 +14,7 @@ class ProyectoService
     {
         self::$urlApi = ApiUrl::urlApi();
 
-        $response = Http::get(self::$urlApi . $sucursal . '/ComercialProyecto');
+        $response = Http::timeout(60)->get(self::$urlApi . $sucursal . '/ComercialProyecto');
         if ($response->successful()) {
             return $response->json();
         }

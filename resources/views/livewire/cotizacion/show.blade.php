@@ -664,6 +664,7 @@
                 <textarea wire:model="comentario_cotizacionunica" id="input_cotizacionunica"
                     class="w-full border rounded-lg p-2 mb-2" placeholder="Comentario..." rows="4"></textarea>
                 <x-input-error for="comentario" />
+                Caracteres <span id="contador_cotizacion_unica">0</span>/255
             </div>
 
         </x-slot>
@@ -999,15 +1000,16 @@
 
         $('#input_cotizacionunica').on('keyup', function(e) {
             console.log('algo cambio');
-
-            comentPreAutorizar = e.target.value
-            if (comentPreAutorizar === '') {
+            let cotizacionUnica = e.target.value
+            $('#contador_cotizacion_unica').text(cotizacionUnica.length);
+            if (cotizacionUnica === '' || cotizacionUnica.length > 255) {
                 //console.log('Comentario obligarotiros');
                 $('#btn-autorizar-unica').prop('disabled', true);
-                alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
+                $('#btn-autorizar-unica').hide();
             } else {
                 //console.log('coment valido');
                 $('#btn-autorizar-unica').prop('disabled', false);
+                $('#btn-autorizar-unica').hide();
             }
 
         })

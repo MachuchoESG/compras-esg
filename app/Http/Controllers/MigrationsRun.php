@@ -17,6 +17,7 @@ class MigrationsRun extends Controller
         } */
         if ($session === 2) {
             try {
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
                 \Illuminate\Support\Facades\Artisan::call('view:clear');
                 \Illuminate\Support\Facades\Artisan::call('config:clear');
                 \Illuminate\Support\Facades\Artisan::call('route:clear');

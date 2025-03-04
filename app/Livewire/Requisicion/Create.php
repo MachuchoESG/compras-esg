@@ -107,10 +107,16 @@ class Create extends Component
         if ($this->sucursal) {
             $this->cargandoproductos = true;
 
-            $productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
+            try {
+                $productos = ProductoService::ListaProductos($this->sucursal->nomenclatura);
+                //dd($productos);
+            } catch (\Throwable $th) {
+                dd($productos);
+            }
+            
             $nomenclatura = $this->sucursal->nomenclatura;
 
-            foreach($productos as &$producto){
+            foreach ($productos as &$producto) {
                 $producto['nomenclatura'] = $nomenclatura;
             }
             unset($producto);
