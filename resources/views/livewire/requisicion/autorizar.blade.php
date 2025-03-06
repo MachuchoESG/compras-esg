@@ -471,16 +471,16 @@
 
         $('#input_comentario_final_autorizar').on('input', function(e) {
             let comentAutorizacion = e.target.value;
-            $('#contador_autorizacion').text(comentAutorizacion.length);
+            $('#contador_final_autorizar').text(comentAutorizacion.length);
             if (comentAutorizacion === '' || comentAutorizacion.length > 255) {
                 //console.log('Comentario obligarotiros');
-                $('#btn_comentario_autorizacion').prop('disabled', true);
-                $('#btn_comentario_autorizacion').hide();
+                $('#btn_comentario_final_autorizar').prop('disabled', true);
+                $('#btn_comentario_final_autorizar').hide();
                 //alert('Comentario para finalizar requisicion con Cotizacion Unica es obligatorio.')
             } else {
                 //console.log('coment valido');
-                $('#btn_comentario_autorizacion').prop('disabled', false);
-                $('#btn_comentario_autorizacion').show();
+                $('#btn_comentario_final_autorizar').prop('disabled', false);
+                $('#btn_comentario_final_autorizar').show();
             }
 
         })
