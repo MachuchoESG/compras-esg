@@ -502,7 +502,7 @@ class Autorizar extends Component
                     ];
 
                     // //mandar al api
-                    $response = Http::post($this->urlApi  . $this->requisicion->sucursal->nomenclatura . '/ComercialDocumento', $ComercialDocumento);
+                    $response = Http::timeout(60)->post($this->urlApi  . $this->requisicion->sucursal->nomenclatura . '/ComercialDocumento', $ComercialDocumento);
 
                     if ($response->successful()) {
                         $documento = $response->json();
@@ -531,7 +531,7 @@ class Autorizar extends Component
                         }
 
                         //armo la lista de lo que autorizacon por detalle y mando una lista
-                        $response = Http::post($this->urlApi  .  $this->requisicion->sucursal->nomenclatura  . '/ComercialMovimiento', $listaCotizaciones);
+                        $response = Http::timeout(60)->post($this->urlApi  .  $this->requisicion->sucursal->nomenclatura  . '/ComercialMovimiento', $listaCotizaciones);
 
                         if ($response->successful()) {
                             $usuariorequisicon = User::find($this->requisicion->empleado_id);
